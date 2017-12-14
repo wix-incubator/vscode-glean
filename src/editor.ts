@@ -42,7 +42,7 @@ export function currentEditorPath(): string {
   }
 
 
- export function showQuickPicksList(choices, placeHolder) {
+ export function showQuickPicksList(choices, placeHolder = '') {
     return vscode.window.showQuickPick<vscode.QuickPickItem>(choices, {
       placeHolder
     }) 
@@ -56,7 +56,8 @@ export function currentEditorPath(): string {
     return selection.label;
   };
   
-  export const toQuickPick = (label: string, description) => ({label, description});
+  export const toQuickPick = (label: string, description?) => ({label, description});
   
   export const toQuickPicksList =  (choices: string[]) =>  choices.map(toQuickPick);
   
+  export const showErrorMessage = ({message}) => vscode.window.showErrorMessage(message);
