@@ -30,10 +30,8 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
   }
 }
 
-const TYPESCRIPT: vscode.DocumentFilter = { language: 'typescript' }
-
 export function activate(context: vscode.ExtensionContext) {
-  context.subscriptions.push(vscode.languages.registerCodeActionsProvider(TYPESCRIPT, new CompleteActionProvider()));
+  context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
   const disposable = vscode.commands.registerCommand('extension.extractToFile', () => {
 
