@@ -1,5 +1,6 @@
-import { toQuickPick, currentEditorPath, workspaceRoot, extractQuickPickValue, showQuickPicksList } from "./editor";
+import { toQuickPick, currentEditorPath, workspaceRoot, extractQuickPickValue, showQuickPicksList, toQuickPicksList } from "./editor";
 import { subfoldersListOf, gitIgnoreFolders } from "./file-system";
+import { cancelActionIfNeeded } from "./utils";
 
 function getWorkspaceFolderStructure(): Promise<string[]> {
     return new Promise((resolveWith, reject) => {
@@ -31,6 +32,8 @@ export function showDirectoryPicker(): any {
       return getQuickPicksForWorkspaceFolderStructure()
         .then(prependQuickpickForCurrentFileFolder)
         .then(choices =>  showQuickPicksList(choices, 'Pick directory that contains the file'))
-        .then(extractQuickPickValue);
+        .then(extractQuickPickValue)
+        .then(cancelActionIfNeeded);
+
     }
     

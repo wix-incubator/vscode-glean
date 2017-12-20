@@ -7,12 +7,33 @@ import { selectedText, openFile, showErrorMessage } from './editor';
 import { appendTextToFile } from './file-system';
 
 
-const appendSelectedTextToFile = absolutePath =>  { 
+const appendSelectedTextToFile = absolutePath => {
   appendTextToFile(selectedText(), absolutePath);
   return absolutePath;
 };
 
+const handleError = e => {
+  if (e) {
+    showErrorMessage(e.message);
+  }
+};
+
+export class CompleteActionProvider implements vscode.CodeActionProvider {
+  public provideCodeActions(): Promise<vscode.Command[]> {
+    return new Promise(resolve => resolve([
+      {
+        command: 'extension.extractToFile',
+        title: 'Export to File'
+      }
+    ])
+    );
+  }
+}
+
+const TYPESCRIPT: vscode.DocumentFilter = { language: 'typescript' }
+
 export function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(vscode.languages.registerCodeActionsProvider(TYPESCRIPT, new CompleteActionProvider()));
 
   const disposable = vscode.commands.registerCommand('extension.extractToFile', () => {
 
@@ -21,14 +42,15 @@ export function activate(context: vscode.ExtensionContext) {
       return; // No open text editor
     }
 
+
+
     showDirectoryPicker()
       .then(showFilePicker)
       .then(appendSelectedTextToFile)
       .then(openFile)
-      .catch(showErrorMessage);
+      .catch(handleError);
   });
 
-  context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated

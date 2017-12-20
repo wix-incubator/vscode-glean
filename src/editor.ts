@@ -60,4 +60,5 @@ export function currentEditorPath(): string {
   
   export const toQuickPicksList =  (choices: string[]) =>  choices.map(toQuickPick);
   
-  export const showErrorMessage = ({message}) => vscode.window.showErrorMessage(message);
+  export const showErrorMessage = message => vscode.window.showErrorMessage(message);      
+  

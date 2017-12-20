@@ -1,0 +1,1 @@
+export const cancelActionIfNeeded  = value => value? value : Promise.reject(false);

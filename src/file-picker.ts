@@ -1,5 +1,6 @@
 import { showQuickPicksList, extractQuickPickValue, toQuickPicksList, convertRelativeToFullPath, showInputBox, workspaceRoot } from "./editor";
 import { filesInFolder, createFileIfDoesntExist } from "./file-system";
+import { cancelActionIfNeeded } from "./utils";
 
 function completeToFullFilePath(file, folder) {
     if (file === NEW_FILE_OPTION) {
@@ -27,5 +28,6 @@ function completeToFullFilePath(file, folder) {
   export function showFilePicker(directory) {
     return showQuickPicksList(filesInDirectoryQuickPicksList(directory), 'Select File to extract to')
       .then(extractQuickPickValue)
+      .then(cancelActionIfNeeded)
       .then(file => completeToFullFilePath(file, directory));
   };
