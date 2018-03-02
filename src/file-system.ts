@@ -4,6 +4,8 @@ import * as mkdirp from 'mkdirp';
 import { sync as globSync } from 'glob';
 import * as gitignoreToGlob from 'gitignore-to-glob';
 import { workspaceRoot } from './editor';
+import * as lineColumn from 'line-column';
+import * as prependFile from 'prepend-file';
 
 
 export function createFileIfDoesntExist(absolutePath: string): string {
@@ -35,7 +37,7 @@ export function filesInFolder(folder): string[] {
 }
 
 export function appendTextToFile(text, absolutePath) {
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     fs.appendFile(absolutePath, text, function (err) {
       if (err)
         reject(err);
@@ -44,6 +46,41 @@ export function appendTextToFile(text, absolutePath) {
   });
 }
 
+export function prependTextToFile(text, absolutePath) {
+  return new Promise((resolve, reject) => {
+    prependFile(absolutePath, text, err => {
+      if (err) {
+        reject(err);
+      }
+      resolve(absolutePath);
+    });
+  });
+}
+
 const invertGlob = pattern => pattern.replace(/^!/, '');
 
-export const gitIgnoreFolders = () => gitignoreToGlob(workspaceRoot() + '/.gitignore').map(invertGlob);
+export const gitIgnoreFolders = () => { 
+  const pathToLocalGitIgnore = workspaceRoot() + '/.gitignore';
+  return fs.existsSync(pathToLocalGitIgnore)?  gitignoreToGlob(pathToLocalGitIgnore).map(invertGlob) : [];
+};
+
+export function removeContentFromFileAtLineAndColumn(start, end, path) {
+  return new Promise ((resolve, reject) => {
+    fs.readFile(path, 'utf8', function (err,content) {
+      if (err) {
+        reject(err);
+      }
+      const lineColumnFinder = lineColumn(content, {origin: 0});
+      const startIndex = lineColumnFinder.toIndex(start.line, start.character);
+      const endIndex = lineColumnFinder.toIndex(end.line, end.character);
+      var result = content.substr(0, startIndex) + content.substr(endIndex);
+    
+      fs.writeFile(path, result, 'utf8', function (err) {
+         if (err)  reject(err);
+
+         resolve(path);
+      });
+    });
+  });
+
+}
