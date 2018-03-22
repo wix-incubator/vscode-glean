@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { QuickPickItem } from 'vscode';
 
 
 export const workspaceRoot = () => vscode.workspace.rootPath;
@@ -42,7 +43,7 @@ export function currentEditorPath(): string {
   }
 
 
- export function showQuickPicksList(choices, placeHolder = '') {
+ export function showQuickPicksList(choices: QuickPickItem[], placeHolder = '') {
     return vscode.window.showQuickPick<vscode.QuickPickItem>(choices, {
       placeHolder
     }) 
@@ -58,7 +59,7 @@ export function currentEditorPath(): string {
   
   export const toQuickPick = (label: string, description?) => ({label, description});
   
-  export const toQuickPicksList =  (choices: string[]) =>  choices.map(toQuickPick);
+  export const toQuickPicksList =  (choices: string[]) =>  choices.map(item => toQuickPick(item));
   
   export const showErrorMessage = message => vscode.window.showErrorMessage(message);      
   

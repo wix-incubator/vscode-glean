@@ -26,8 +26,15 @@
             "title": "Extract to File Configuration",
             "properties": {
                 "extract-to-file.jsFilesExtentions": {
-                    "type": ["string"],
-                    "default": ["js", "jsx", "ts", "tsx"],
+                    "type": [
+                        "string"
+                    ],
+                    "default": [
+                        "js",
+                        "jsx",
+                        "ts",
+                        "tsx"
+                    ],
                     "description": "File extentions to be treated as Javascript files"
                 }
             }
