@@ -36,7 +36,13 @@
                         "tsx"
                     ],
                     "description": "File extentions to be treated as Javascript files"
+                },
+                "extract-to-file.jsModuleSystem": {
+                    "type": "string",
+                    "default": "esm",
+                    "description": "Module system to be used whem extracting Javascript"
                 }
+  
             }
         }
     },
