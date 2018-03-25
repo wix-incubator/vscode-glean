@@ -15,9 +15,8 @@ const transformSelectedJS = code => {
     return exportAllDeclarationsESM(code);
   } else if(commonJSModuleSystemUsed()) {
     return `
-    ${code}
-
-    ${exportAllDeclarationsCommonJS(code)}
+${code}
+${exportAllDeclarationsCommonJS(code)}
     `;
   }
 }
@@ -34,6 +33,7 @@ const appendSelectedTextToFile = destinationPath => {
 
   return appendTextToFile(`
   ${text}
+  
   `, destinationPath);
 };
 
