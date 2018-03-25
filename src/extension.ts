@@ -5,28 +5,19 @@ import { showDirectoryPicker } from './directories-picker';
 import { showFilePicker } from './file-picker';
 import { selectedText, openFile, showErrorMessage, currentEditorPath } from './editor';
 import { appendTextToFile, removeContentFromFileAtLineAndColumn, prependTextToFile } from './file-system';
-import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCommonJS, exportAllDeclarationsESM } from './parsing';
+import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCommonJS, exportAllDeclarationsESM, transformJSIntoExportExpressions } from './parsing';
 import * as relative from 'relative';
 import * as path from 'path';
 import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
 
-const transformSelectedJS = code => {
-  if(esmModuleSystemUsed()) {
-    return exportAllDeclarationsESM(code);
-  } else if(commonJSModuleSystemUsed()) {
-    return `
-${code}
-${exportAllDeclarationsCommonJS(code)}
-    `;
-  }
-}
+
 
 const appendSelectedTextToFile = destinationPath => {
   let text;
   const selection = selectedText();
 
   if (isOperationBetweenJSFiles(destinationPath)) {
-    text = transformSelectedJS(selection);
+    text = transformJSIntoExportExpressions(selection);
   } else {
     text = selection;
   }
