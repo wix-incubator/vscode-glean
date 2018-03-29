@@ -23,8 +23,7 @@ const appendSelectedTextToFile = destinationPath => {
   }
 
   return appendTextToFile(`
-  ${text}
-  
+${text}
   `, destinationPath);
 };
 
