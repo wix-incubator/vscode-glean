@@ -75,9 +75,9 @@ export function exportAllDeclarationsCommonJS(code) {
     const exportExpression = generateExportsExpr(t.objectExpression(identifiers));
     const ast = t.file(t.program([exportExpression]), '', '');
     return `
-    ${code}
+${code}
     
-    ${transformFromAst(ast).code}
+${transformFromAst(ast).code}
         `;
 }
 
