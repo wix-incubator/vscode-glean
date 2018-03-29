@@ -15,7 +15,7 @@ import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUse
 const appendSelectedTextToFile = destinationPath => {
   let text;
   const selection = selectedText();
-
+  
   if (isOperationBetweenJSFiles(destinationPath)) {
     text = transformJSIntoExportExpressions(selection);
   } else {
@@ -24,7 +24,6 @@ const appendSelectedTextToFile = destinationPath => {
 
   return appendTextToFile(`
   ${text}
-  
   `, destinationPath);
 };
 

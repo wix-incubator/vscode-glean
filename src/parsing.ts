@@ -5,9 +5,10 @@ import { transformFromAst } from '@babel/core';
 import { esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
 
 
-const codeToAst = code => parse(code, {
+export const codeToAst = code => parse(code, {
     plugins: [
-        "typescript"
+        "typescript",
+        "jsx"
     ],
     sourceType: "module"
 });
