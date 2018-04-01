@@ -15,6 +15,7 @@ Copying between non-js files is supported aswell
 - Plain Text support
 
 Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
+
 ![Image of Yaktocat](https://media.giphy.com/media/5QI4abbeZqWpWN0nP8/giphy.gif)
 
 ## Configuration Options
