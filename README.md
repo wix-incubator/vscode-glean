@@ -1,4 +1,4 @@
-# VSCode sexport-to-file
+# VSCode Glean
 
 The extention allows extracting Javascript/Typescript into a new or existing file.
 The extention automatically exports all exported declarations from target file and imports them in the origin file.
