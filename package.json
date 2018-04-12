@@ -1,6 +1,6 @@
 {
-    "name": "export-to-file",
-    "displayName": "export-to-file",
+    "name": "glean",
+    "displayName": "glean",
     "description": "",
     "version": "0.0.1",
     "publisher": "wix",
@@ -25,7 +25,7 @@
             "type": "object",
             "title": "Extract to File Configuration",
             "properties": {
-                "extract-to-file.jsFilesExtentions": {
+                "glean.jsFilesExtentions": {
                     "type": [
                         "string"
                     ],
@@ -37,7 +37,7 @@
                     ],
                     "description": "File extentions to be treated as Javascript files"
                 },
-                "extract-to-file.jsModuleSystem": {
+                "glean.jsModuleSystem": {
                     "type": "string",
                     "default": "esm",
                     "description": "Module system to be used whem extracting Javascript"

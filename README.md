@@ -19,10 +19,10 @@ Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pa
 ![Image of Yaktocat](https://media.giphy.com/media/5QI4abbeZqWpWN0nP8/giphy.gif)
 
 ## Configuration Options
-#### extract-to-file.jsModuleSystem (Default: 'esm')
+#### glean.jsModuleSystem (Default: 'esm')
 Determines how the selected code will be exported/imported. Valid options are 'esm' and 'commonjs'.
 
-#### extract-to-file.jsFilesExtentions (Default: [ "js", "jsx", "ts", "tsx" ])
+#### glean.jsFilesExtentions (Default: [ "js", "jsx", "ts", "tsx" ])
 List of extentions of files that should be treated as javascript files. This determines whether or not the snippet will be exported and imported. The snippet will be treated as javascript only if the extention of both origin and target files appears in this list.
 
 

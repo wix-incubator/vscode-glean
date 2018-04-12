@@ -12,7 +12,7 @@ export const selectedTextStart = () => vscode.window.activeTextEditor.selection.
 export const selectedTextEnd = () => vscode.window.activeTextEditor.selection.end;
 export const activeEditor = () => vscode.window.activeTextEditor;
 
-export const config = () => vscode.workspace.getConfiguration('extract-to-file');
+export const config = () => vscode.workspace.getConfiguration('glean');
 
 
 export function currentEditorPath(): string {
