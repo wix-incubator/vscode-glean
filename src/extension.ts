@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { showDirectoryPicker } from './directories-picker';
 import { showFilePicker } from './file-picker';
-import { selectedText, openFile, showErrorMessage, currentEditorPath } from './editor';
+import { selectedText, openFile, showErrorMessage, currentEditorPath, activeFileName, selectedTextStart, selectedTextEnd, activeEditor } from './editor';
 import { appendTextToFile, removeContentFromFileAtLineAndColumn, prependTextToFile } from './file-system';
 import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCommonJS, exportAllDeclarationsESM, transformJSIntoExportExpressions } from './parsing';
 import * as relative from 'relative';
@@ -31,7 +31,7 @@ const prependImportsToFileIfNeeded = destinationFilePath => {
 
   if (!isOperationBetweenJSFiles(destinationFilePath)) return;
 
-  const originFilePath = vscode.window.activeTextEditor.document.fileName;
+  const originFilePath = activeFileName();
   const identifiers = getIdentifier(selectedText());
   const destinationPathRelativeToOrigin = relative(originFilePath, destinationFilePath);
 
@@ -48,12 +48,12 @@ const prependImportsToFileIfNeeded = destinationFilePath => {
 
 const removeSelectedTextFromOriginalFile = () => {
   return removeContentFromFileAtLineAndColumn(
-    vscode.window.activeTextEditor.selection.start,
-    vscode.window.activeTextEditor.selection.end,
-    vscode.window.activeTextEditor.document.fileName);
+    selectedTextStart(),
+    selectedTextEnd(),
+    activeFileName());
 }
 
-const isOperationBetweenJSFiles = destinationPath => shouldBeConsideredJsFiles(vscode.window.activeTextEditor.document.fileName, destinationPath);
+const isOperationBetweenJSFiles = destinationPath => shouldBeConsideredJsFiles(activeFileName(), destinationPath);
 
 const handleError = e => {
   if (e) {
@@ -73,30 +73,32 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
   }
 }
 
+export async function run() {
+
+  var editor = activeEditor();
+  if (!editor) {
+    return; // No open text editor
+  }
+
+  try {
+    const folderPath = await showDirectoryPicker()
+    const filePath = await showFilePicker(folderPath);
+
+    await appendSelectedTextToFile(filePath);
+    await removeSelectedTextFromOriginalFile();
+    await prependImportsToFileIfNeeded(filePath);
+    await openFile(filePath);
+
+  } catch (e) {
+    handleError(e);
+  }
+
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
-  const disposable = vscode.commands.registerCommand('extension.extractToFile', async () => {
-
-    var editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      return; // No open text editor
-    }
-
-    try {
-      const folderPath = await showDirectoryPicker()
-      const filePath = await showFilePicker(folderPath);
-
-      await appendSelectedTextToFile(filePath);
-      await removeSelectedTextFromOriginalFile();
-      await prependImportsToFileIfNeeded(filePath);
-      await openFile(filePath);
-
-    } catch (e) {
-      handleError(e);
-    }
-
-  });
+  const disposable = vscode.commands.registerCommand('extension.extractToFile', run);
 
 }
 

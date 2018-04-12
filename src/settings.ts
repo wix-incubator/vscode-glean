@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-
-const config = () => vscode.workspace.getConfiguration('extract-to-file');
+import { config } from './editor';
 
 export const shouldBeConsideredJsFiles = (...files) => {
     const extentionsToBeConsideredJS = config().jsFilesExtentions;

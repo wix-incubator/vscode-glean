@@ -5,6 +5,16 @@ import { QuickPickItem } from 'vscode';
 
 export const workspaceRoot = () => vscode.workspace.rootPath;
 
+
+export const activeFileName = () => vscode.window.activeTextEditor.document.fileName;
+
+export const selectedTextStart = () => vscode.window.activeTextEditor.selection.start;
+export const selectedTextEnd = () => vscode.window.activeTextEditor.selection.end;
+export const activeEditor = () => vscode.window.activeTextEditor;
+
+export const config = () => vscode.workspace.getConfiguration('extract-to-file');
+
+
 export function currentEditorPath(): string {
     const activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor) return;
