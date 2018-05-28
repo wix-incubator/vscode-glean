@@ -9,14 +9,25 @@ import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCo
 import * as relative from 'relative';
 import * as path from 'path';
 import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
+import { isJSX, wrapWithComponent } from './modules/jsx';
 
+const preprocessSelection = (destinationPath) => {
+  let selection = selectedText();
+  if (isOperationBetweenJSFiles(destinationPath) && isJSX(selection)) {
+    return wrapWithComponent(selection);
+  } else {
+    return selection;
+  }
+};
 
-
-const appendSelectedTextToFile = destinationPath => {
+const appendSelectedTextToFile = (selection, destinationPath) => {
   let text;
-  const selection = selectedText();
-  
+
   if (isOperationBetweenJSFiles(destinationPath)) {
+    if (isJSX(selection)) {
+      selection = wrapWithComponent(selection)
+    }
+
     text = transformJSIntoExportExpressions(selection);
   } else {
     text = selection;
@@ -27,12 +38,12 @@ const appendSelectedTextToFile = destinationPath => {
   `, destinationPath);
 };
 
-const prependImportsToFileIfNeeded = destinationFilePath => {
+const prependImportsToFileIfNeeded = (selection, destinationFilePath) => {
 
   if (!isOperationBetweenJSFiles(destinationFilePath)) return;
 
   const originFilePath = vscode.window.activeTextEditor.document.fileName;
-  const identifiers = getIdentifier(selectedText());
+  const identifiers = getIdentifier(selection);
   const destinationPathRelativeToOrigin = relative(originFilePath, destinationFilePath);
 
   const destinationFileName = path.parse(destinationPathRelativeToOrigin).name;
@@ -87,9 +98,10 @@ export function activate(context: vscode.ExtensionContext) {
       const folderPath = await showDirectoryPicker()
       const filePath = await showFilePicker(folderPath);
 
-      await appendSelectedTextToFile(filePath);
+      const processedSelection = preprocessSelection(filePath);
+      await appendSelectedTextToFile(processedSelection, filePath);
       await removeSelectedTextFromOriginalFile();
-      await prependImportsToFileIfNeeded(filePath);
+      await prependImportsToFileIfNeeded(processedSelection, filePath);
       await openFile(filePath);
 
     } catch (e) {
