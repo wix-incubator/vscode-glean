@@ -24,6 +24,10 @@ export function isJSX(code) {
 
 }
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
 
   const componentProperties = {
@@ -68,14 +72,14 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
   const processedJSX = transformFromAst(ast).code;
   const indexOfLastSemicolon = processedJSX.lastIndexOf(';');
   const code = processedJSX.slice(0, indexOfLastSemicolon) + processedJSX.slice(indexOfLastSemicolon + 1);
-  var camelCasedName = path.basename(fullPath, path.extname(fullPath)).replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+  const componentName = capitalizeFirstLetter(path.basename(fullPath, path.extname(fullPath)).replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); }));
 
   return {
-    text: buildComponent(camelCasedName, code, componentProperties),
+    text: buildComponent(componentName, code, componentProperties),
     metadata: {
       isJSX: true,
       componentProperties,
-      name: camelCasedName
+      name: componentName
     }
   };
 }
