@@ -3,6 +3,8 @@ import traverse from "@babel/traverse";
 import * as t from '@babel/types';
 import { buildComponent } from "./component-builder";
 import { transformFromAst } from '@babel/core';
+import { ProcessedSelection } from "../extension";
+import * as path from 'path';
 
 
 export function isJSX(code) {
@@ -22,7 +24,8 @@ export function isJSX(code) {
 
 }
 
-export function wrapWithComponent(jsx) {
+export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
+
   const componentProperties = {
     argumentProps: new Set(),
     memberProps: new Set(),
@@ -37,7 +40,7 @@ export function wrapWithComponent(jsx) {
       }
     },
     MemberExpression(path) {
-      if (!path.node.wasVisited && path.node.object && path.node.property && path.node.object.type === 'ThisExpression') {
+      if (!path.node.wasVisited && t.isThisExpression(path.node.object)) {
         if (path.parent.property && (path.node.property.name === 'props' || path.node.property.name === 'state')) {
           //props or state = path.node.property.name;
           if (path.node.property.name === 'props') {
@@ -65,11 +68,23 @@ export function wrapWithComponent(jsx) {
   const processedJSX = transformFromAst(ast).code;
   const indexOfLastSemicolon = processedJSX.lastIndexOf(';');
   const code = processedJSX.slice(0, indexOfLastSemicolon) + processedJSX.slice(indexOfLastSemicolon + 1);
+  var camelCasedName = path.basename(fullPath, path.extname(fullPath)).replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
 
-  return buildComponent('Yosi', code, componentProperties);
+  return {
+    text: buildComponent(camelCasedName, code, componentProperties),
+    metadata: {
+      isJSX: true,
+      componentProperties,
+      name: camelCasedName
+    }
+  };
 }
 
-export function createComponent(name, props) {
-  const allProps = new Set([...props.state, ...props.memberProps, ...props.argumentProps]);
-  return `<${name}  />`
+
+export function createComponentInstance(name, props) {
+  const stateToInputProps = Array.from(props.state).map(prop => `${prop}={this.state.${prop}}`).join(' ');
+  const argPropsToInputProps = Array.from(props.argumentProps).map(prop => `${prop}={${prop}}`).join(' ');
+  const memberPropsToInputProps = Array.from(props.memberProps).map(prop => `${prop}={this.props.${prop}}`).join(' ');
+
+  return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps}/>`;
 }

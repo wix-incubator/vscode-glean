@@ -9,25 +9,26 @@ import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCo
 import * as relative from 'relative';
 import * as path from 'path';
 import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
-import { isJSX, wrapWithComponent } from './modules/jsx';
+import { isJSX, wrapWithComponent, createComponentInstance } from './modules/jsx';
 
-const preprocessSelection = (destinationPath) => {
+export type ProcessedSelection = {
+  text: string;
+  metadata?: any
+}
+
+const preprocessSelection = (destinationPath): ProcessedSelection => {
   let selection = selectedText();
   if (isOperationBetweenJSFiles(destinationPath) && isJSX(selection)) {
-    return wrapWithComponent(selection);
+    return wrapWithComponent(destinationPath, selection);
   } else {
-    return selection;
+    return { text: selection };
   }
 };
 
-const appendSelectedTextToFile = (selection, destinationPath) => {
+const appendSelectedTextToFile = ({ text: selection }, destinationPath) => {
   let text;
 
   if (isOperationBetweenJSFiles(destinationPath)) {
-    if (isJSX(selection)) {
-      selection = wrapWithComponent(selection)
-    }
-
     text = transformJSIntoExportExpressions(selection);
   } else {
     text = selection;
@@ -38,7 +39,7 @@ const appendSelectedTextToFile = (selection, destinationPath) => {
   `, destinationPath);
 };
 
-const prependImportsToFileIfNeeded = (selection, destinationFilePath) => {
+const prependImportsToFileIfNeeded = ({ text: selection }, destinationFilePath) => {
 
   if (!isOperationBetweenJSFiles(destinationFilePath)) return;
 
@@ -57,11 +58,15 @@ const prependImportsToFileIfNeeded = (selection, destinationFilePath) => {
   return prependTextToFile(importStatement, originFilePath);
 }
 
-const removeSelectedTextFromOriginalFile = () => {
+const removeSelectedTextFromOriginalFile = (selection) => {
+  let content = '';
+  if (selection.metadata.isJSX) {
+    content = createComponentInstance(selection.metadata.name, selection.metadata.componentProperties);
+  }
   return removeContentFromFileAtLineAndColumn(
     vscode.window.activeTextEditor.selection.start,
     vscode.window.activeTextEditor.selection.end,
-    vscode.window.activeTextEditor.document.fileName);
+    vscode.window.activeTextEditor.document.fileName, content);
 }
 
 const isOperationBetweenJSFiles = destinationPath => shouldBeConsideredJsFiles(vscode.window.activeTextEditor.document.fileName, destinationPath);
@@ -98,10 +103,10 @@ export function activate(context: vscode.ExtensionContext) {
       const folderPath = await showDirectoryPicker()
       const filePath = await showFilePicker(folderPath);
 
-      const processedSelection = preprocessSelection(filePath);
-      await appendSelectedTextToFile(processedSelection, filePath);
-      await removeSelectedTextFromOriginalFile();
-      await prependImportsToFileIfNeeded(processedSelection, filePath);
+      const selectionProccessingResult = preprocessSelection(filePath);
+      await appendSelectedTextToFile(selectionProccessingResult, filePath);
+      await removeSelectedTextFromOriginalFile(selectionProccessingResult);
+      await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
       await openFile(filePath);
 
     } catch (e) {
