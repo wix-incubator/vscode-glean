@@ -18,7 +18,7 @@ export function getIdentifier(code) {
     const identifiers = [];
     const Visitor = {
         Identifier(path) {
-            if (path.parentPath.parent.type === 'Program' || path.parentPath.parent.type === 'File') {
+            if ((path.parentPath.parent.type === 'Program' || path.parentPath.parent.type === 'File') && path.listKey !== 'params') {
                 identifiers.push(path.node.name);
             }
         }

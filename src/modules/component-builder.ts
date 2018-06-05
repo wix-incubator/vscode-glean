@@ -27,6 +27,6 @@ export function buildComponent(name, code, attributes) {
   if (attributes.memberProps.size) {
     return buildStatefulComponent(name, code, attributes);
   } else {
-    return buildFunctionalComponent(name, code, attributes);
+    return buildFunctionalComponent(name, code, attributes.argumentProps);
   }
 }

@@ -28,6 +28,10 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function produceComponentNameFrom(fullPath: any) {
+  return capitalizeFirstLetter(path.basename(fullPath, path.extname(fullPath)).replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); }));
+}
+
 export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
 
   const componentProperties = {
@@ -72,7 +76,7 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
   const processedJSX = transformFromAst(ast).code;
   const indexOfLastSemicolon = processedJSX.lastIndexOf(';');
   const code = processedJSX.slice(0, indexOfLastSemicolon) + processedJSX.slice(indexOfLastSemicolon + 1);
-  const componentName = capitalizeFirstLetter(path.basename(fullPath, path.extname(fullPath)).replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); }));
+  const componentName = produceComponentNameFrom(fullPath);
 
   return {
     text: buildComponent(componentName, code, componentProperties),
@@ -83,7 +87,6 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
     }
   };
 }
-
 
 export function createComponentInstance(name, props) {
   const stateToInputProps = Array.from(props.state).map(prop => `${prop}={this.state.${prop}}`).join(' ');

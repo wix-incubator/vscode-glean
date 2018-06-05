@@ -42,7 +42,6 @@
                     "default": "esm",
                     "description": "Module system to be used whem extracting Javascript"
                 }
-  
             }
         }
     },
