@@ -13,7 +13,7 @@ import { isJSX, wrapWithComponent, createComponentInstance } from './modules/jsx
 
 export type ProcessedSelection = {
   text: string;
-  metadata?: any
+  metadata: any
 }
 
 const preprocessSelection = (destinationPath): ProcessedSelection => {
@@ -21,7 +21,7 @@ const preprocessSelection = (destinationPath): ProcessedSelection => {
   if (isOperationBetweenJSFiles(destinationPath) && isJSX(selection)) {
     return wrapWithComponent(destinationPath, selection);
   } else {
-    return { text: selection };
+    return { text: selection, metadata: {} };
   }
 };
 
