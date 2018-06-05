@@ -5,9 +5,10 @@ import { transformFromAst } from '@babel/core';
 import { esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
 
 
-const codeToAst = code => parse(code, {
+export const codeToAst = code => parse(code, {
     plugins: [
-        "typescript"
+        "typescript",
+        "jsx"
     ],
     sourceType: "module"
 });
@@ -17,7 +18,7 @@ export function getIdentifier(code) {
     const identifiers = [];
     const Visitor = {
         Identifier(path) {
-            if (path.parentPath.parent.type === 'Program' || path.parentPath.parent.type === 'File') {
+            if ((path.parentPath.parent.type === 'Program' || path.parentPath.parent.type === 'File') && path.listKey !== 'params') {
                 identifiers.push(path.node.name);
             }
         }
