@@ -8,7 +8,7 @@ import { appendTextToFile, removeContentFromFileAtLineAndColumn, prependTextToFi
 import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCommonJS, exportAllDeclarationsESM, transformJSIntoExportExpressions } from './parsing';
 import * as relative from 'relative';
 import * as path from 'path';
-import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
+import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUsed, shouldSwitchToTarget } from './settings';
 import { isJSX, wrapWithComponent, createComponentInstance } from './modules/jsx';
 
 export type ProcessedSelection = {
@@ -105,7 +105,10 @@ export async function run() {
     await appendSelectedTextToFile(selectionProccessingResult, filePath);
     await removeSelectedTextFromOriginalFile(selectionProccessingResult);
     await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
-    await openFile(filePath);
+
+    if (shouldSwitchToTarget()) {
+      await openFile(filePath);
+    }
 
   } catch (e) {
     handleError(e);

@@ -23,7 +23,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "Extract to File Configuration",
+            "title": "Glean Configuration",
             "properties": {
                 "glean.jsFilesExtentions": {
                     "type": [
@@ -41,6 +41,11 @@
                     "type": "string",
                     "default": "esm",
                     "description": "Module system to be used whem extracting Javascript"
+                },
+                "glean.switchToTarget": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specifies whether to switch to the target file after extracting the content or not"
                 }
             }
         }

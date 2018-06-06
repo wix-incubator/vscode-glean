@@ -24,8 +24,8 @@ Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pa
 ## JSX Support
 Glean allows easy extraction of JSX into new React components. Just select the JSX to extract, and Glean will handle all the rest:
 
-- Generate either Stateful or Stateless Component, such that the extracted JSX will continue to function;
-- It will identify all inputs to the newly created component
+- Generate either Stateful or Stateless Component, such that the extracted JSX will continue to function.
+- It will identify all inputs to the newly created component.
 - Replace extracted JSX will newly created component, while providing it with all the props.
 
 ![Example of JSX extraction](https://media.giphy.com/media/22Q7TtNqCIqM7j8Ph6/giphy.gif)
