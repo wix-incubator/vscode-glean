@@ -37,4 +37,7 @@ Determines how the selected code will be exported/imported. Valid options are 'e
 #### glean.jsFilesExtentions (Default: [ "js", "jsx", "ts", "tsx" ])
 List of extentions of files that should be treated as javascript files. This determines whether or not the snippet will be exported and imported. The snippet will be treated as javascript only if the extention of both origin and target files appears in this list.
 
+#### glean.switchToTarget (Default: false)
+Determines whether VSCode should switch to target file after extracting.
+
 
