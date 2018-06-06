@@ -35,7 +35,7 @@ const appendSelectedTextToFile = ({ text: selection }, destinationPath) => {
   }
 
   return appendTextToFile(`
-  ${text}
+${text}
   `, destinationPath);
 };
 
