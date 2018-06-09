@@ -11,7 +11,7 @@ const expect = chai.expect;
 
 chai.use(sinonChai);
 
-describe('esm support', function () {
+describe('jsx module', function () {
     let sandbox;
 
     beforeEach(() => {
