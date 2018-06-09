@@ -1,8 +1,6 @@
 
-import * as vscode from 'vscode'
 import * as sinon from 'sinon';
 import { run } from '../extension';
-import * as editorAdapter from '../editor';
 import * as directoryPicker from '../directories-picker';
 import * as filePicker from '../file-picker';
 import * as editor from '../editor';
