@@ -85,37 +85,4 @@ describe('esm support', function () {
         });
     })
 
-
-    it('replaces all state references to props', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
-        <div>{this.state.foo}</div>
-    `);
-
-        await run();
-
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target() {\n  return <div>{this.props.foo}</div>;\n}\n  ', '/target.js');
-    });
-
-    // it('removes selected text from the source file', async () => {
-
-    //     await run();
-
-    //     expect(fileSystem.removeContentFromFileAtLineAndColumn).to.have.been.called;
-
-    // });
-
-    // it('prepends import statement to target with all exported declarations', async () => {
-
-    //     await run();
-
-    //     expect(fileSystem.prependTextToFile).to.have.been.calledWith(`import { Foo } from './target';\n`);
-
-    // });
-
-    // it('should switches to the target file if defined by the user', async () => {
-    //     await run();
-
-    //     expect(editor.openFile).to.have.calledWith('/target.js');
-
-    // });
 });
