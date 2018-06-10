@@ -59,6 +59,7 @@
         "semantic-release": "semantic-release"
     },
     "devDependencies": {
+        "@semantic-release/github": "^4.2.17",
         "@types/chai": "^4.1.2",
         "@types/mocha": "^2.2.48",
         "@types/node": "^7.0.43",
@@ -89,14 +90,19 @@
     },
     "release": {
         "verifyConditions": [
-            "semantic-release-vsce"
+            "semantic-release-vsce",
+            "@semantic-release/github"
         ],
         "prepare": {
             "path": "semantic-release-vsce",
             "packageVsix": "vscode-glean.vsix"
         },
         "publish": [
-            "semantic-release-vsce"
+            "semantic-release-vsce",
+            {
+                "path": "@semantic-release/github",
+                "assets": "vscode-glean.vsix"
+            }
         ]
     }
 }
