@@ -45,10 +45,12 @@ const prependImportsToFileIfNeeded = ({ text: selection }, destinationFilePath) 
 
   const originFilePath = activeFileName();
   const identifiers = getIdentifier(selection);
-
   const destinationPathRelativeToOrigin = relative(originFilePath, destinationFilePath);
 
   const destinationFileName = path.parse(destinationPathRelativeToOrigin).name;
+
+  console.log(originFilePath, destinationFilePath, destinationPathRelativeToOrigin);
+
   const destinationModule = [
     ...destinationPathRelativeToOrigin.split('/').slice(0, -1),
     destinationFileName
