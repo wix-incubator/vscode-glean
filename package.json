@@ -90,8 +90,7 @@
     },
     "release": {
         "verifyConditions": [
-            "semantic-release-vsce",
-            "@semantic-release/github"
+            "semantic-release-vsce"
         ],
         "prepare": {
             "path": "semantic-release-vsce",
