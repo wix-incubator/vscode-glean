@@ -59,7 +59,6 @@
         "semantic-release": "semantic-release"
     },
     "devDependencies": {
-        "@semantic-release/github": "^4.2.17",
         "@types/chai": "^4.1.2",
         "@types/mocha": "^2.2.48",
         "@types/node": "^7.0.43",
