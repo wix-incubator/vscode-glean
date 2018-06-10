@@ -21,7 +21,7 @@ describe('commonjs support', function () {
     beforeEach(() => {
         sandbox.stub(directoryPicker, 'showDirectoryPicker').returns(Promise.resolve('/folder'));
         sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('/target.js'));
-        sandbox.stub(editor, 'activeFileName').returns('source.js');
+        sandbox.stub(editor, 'activeFileName').returns('./source.js');
         sandbox.stub(editor, 'activeEditor').returns('67676');
         sandbox.stub(editor, 'selectedTextStart').returns({});
         sandbox.stub(editor, 'selectedTextEnd').returns({});
