@@ -98,11 +98,7 @@
             "packageVsix": "vscode-glean.vsix"
         },
         "publish": [
-            "semantic-release-vsce",
-            {
-                "path": "@semantic-release/github",
-                "assets": "vscode-glean.vsix"
-            }
+            "semantic-release-vsce"
         ]
     }
 }
