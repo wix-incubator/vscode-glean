@@ -20,7 +20,7 @@ describe('esm support', function () {
 
     beforeEach(() => {
         sandbox.stub(directoryPicker, 'showDirectoryPicker').returns(Promise.resolve('/folder'));
-        sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('/target.js'));
+        sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('./target.js'));
         sandbox.stub(editor, 'activeFileName').returns('source.js');
         sandbox.stub(editor, 'activeEditor').returns('67676');
         sandbox.stub(editor, 'selectedTextStart').returns({});
@@ -50,7 +50,7 @@ describe('esm support', function () {
     it('exports selected declarations from target file', async () => {
         await run();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Foo {}\n  ', '/target.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Foo {}\n  ', './target.js');
 
     });
 
@@ -73,7 +73,7 @@ describe('esm support', function () {
     it('should switches to the target file if defined by the user', async () => {
         await run();
 
-        expect(editor.openFile).to.have.calledWith('/target.js');
+        expect(editor.openFile).to.have.calledWith('./target.js');
 
     });
 });
