@@ -20,7 +20,7 @@ describe('commonjs support', function () {
 
     beforeEach(() => {
         sandbox.stub(directoryPicker, 'showDirectoryPicker').returns(Promise.resolve('/folder'));
-        sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('/target.js'));
+        sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('./target.js'));
         sandbox.stub(editor, 'activeFileName').returns('./source.js');
         sandbox.stub(editor, 'activeEditor').returns('67676');
         sandbox.stub(editor, 'selectedTextStart').returns({});
@@ -50,7 +50,7 @@ describe('commonjs support', function () {
     it('exports selected declarations from target file', async () => {
         await run();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ', '/target.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ', './target.js');
 
     });
 
@@ -74,7 +74,7 @@ describe('commonjs support', function () {
 
         await run();
 
-        expect(editor.openFile).to.have.calledWith('/target.js');
+        expect(editor.openFile).to.have.calledWith('./target.js');
 
     });
 });
