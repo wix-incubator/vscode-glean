@@ -1,19 +1,17 @@
 
-import * as vscode from 'vscode'
-import * as sinon from 'sinon'; 
-import {run} from '../extension';
-import * as editorAdapter from '../editor';
+import * as sinon from 'sinon';
+import { run } from '../extension';
 import * as directoryPicker from '../directories-picker';
 import * as filePicker from '../file-picker';
 import * as editor from '../editor';
 import * as fileSystem from '../file-system';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-const expect  = chai.expect;
+const expect = chai.expect;
 
 chai.use(sinonChai);
 
-describe('commonjs support', function() {
+describe('commonjs support', function () {
     let sandbox;
 
     beforeEach(() => {
@@ -21,9 +19,9 @@ describe('commonjs support', function() {
     });
 
     beforeEach(() => {
-        sandbox.stub(directoryPicker,'showDirectoryPicker').returns(Promise.resolve('/folder'));
-        sandbox.stub(filePicker,'showFilePicker').returns(Promise.resolve('/target.js'));
-        sandbox.stub(editor, 'activeFileName').returns('source.js');
+        sandbox.stub(directoryPicker, 'showDirectoryPicker').returns(Promise.resolve('/folder'));
+        sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('./target.js'));
+        sandbox.stub(editor, 'activeFileName').returns('./source.js');
         sandbox.stub(editor, 'activeEditor').returns('67676');
         sandbox.stub(editor, 'selectedTextStart').returns({});
         sandbox.stub(editor, 'selectedTextEnd').returns({});
@@ -31,7 +29,8 @@ describe('commonjs support', function() {
         sandbox.stub(fileSystem, 'prependTextToFile').returns(Promise.resolve())
         sandbox.stub(editor, 'config').returns({
             jsModuleSystem: 'commonjs',
-            jsFilesExtentions: ['js']
+            jsFilesExtentions: ['js'],
+            switchToTarget: true
         });
         sandbox.stub(fileSystem, 'appendTextToFile').returns(Promise.resolve());
         sandbox.stub(editor, 'selectedText').returns(`
@@ -42,20 +41,20 @@ describe('commonjs support', function() {
 
         sandbox.stub(editor, 'openFile');
     })
-    
+
     afterEach(function () {
         sandbox.restore();
     });
 
-    
-    it('exports selected declarations from target file',  async () => {
+
+    it('exports selected declarations from target file', async () => {
         await run();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ', '/target.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ', './target.js');
 
     });
 
-    it('removes selected text from the source file',  async () => {
+    it('removes selected text from the source file', async () => {
 
         await run();
 
@@ -63,7 +62,7 @@ describe('commonjs support', function() {
 
     });
 
-    it('prepends import statement to target with all exported declarations',  async () => {
+    it('prepends import statement to target with all exported declarations', async () => {
 
         await run();
 
@@ -71,11 +70,11 @@ describe('commonjs support', function() {
 
     });
 
-    it('should switches to the target file',  async () => {
+    it('should switches to the target file', async () => {
 
         await run();
 
-        expect(editor.openFile).to.have.calledWith('/target.js');
+        expect(editor.openFile).to.have.calledWith('./target.js');
 
     });
 });
