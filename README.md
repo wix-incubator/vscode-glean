@@ -1,5 +1,8 @@
 # VSCode Glean
 
+[![Build Status](https://travis-ci.org/wix-incubator/vscode-glean.svg?branch=master)](https://travis-ci.org/wix-incubator/vscode-glean)
+[![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
+
 The extention allows extracting Javascript/Typescript/JSX into a new or existing file.
 The extention automatically exports all exported declarations from target file and imports them in the origin file.
 For example, this is super useful during refactoring of your code - just select the code you would like to extract and choose the destination.
