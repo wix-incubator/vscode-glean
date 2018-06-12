@@ -1,12 +1,15 @@
 # VSCode Glean
+> Extract Javascript/Typescript/JSX into a new or existing file.
+
 
 [![Build Status](https://travis-ci.org/wix-incubator/vscode-glean.svg?branch=master)](https://travis-ci.org/wix-incubator/vscode-glean)
 [![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
 The extention allows extracting Javascript/Typescript/JSX into a new or existing file.
 The extention automatically exports all exported declarations from target file and imports them in the origin file.
-For example, this is super useful during refactoring of your code - just select the code you would like to extract and choose the destination.
-Copying between non-js files is supported aswell
+This is super useful while refactoring your code - just select the code you would like to extract and choose the destination.
+
+Copying between non-js files is supported as well.
 
 
 
@@ -27,7 +30,7 @@ Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pa
 ## JSX Support
 Glean allows easy extraction of JSX into new React components. Just select the JSX to extract, and Glean will handle all the rest:
 
-- Generate either Stateful or Stateless Component, such that the extracted JSX will continue to function.
+- Generate Stateful or Stateless Component, such that the extracted JSX will continue to function.
 - It will identify all inputs to the newly created component.
 - Replace extracted JSX will newly created component, while providing it with all the props.
 
