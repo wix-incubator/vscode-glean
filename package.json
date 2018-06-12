@@ -1,7 +1,7 @@
 {
     "name": "glean",
     "displayName": "glean",
-    "description": "",
+    "description": "Allows extracting typescript and javascript code into separate module, aswell as extracting JSX into new components",
     "version": "0.0.1",
     "publisher": "wix",
     "engines": {
