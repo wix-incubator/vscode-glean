@@ -17,7 +17,7 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.extractToFile",
+                "command": "extension.glean",
                 "title": "Extract to File"
             }
         ],

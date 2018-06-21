@@ -82,7 +82,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): Promise<vscode.Command[]> {
     return new Promise(resolve => resolve([
       {
-        command: 'extension.extractToFile',
+        command: 'extension.glean',
         title: 'Export to File'
       }
     ])
@@ -119,7 +119,7 @@ export async function run() {
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
-  const disposable = vscode.commands.registerCommand('extension.extractToFile', run);
+  const disposable = vscode.commands.registerCommand('extension.glean', run);
 
 }
 
