@@ -66,7 +66,6 @@
         "@types/sinon": "^4.3.0",
         "@types/sinon-chai": "^2.7.29",
         "chai": "^4.1.2",
-        "line-column": "^1.0.2",
         "semantic-release": "^15.5.1",
         "semantic-release-vsce": "^2.1.2",
         "sinon": "^4.5.0",
@@ -82,11 +81,13 @@
         "babylon": "^7.0.0-beta.40",
         "gitignore-globs": "^0.1.1",
         "gitignore-to-glob": "^0.3.0",
+        "glob": "^7.1.2",
         "mkdirp": "^0.5.1",
         "prepend": "^1.0.2",
         "prepend-file": "^1.3.1",
         "relative": "^3.0.2",
-        "vscode-cache": "^0.3.0"
+        "vscode-cache": "^0.3.0",
+        "line-column": "^1.0.2"
     },
     "release": {
         "verifyConditions": [
