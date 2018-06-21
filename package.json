@@ -2,7 +2,7 @@
     "name": "glean",
     "displayName": "glean",
     "description": "Allows extracting typescript and javascript code into separate module, aswell as extracting JSX into new components",
-    "version": "0.0.1",
+    "version": "2.0.0",
     "publisher": "wix",
     "engines": {
         "vscode": "^1.23.0"
