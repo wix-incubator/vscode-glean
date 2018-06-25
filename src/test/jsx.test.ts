@@ -60,7 +60,7 @@ describe('jsx module', function () {
 
         await run();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target(foo) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
     });
 
     describe('when creating stateful component', () => {
@@ -71,7 +71,9 @@ describe('jsx module', function () {
 
             await run();
 
-            expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target() {\n  return <div>{this.props.foo}</div>;\n}\n  ', '/target.js');
+            expect((<any>fileSystem.appendTextToFile).args[0][0]).to.contain('this.props.foo');
+            expect((<any>fileSystem.appendTextToFile).args[0][0]).not.to.contain('this.state.foo');
+
         });
 
         it('instantiates referenced variables by destructring them from prosp object', async () => {
