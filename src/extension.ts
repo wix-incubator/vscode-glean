@@ -101,22 +101,24 @@ export async function run() {
     const folderPath = await showDirectoryPicker()
     const filePath = await showFilePicker(folderPath);
 
-    const selectionProccessingResult = preprocessSelection(filePath);
-    await appendSelectedTextToFile(selectionProccessingResult, filePath);
-    await removeSelectedTextFromOriginalFile(selectionProccessingResult);
-    await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
     const fullText = vscode.window.activeTextEditor.document.getText();
 
     const fullRange = new vscode.Range(
       vscode.window.activeTextEditor.document.positionAt(0),
       vscode.window.activeTextEditor.document.positionAt(fullText.length - 1)
     )
-    const codeactions = await vscode.commands.executeCommand('vscode.executeCodeActionProvider', vscode.Uri.parse(`file://${filePath}`), fullRange) as { command: string, title: string, arguments: string[] }[];
+    const codeactions = await vscode.commands.executeCommand('vscode.executeCodeActionProvider', vscode.Uri.parse(`file://${vscode.window.activeTextEditor.document.fileName}`), fullRange) as { command: string, title: string, arguments: string[] }[];
     const removeImportsCommand = codeactions.find(({ title }) => title.includes('import')) as { command: string, title: string, arguments: string[] };
 
     if (removeImportsCommand) {
-      await vscode.commands.executeCommand(removeImportsCommand.command, ...removeImportsCommand.arguments);
+      const result = await vscode.commands.executeCommand('editor.action.codeAction', removeImportsCommand);
     }
+
+    const selectionProccessingResult = preprocessSelection(filePath);
+    await appendSelectedTextToFile(selectionProccessingResult, filePath);
+    await removeSelectedTextFromOriginalFile(selectionProccessingResult);
+    await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
+
 
     if (shouldSwitchToTarget()) {
       await openFile(filePath);
