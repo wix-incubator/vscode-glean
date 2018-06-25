@@ -2,7 +2,7 @@ import template from "@babel/template";
 
 function buildFunctionalComponent(name, code, props) {
   return `
-    function ${name}(${Array.from(props).join(', ')}) {
+    function ${name}({${Array.from(props).join(', ')}}) {
       return (${code});
     } 
   `
