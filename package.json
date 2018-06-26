@@ -19,6 +19,10 @@
             {
                 "command": "extension.glean",
                 "title": "Extract to File"
+            },
+            {
+                "command": "extension.glean.react.stateless-to-stateful",
+                "title": "Convert to Stateful Component"
             }
         ],
         "configuration": {
@@ -60,6 +64,8 @@
     },
     "devDependencies": {
         "@semantic-release/github": "^4.2.17",
+        "@types/babel-traverse": "^6.25.4",
+        "@types/babel-types": "^7.0.4",
         "@types/chai": "^4.1.2",
         "@types/mocha": "^2.2.48",
         "@types/node": "^7.0.43",
@@ -74,11 +80,11 @@
         "vscode": "^1.1.6"
     },
     "dependencies": {
-        "@babel/core": "^7.0.0-beta.40",
+        "@babel/core": "^7.0.0-beta.51",
         "@babel/template": "^7.0.0-beta.49",
-        "@babel/traverse": "^7.0.0-beta.40",
-        "@babel/types": "^7.0.0-beta.40",
-        "babylon": "^7.0.0-beta.40",
+        "@babel/traverse": "^7.0.0-beta.51",
+        "@babel/types": "^7.0.0-beta.51",
+        "babylon": "^7.0.0-beta.30",
         "gitignore-globs": "^0.1.1",
         "gitignore-to-glob": "^0.3.0",
         "glob": "^7.1.2",

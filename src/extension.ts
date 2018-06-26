@@ -10,6 +10,8 @@ import * as relative from 'relative';
 import * as path from 'path';
 import { shouldBeConsideredJsFiles, esmModuleSystemUsed, commonJSModuleSystemUsed, shouldSwitchToTarget } from './settings';
 import { isJSX, wrapWithComponent, createComponentInstance } from './modules/jsx';
+import { CancellationToken, CodeActionContext, Range, TextDocument } from 'vscode';
+import { statelessToStateful } from './modules/statless-to-stateful';
 
 export type ProcessedSelection = {
   text: string;
@@ -79,11 +81,15 @@ const handleError = e => {
 };
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
-  public provideCodeActions(): Promise<vscode.Command[]> {
+  public provideCodeActions(document: TextDocument, range: Range, context: CodeActionContext, token: CancellationToken): Promise<vscode.Command[]> {
     return new Promise(resolve => resolve([
       {
         command: 'extension.glean',
         title: 'Export to File'
+      },
+      {
+        command: 'extension.glean.react.stateless-to-stateful',
+        title: 'Convert Stateless to Stateful Component'
       }
     ])
     );
@@ -102,13 +108,7 @@ export async function run() {
     const filePath = await showFilePicker(folderPath);
 
     const selectionProccessingResult = preprocessSelection(filePath);
-    await appendSelectedTextToFile(selectionProccessingResult, filePath);
-    await removeSelectedTextFromOriginalFile(selectionProccessingResult);
-    await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
-
-    if (shouldSwitchToTarget()) {
-      await openFile(filePath);
-    }
+    await commonFlow(selectionProccessingResult, filePath);
 
   } catch (e) {
     handleError(e);
@@ -116,10 +116,37 @@ export async function run() {
 
 }
 
+async function commonFlow(selectionProccessingResult, filePath) {
+  await appendSelectedTextToFile(selectionProccessingResult, filePath);
+  await removeSelectedTextFromOriginalFile(selectionProccessingResult);
+  await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
+
+  if (shouldSwitchToTarget()) {
+    await openFile(filePath);
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
-  const disposable = vscode.commands.registerCommand('extension.glean', run);
+  vscode.commands.registerCommand('extension.glean', run);
+
+  vscode.commands.registerCommand('extension.glean.react.stateless-to-stateful', async () => {
+    try {
+      const selectionProccessingResult = statelessToStateful(selectedText())
+      const filePath = activeFileName();
+      await appendSelectedTextToFile(selectionProccessingResult, filePath);
+      await removeSelectedTextFromOriginalFile(selectionProccessingResult);
+
+      if (shouldSwitchToTarget()) {
+        await openFile(filePath);
+      }
+
+    } catch (e) {
+      handleError(e);
+    }
+  });
+
 
 }
 
