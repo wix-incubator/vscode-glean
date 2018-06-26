@@ -7,6 +7,7 @@ import { workspaceRoot, activeURI } from './editor';
 import * as lineColumn from 'line-column';
 import * as prependFile from 'prepend-file';
 import * as vscode from 'vscode';
+import { SSL_OP_CISCO_ANYCONNECT } from 'constants';
 
 export function createFileIfDoesntExist(absolutePath: string): string {
   let directoryToFile = path.dirname(absolutePath);
@@ -36,6 +37,12 @@ export function filesInFolder(folder): string[] {
   return results;
 }
 
+export function replaceTextInFile(text, start: vscode.Position, end: vscode.Position, path) {
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(vscode.Uri.parse(`file://${path}`), new vscode.Range(start, end), text);
+  return vscode.workspace.applyEdit(edit);
+
+}
 export function appendTextToFile(text, absolutePath) {
   return new Promise((resolve, reject) => {
     fs.appendFile(absolutePath, text, function (err) {

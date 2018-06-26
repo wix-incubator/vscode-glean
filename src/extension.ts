@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { showDirectoryPicker } from './directories-picker';
 import { showFilePicker } from './file-picker';
 import { selectedText, openFile, showErrorMessage, currentEditorPath, activeFileName, selectedTextStart, selectedTextEnd, activeEditor } from './editor';
-import { appendTextToFile, removeContentFromFileAtLineAndColumn, prependTextToFile } from './file-system';
+import { appendTextToFile, removeContentFromFileAtLineAndColumn, prependTextToFile, replaceTextInFile } from './file-system';
 import { generateImportStatementFromFile, getIdentifier, exportAllDeclarationsCommonJS, exportAllDeclarationsESM, transformJSIntoExportExpressions } from './parsing';
 import * as relative from 'relative';
 import * as path from 'path';
@@ -135,7 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       const selectionProccessingResult = statelessToStateful(selectedText())
       const filePath = activeFileName();
-      await appendSelectedTextToFile(selectionProccessingResult, filePath);
+      await replaceTextInFile(selectionProccessingResult.text, selectedTextStart(), selectedTextEnd(), filePath);
       await removeSelectedTextFromOriginalFile(selectionProccessingResult);
 
       if (shouldSwitchToTarget()) {
