@@ -3,10 +3,10 @@ import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import { sync as globSync } from 'glob';
 import * as gitignoreToGlob from 'gitignore-to-glob';
-import { workspaceRoot } from './editor';
+import { workspaceRoot, activeURI } from './editor';
 import * as lineColumn from 'line-column';
 import * as prependFile from 'prepend-file';
-
+import * as vscode from 'vscode';
 
 export function createFileIfDoesntExist(absolutePath: string): string {
   let directoryToFile = path.dirname(absolutePath);
@@ -47,14 +47,9 @@ export function appendTextToFile(text, absolutePath) {
 }
 
 export function prependTextToFile(text, absolutePath) {
-  return new Promise((resolve, reject) => {
-    prependFile(absolutePath, text, err => {
-      if (err) {
-        reject(err);
-      }
-      resolve(absolutePath);
-    });
-  });
+  let edit = new vscode.WorkspaceEdit();
+  edit.insert(vscode.Uri.parse(`file://${absolutePath}`), new vscode.Position(0, 0), text);
+  return vscode.workspace.applyEdit(edit);
 }
 
 const invertGlob = pattern => pattern.replace(/^!/, '');
@@ -65,22 +60,7 @@ export const gitIgnoreFolders = () => {
 };
 
 export function removeContentFromFileAtLineAndColumn(start, end, path, replacement) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', function (err, content) {
-      if (err) {
-        reject(err);
-      }
-      const lineColumnFinder = lineColumn(content, { origin: 0 });
-      const startIndex = lineColumnFinder.toIndex(start.line, start.character);
-      const endIndex = lineColumnFinder.toIndex(end.line, end.character);
-      var result = content.substr(0, startIndex) + replacement + content.substr(endIndex);
-
-      fs.writeFile(path, result, 'utf8', function (err) {
-        if (err) reject(err);
-
-        resolve(path);
-      });
-    });
-  });
-
-}
+  let edit = new vscode.WorkspaceEdit();
+  edit.delete(activeURI(), new vscode.Range(start, end));
+  return vscode.workspace.applyEdit(edit);
+};
