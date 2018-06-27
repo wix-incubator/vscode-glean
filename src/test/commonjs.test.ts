@@ -1,12 +1,12 @@
 
 import * as sinon from 'sinon';
-import { run } from '../extension';
 import * as directoryPicker from '../directories-picker';
 import * as filePicker from '../file-picker';
 import * as editor from '../editor';
 import * as fileSystem from '../file-system';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
+import { extractToFile } from '../code-actions';
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -48,7 +48,7 @@ describe('commonjs support', function () {
 
 
     it('exports selected declarations from target file', async () => {
-        await run();
+        await extractToFile();
 
         expect(fileSystem.appendTextToFile).to.have.been.calledWith('\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ', './target.js');
 
@@ -56,7 +56,7 @@ describe('commonjs support', function () {
 
     it('removes selected text from the source file', async () => {
 
-        await run();
+        await extractToFile();
 
         expect(fileSystem.removeContentFromFileAtLineAndColumn).to.have.been.called;
 
@@ -64,7 +64,7 @@ describe('commonjs support', function () {
 
     it('prepends import statement to target with all exported declarations', async () => {
 
-        await run();
+        await extractToFile();
 
         expect(fileSystem.prependTextToFile).to.have.been.calledWith(`const { Foo } = require('./target');\n`);
 
@@ -72,7 +72,7 @@ describe('commonjs support', function () {
 
     it('should switches to the target file', async () => {
 
-        await run();
+        await extractToFile();
 
         expect(editor.openFile).to.have.calledWith('./target.js');
 

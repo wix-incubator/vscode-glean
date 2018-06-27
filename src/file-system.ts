@@ -8,6 +8,7 @@ import * as lineColumn from 'line-column';
 import * as prependFile from 'prepend-file';
 import * as vscode from 'vscode';
 import { SSL_OP_CISCO_ANYCONNECT } from 'constants';
+import { Position, Uri } from 'vscode';
 
 export function createFileIfDoesntExist(absolutePath: string): string {
   let directoryToFile = path.dirname(absolutePath);
@@ -43,14 +44,20 @@ export function replaceTextInFile(text, start: vscode.Position, end: vscode.Posi
   return vscode.workspace.applyEdit(edit);
 
 }
-export function appendTextToFile(text, absolutePath) {
-  return new Promise((resolve, reject) => {
-    fs.appendFile(absolutePath, text, function (err) {
-      if (err)
-        reject(err);
-      resolve(absolutePath);
-    });
-  });
+export async function appendTextToFile(text, absolutePath) {
+  const edit = new vscode.WorkspaceEdit();
+  const linesInFile = await countLineInFile(absolutePath);
+
+  edit.insert(Uri.parse(`file://${absolutePath}`), new Position(linesInFile, 0), text);
+  return vscode.workspace.applyEdit(edit);
+
+  // return new Promise((resolve, reject) => {
+  //   fs.appendFile(absolutePath, text, function (err) {
+  //     if (err)
+  //       reject(err);
+  //     resolve(absolutePath);
+  //   });
+  // });
 }
 
 export function prependTextToFile(text, absolutePath) {
@@ -71,3 +78,20 @@ export function removeContentFromFileAtLineAndColumn(start, end, path, replaceme
   edit.delete(activeURI(), new vscode.Range(start, end));
   return vscode.workspace.applyEdit(edit);
 };
+
+
+function countLineInFile(file): Promise<number> {
+  return new Promise(reoslve => {
+    let i;
+    let count = 0;
+    fs.createReadStream(file)
+      .on('data', function (chunk) {
+        for (i = 0; i < chunk.length; ++i)
+          if (chunk[i] == 10) count++;
+      })
+      .on('end', function () {
+        reoslve(count);
+      });
+  })
+
+}

@@ -1,26 +1,23 @@
 import { codeToAst } from "../parsing";
 import traverse from "@babel/traverse";
-import * as t from '@babel/types';
 import { buildComponent } from "./component-builder";
 import { transformFromAst } from '@babel/core';
-import { ProcessedSelection } from "../extension";
 import * as path from 'path';
+import { ProcessedSelection } from "../code-actions";
+import * as template from "@babel/template";
+import * as t from '@babel/types';
 
 
 export function isJSX(code) {
-  let isJSXString = false;
-  const Visitor = {
-    JSXElement(path) {
-      if (path.parentPath.parent.type === 'Program' || path.parentPath.parent.type === 'File') {
-        isJSXString = true;
-      }
-    }
+  const ast = template.smart(code, {
+    plugins: [
+      "typescript",
+      "jsx"
+    ],
+    sourceType: "module"
+  })();
 
-  };
-
-  traverse(codeToAst(code), Visitor);
-
-  return isJSXString;
+  return ast.expression && t.isJSX(ast.expression);
 
 }
 
@@ -94,4 +91,19 @@ export function createComponentInstance(name, props) {
   const memberPropsToInputProps = Array.from(props.memberProps).map(prop => `${prop}={this.props.${prop}}`).join(' ');
 
   return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps}/>`;
+}
+
+export function isStatelessComp(code) {
+  const ast = template.smart(code, {
+    plugins: [
+      "typescript",
+      "jsx"
+    ],
+    sourceType: "module"
+  })();
+
+  return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
+    (t.isExportDeclaration(ast) && t.isFunction(ast.declaration)) ||
+    t.isFunction(ast);
+
 }
