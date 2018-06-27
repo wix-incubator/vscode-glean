@@ -47,3 +47,28 @@ List of extentions of files that should be treated as javascript files. This det
 Determines whether VSCode should switch to target file after extracting.
 
 
+## Contribute
+
+Feel free to open issues or PRs!
+
+### Getting started
+
+In order to start working all you need to do is:
+```sh
+$ https://github.com/wix-incubator/vscode-glean
+$ cd vscode-glean
+$ npm install
+$ code .
+```
+
+### Running Extention
+* Go to VSCode debug sidebar
+* Select `Extention` from the dropdown
+* Hit `F5`
+
+### Running Tests
+* Go to VSCode debug sidebar
+* Select `Extention Tests` from the dropdown
+* Hit `F5`
+
+
