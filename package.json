@@ -111,7 +111,7 @@
             "semantic-release-vsce",
             {
                 "path": "@semantic-release/changelog",
-                "changelogFile": "docs/changelog.md"
+                "changelogFile": "CHANGELOG.md"
             },
             {
                 "path": "@semantic-release/github",
