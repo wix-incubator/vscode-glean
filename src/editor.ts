@@ -28,12 +28,12 @@ export function currentEditorPath(): string {
 
 export function openFile(absolutePath: string): PromiseLike<string> {
   return vscode.workspace.openTextDocument(absolutePath)
-    .then((textDocument): PromiseLike<string> => {
+    .then((textDocument) => {
       if (textDocument) {
         vscode.window.showTextDocument(textDocument);
-        return Promise.resolve(absolutePath);
+        return absolutePath;
       } else {
-        return Promise.reject('Could not open document');
+        throw Error('Could not open document');
       }
     });
 }

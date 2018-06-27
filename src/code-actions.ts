@@ -55,8 +55,6 @@ export async function statelessToStatefulComponent() {
   try {
     const selectionProccessingResult = statelessToStateful(selectedText())
     await replaceSelectionWith(selectionProccessingResult.text);
-    //await removeSelectedTextFromOriginalFile(selectionProccessingResult);
-    await switchToDestinationFileIfRequired(activeFileName())
 
   } catch (e) {
     handleError(e);
@@ -107,10 +105,6 @@ export const prependImportsToFileIfNeeded = ({
 };
 export const removeSelectedTextFromOriginalFile = selection => {
   let content = '';
-
-  if (selection.metadata.isJSX) {
-    content = createComponentInstance(selection.metadata.name, selection.metadata.componentProperties);
-  }
 
   return removeContentFromFileAtLineAndColumn(selectedTextStart(), selectedTextEnd(), activeFileName(), content);
 };

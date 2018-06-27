@@ -4,13 +4,14 @@ import { extractToFile, statelessToStatefulComponent, extractJSXToComponent } fr
 import * as vscode from 'vscode';
 import { selectedText } from './editor';
 import { isStatelessComp, isJSX } from './modules/jsx';
+import { ProviderResult } from 'vscode';
 
 
 
 
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
-  public provideCodeActions(): Promise<vscode.Command[]> {
+  public provideCodeActions(): ProviderResult<vscode.Command[]> {
     const actions = [
       {
         command: 'extension.glean',
@@ -31,7 +32,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       })
     }
 
-    return Promise.resolve(actions);
+    return actions;
   }
 }
 
@@ -40,7 +41,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
-  vscode.commands.registerCommand('extension.glean', extractToFile);
+  vscode.commands.registerCommand('extension.glean', extractToFile;
 
   vscode.commands.registerCommand('extension.glean.react.extract-component', extractJSXToComponent);
 
