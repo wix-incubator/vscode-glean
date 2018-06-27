@@ -41,7 +41,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
-  vscode.commands.registerCommand('extension.glean', extractToFile;
+  vscode.commands.registerCommand('extension.glean', extractToFile);
 
   vscode.commands.registerCommand('extension.glean.react.extract-component', extractJSXToComponent);
 
