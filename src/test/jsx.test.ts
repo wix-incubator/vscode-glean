@@ -88,6 +88,29 @@ describe('jsx module', function () {
 
             expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <>\n                <Wrapper bar={bar}>{this.props.foo}</Wrapper>\n            </>;\n  }\n\n}\n  ', '/target.js');
         });
+
+        it('replaces selected jsx code with an instance of newly created component', async () => {
+            sandbox.stub(editor, 'selectedText').returns(`
+                <Wrapper></Wrapper>
+            `);
+
+            await extractJSXToComponent();
+
+            expect(fileSystem.replaceTextInFile).to.have.been.calledWith('<Target     />', selectedTextStart, selectedTextStart, '/source.js');
+        });
+
+        it('should pass original references used by original jsx to the new component instance', async () => {
+            sandbox.stub(editor, 'selectedText').returns(`
+                <div>{x}</div>
+                <div>{this.state.foo}</div>
+                <div>{this.props.bar}</div>
+                <div>{this.getZoo()}</div>
+            `);
+
+            await extractJSXToComponent();
+
+            expect((<any>fileSystem.replaceTextInFile).args[0][0]).to.be.equal('<Target  foo={this.state.foo} x={x} bar={this.props.bar} getZoo={this.getZoo}/>');
+        });
     });
 
     describe('when refactoring stateless component into stateful component', () => {
