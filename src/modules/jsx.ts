@@ -1,21 +1,33 @@
-import { codeToAst } from "../parsing";
+import { codeToAst, jsxToAst } from "../parsing";
 import traverse from "@babel/traverse";
 import { buildComponent } from "./component-builder";
 import { transformFromAst } from '@babel/core';
 import * as path from 'path';
 import { ProcessedSelection } from "../code-actions";
-import * as template from "@babel/template";
+import template from "@babel/template";
 import * as t from '@babel/types';
 
 
 export function isJSX(code) {
-  const ast = template.smart(code, {
-    plugins: [
-      "typescript",
-      "jsx"
-    ],
-    sourceType: "module"
-  })();
+  let ast;
+  try {
+    ast = template.smart(code, {
+      plugins: [
+        "typescript",
+        "jsx"
+      ],
+      sourceType: "module"
+    })();
+
+  } catch (e) {
+    ast = template.smart(`<>${code}</>`, {
+      plugins: [
+        "typescript",
+        "jsx"
+      ],
+      sourceType: "module"
+    })();
+  }
 
   return ast.expression && t.isJSX(ast.expression);
 
@@ -66,7 +78,7 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
     }
   }
 
-  const ast = codeToAst(jsx);
+  const ast = jsxToAst(jsx);
 
   traverse(ast, visitor);
 
@@ -94,13 +106,13 @@ export function createComponentInstance(name, props) {
 }
 
 export function isStatelessComp(code) {
-  const ast = template.smart(code, {
+  const ast = template.ast(code, {
     plugins: [
       "typescript",
       "jsx"
     ],
     sourceType: "module"
-  })();
+  });
 
   return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
     (t.isExportDeclaration(ast) && t.isFunction(ast.declaration)) ||

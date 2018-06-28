@@ -13,6 +13,7 @@ export const codeToAst = code => parse(code, {
     sourceType: "module"
 });
 
+export const jsxToAst = code => codeToAst(`<>${code}</>`);
 
 export function getIdentifier(code) {
     const identifiers = [];

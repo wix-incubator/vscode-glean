@@ -12,27 +12,27 @@ import { ProviderResult } from 'vscode';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {
-    const actions = [
-      {
-        command: 'extension.glean',
-        title: 'Export to File'
-      }];
+    const exportToFileAction = {
+      command: 'extension.glean',
+      title: 'Export to File'
+    };
 
     if (isJSX(selectedText())) {
-      actions.push({
+      return [{
         command: 'extension.glean.react.extract-component',
-        title: 'Extract Converter'
-      })
+        title: 'Extract Component'
+      }];
     }
 
     if (isStatelessComp(selectedText())) {
-      actions.push({
+      return [exportToFileAction, {
         command: 'extension.glean.react.stateless-to-stateful',
         title: 'Convert Stateless to Stateful Component'
-      })
+      }]
     }
 
-    return actions;
+    return [exportToFileAction];
+
   }
 }
 

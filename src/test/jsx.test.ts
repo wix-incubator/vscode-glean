@@ -52,7 +52,7 @@ describe('jsx module', function () {
 
         await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Source extends React.Component {\n  render() {\n    return <div>{this.props.foo}</div>;\n  }\n\n}\n  ', '/source.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    return <>\n        <div>{this.props.foo}</div>\n    </>;\n  }\n\n}\n  ', '/target.js');
     });
 
     it('creates functional component if there are no "this" references', async () => {
@@ -62,7 +62,7 @@ describe('jsx module', function () {
 
         await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Source({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/source.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <>\n        <div>{foo}</div>\n    </>;\n}\n  ', '/target.js');
     });
 
 
@@ -86,7 +86,7 @@ describe('jsx module', function () {
 
             await extractJSXToComponent();
 
-            expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Source extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ', '/source.js');
+            expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <>\n                <Wrapper bar={bar}>{this.props.foo}</Wrapper>\n            </>;\n  }\n\n}\n  ', '/target.js');
         });
     });
 

@@ -15,15 +15,19 @@ export async function extractJSXToComponent() {
     return; // No open text editor
   }
 
-  const filePath = activeFileName();
+  try {
+    const folderPath = await showDirectoryPicker()
+    const filePath = await showFilePicker(folderPath);
 
-  const selectionProccessingResult = await wrapWithComponent(filePath, selectedText());
-  await appendSelectedTextToFile(selectionProccessingResult, filePath);
-  await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
-  const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
-  await replaceSelectionWith(componentInstance);
-  await switchToDestinationFileIfRequired(filePath);
-
+    const selectionProccessingResult = await wrapWithComponent(filePath, selectedText());
+    await appendSelectedTextToFile(selectionProccessingResult, filePath);
+    await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
+    const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
+    await replaceSelectionWith(componentInstance);
+    await switchToDestinationFileIfRequired(filePath);
+  } catch (e) {
+    handleError(e);
+  }
 }
 
 export async function extractToFile() {
