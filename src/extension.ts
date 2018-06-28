@@ -25,10 +25,12 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
     }
 
     if (isStatelessComp(selectedText())) {
-      return [exportToFileAction, {
-        command: 'extension.glean.react.stateless-to-stateful',
-        title: 'Convert Stateless to Stateful Component'
-      }]
+      return [
+        exportToFileAction,
+        {
+          command: 'extension.glean.react.stateless-to-stateful',
+          title: 'Convert Stateless to Stateful Component'
+        }]
     }
 
     return [exportToFileAction];
