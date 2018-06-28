@@ -1,3 +1,10 @@
+## [3.0.5](https://github.com/wix-incubator/vscode-glean/compare/v3.0.4...v3.0.5) (2018-06-28)
+
+
+### Bug Fixes
+
+* **jsx:** Fixed [#13](https://github.com/wix-incubator/vscode-glean/issues/13) ([eaa9618](https://github.com/wix-incubator/vscode-glean/commit/eaa9618))
+
 ## [3.0.4](https://github.com/wix-incubator/vscode-glean/compare/v3.0.3...v3.0.4) (2018-06-28)
 
 
