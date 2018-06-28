@@ -46,7 +46,8 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
   const componentProperties = {
     argumentProps: new Set(),
     memberProps: new Set(),
-    state: new Set()
+    state: new Set(),
+    componentMembers: new Set()
   };
 
   const visitor = {
@@ -67,9 +68,11 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
             componentProperties.state.add(path.parent.property.name);
           }
         } else {
+          componentProperties.componentMembers.add(path.node.property.name);
           const membershipExpr = t.memberExpression(t.memberExpression(path.node.object, t.identifier('props')), t.identifier(path.node.property.name));
           (<any>membershipExpr).wasVisited = true;
           path.replaceWith(membershipExpr);
+          path.skip();
         }
 
         path.node.wasVisited = true;
@@ -101,8 +104,9 @@ export function createComponentInstance(name, props) {
   const stateToInputProps = Array.from(props.state).map(prop => `${prop}={this.state.${prop}}`).join(' ');
   const argPropsToInputProps = Array.from(props.argumentProps).map(prop => `${prop}={${prop}}`).join(' ');
   const memberPropsToInputProps = Array.from(props.memberProps).map(prop => `${prop}={this.props.${prop}}`).join(' ');
+  const componentMembersToInputProps = Array.from(props.componentMembers).map(prop => `${prop}={this.${prop}}`).join(' ');
 
-  return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps}/>`;
+  return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps} ${componentMembersToInputProps}/>`;
 }
 
 export function isStatelessComp(code) {
