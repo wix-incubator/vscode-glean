@@ -1,7 +1,8 @@
 import { showDirectoryPicker } from "./directories-picker";
 import { showFilePicker } from "./file-picker";
-import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage } from "./editor";
+import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage } from "./editor";
 import { statelessToStateful } from "./modules/statless-to-stateful";
+import { statefulToStateless } from './modules/stateful-to-stateless'
 import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from "./settings";
 import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn } from "./file-system";
 import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions } from "./parsing";
@@ -64,6 +65,20 @@ export async function statelessToStatefulComponent() {
     handleError(e);
   }
 }
+
+export async function statefulToStatelessComponent() {
+  try {
+    await showInformationMessage('WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?', ['Yes', 'No']).then(async res => {
+      if (res === 'Yes') {
+        const selectionProccessingResult = statefulToStateless(selectedText())
+        await replaceSelectionWith(selectionProccessingResult.text);
+      }
+    });
+  } catch (e) {
+    handleError(e);
+  }
+}
+
 export async function switchToDestinationFileIfRequired(destinationFilePath: any) {
   if (shouldSwitchToTarget()) {
     await openFile(destinationFilePath);

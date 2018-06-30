@@ -6,7 +6,8 @@ import * as editor from '../editor';
 import * as fileSystem from '../file-system';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { extractJSXToComponent, statelessToStatefulComponent } from '../code-actions';
+import { extractJSXToComponent, statelessToStatefulComponent, statefulToStatelessComponent } from '../code-actions';
+import { toASCII } from 'punycode';
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -161,6 +162,171 @@ describe('jsx module', function () {
 
             expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return <div></div>;\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
         });
+    })
+
+    describe('when refactoring stateful component into stateless component', () => {
+      it('shows the warning dialog before making a change', async () => {
+        givenApprovedWarning();
+        await statefulToStatelessComponent();
+
+        expect((<any>editor.showInformationMessage).args[0][0]).to.equal('WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?');
+        expect((<any>editor.showInformationMessage).args[0][1]).to.deep.equal(['Yes', 'No']);
+      });
+
+      it('does not refactor when the user does not accept the warning message', async () => {
+        givenDeclinedWarning();
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).not.to.have.been.called;
+      });
+
+      it('creates a stateless component from a class component ', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          class SomeComponent extends React.Component {
+            render() {
+              return <div />;
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = props => {\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates a stateless component without lifecycle methods and instance references', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          class SomeComponent extends React.Component {
+            componentWillMount() {
+              console.log(2);
+            }
+            render() {
+              return (
+                <div>
+                  {this.state.foo} + {this.state.bar}
+                </div>
+              );
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = props => {\n  return <div>\n                  {props.foo} + {props.bar}\n                </div>;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates stateless component including instance methods without state functions', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          class SomeComponent extends React.Component {
+            someMethod() {
+              this.setState({a: 3});
+              console.log(2);
+              this.forceUpdate();
+            }
+            render() {
+              return <div />;
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates stateless component with props type interface and default props', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          class SomeComponent extends React.Component<MyProps> {
+            static defaultProps = {a: 3};
+            someMethod() {
+              this.setState({a: 3});
+              console.log(2);
+              this.forceUpdate();
+            }
+            render() {
+              return <div />;
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = (props: MyProps = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates stateless component with props type literal and default props', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          class SomeComponent extends React.Component<{a: number}> {
+            static defaultProps = {a: 3};
+            someMethod() {
+              this.setState({a: 3});
+              console.log(2);
+              this.forceUpdate();
+            }
+            render() {
+              return <div />;
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates stateless component with default export', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          export default class SomeComponent extends React.Component<{a: number}> {
+            static defaultProps = {a: 3};
+            someMethod() {
+              this.setState({a: 3});
+              console.log(2);
+              this.forceUpdate();
+            }
+            render() {
+              return <div />;
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default someComponent;', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates stateless component with named export', async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, 'selectedText').returns(`
+          export class SomeComponent extends React.Component<{a: number}> {
+            static defaultProps = {a: 3};
+            someMethod() {
+              this.setState({a: 3});
+              console.log(2);
+              this.forceUpdate();
+            }
+            render() {
+              return <div />;
+            }
+          }
+        `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('export const someComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      const givenApprovedWarning = () => {
+        sandbox.stub(editor, 'showInformationMessage').returns(Promise.resolve('Yes'));
+      }
+      const givenDeclinedWarning = () => {
+        sandbox.stub(editor, 'showInformationMessage').returns(Promise.resolve('No'));
+      }
     })
 
 });

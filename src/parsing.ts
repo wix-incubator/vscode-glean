@@ -7,6 +7,7 @@ import { esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
 
 export const codeToAst = code => parse(code, {
     plugins: [
+        "classProperties",
         "typescript",
         "jsx"
     ],

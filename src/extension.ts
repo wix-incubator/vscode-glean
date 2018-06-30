@@ -1,9 +1,9 @@
-import { extractToFile, statelessToStatefulComponent, extractJSXToComponent } from './code-actions';
+import { extractToFile, statelessToStatefulComponent, statefulToStatelessComponent, extractJSXToComponent } from './code-actions';
 'use strict';
 
 import * as vscode from 'vscode';
 import { selectedText } from './editor';
-import { isStatelessComp, isJSX } from './modules/jsx';
+import { isStatelessComp, isStatefulComp, isJSX } from './modules/jsx';
 import { ProviderResult } from 'vscode';
 
 
@@ -33,8 +33,14 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
         }]
     }
 
-    return [exportToFileAction];
+    if (isStatefulComp(selectedText())) {
+      return [exportToFileAction, {
+        command: 'extension.glean.react.stateful-to-stateless',
+        title: 'Convert Stateful to Stateless Component'
+      }]
+    }
 
+    return [exportToFileAction];
   }
 }
 
@@ -48,6 +54,8 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('extension.glean.react.extract-component', extractJSXToComponent);
 
   vscode.commands.registerCommand('extension.glean.react.stateless-to-stateful', statelessToStatefulComponent);
+
+  vscode.commands.registerCommand('extension.glean.react.stateful-to-stateless', statefulToStatelessComponent);
 
 }
 

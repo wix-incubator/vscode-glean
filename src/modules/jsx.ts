@@ -13,6 +13,7 @@ export function isJSX(code) {
   try {
     ast = template.smart(code, {
       plugins: [
+        "classProperties",
         "typescript",
         "jsx"
       ],
@@ -22,6 +23,7 @@ export function isJSX(code) {
   } catch (e) {
     ast = template.smart(`<>${code}</>`, {
       plugins: [
+        "classProperties",
         "typescript",
         "jsx"
       ],
@@ -112,6 +114,7 @@ export function createComponentInstance(name, props) {
 export function isStatelessComp(code) {
   const ast = template.ast(code, {
     plugins: [
+      "classProperties",
       "typescript",
       "jsx"
     ],
@@ -121,5 +124,30 @@ export function isStatelessComp(code) {
   return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
     (t.isExportDeclaration(ast) && t.isFunction(ast.declaration)) ||
     t.isFunction(ast);
+
+}
+
+export function isStatefulComp(code) {
+  const ast = template.smart(code, {
+    plugins: [
+      "classProperties",
+      "typescript",
+      "jsx"
+    ],
+    sourceType: "module"
+  })();
+
+  const isSupportedComponent = (classPath) => {
+    const supportedComponents = ['Component', 'PureComponent'];
+      return ((classPath.superClass.object && 
+          classPath.superClass.object.name === 'React' && 
+          supportedComponents.indexOf(classPath.superClass.property.name) !== -1)  ||
+          (supportedComponents.indexOf(classPath.superClass.name) !== -1));
+  }
+
+  return (
+    (t.isExportNamedDeclaration(ast) && isSupportedComponent(ast.declaration)) ||
+    (t.isExportDefaultDeclaration(ast) && isSupportedComponent(ast.declaration)) ||
+    isSupportedComponent(ast));
 
 }

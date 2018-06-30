@@ -72,3 +72,5 @@ export const toQuickPick = (label: string, description?) => ({ label, descriptio
 export const toQuickPicksList = (choices: string[]) => choices.map(item => toQuickPick(item));
 
 export const showErrorMessage = message => vscode.window.showErrorMessage(message);
+
+export const showInformationMessage = (message, items: string[] = []) => vscode.window.showInformationMessage(message, ...items);
