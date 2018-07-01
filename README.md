@@ -79,4 +79,3 @@ $ code .
 * Select `Extention Tests` from the dropdown
 * Hit `F5`
 
-
