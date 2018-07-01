@@ -1,3 +1,5 @@
+![logo](assets/github_logo.svg)
+
 # VSCode Glean
 > Extract Javascript/Typescript/JSX into a new or existing file.
 
