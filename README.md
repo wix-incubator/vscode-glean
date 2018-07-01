@@ -43,6 +43,11 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 ![Example of Stateless to Stateful Component Conversion](https://media.giphy.com/media/fipQDtl5shXdzxqPjB/giphy.gif)
 
 
+### Converting Stateful Component to Functional Component
+
+![Example of Stateless to Stateful Component Conversion](https://media.giphy.com/media/8PgSxWLrxEfBwDwfno/giphy.gif)
+
+**WARNING!!! This refactoring will delete all Lifecycle methods and setState calls!**
 
 ## Configuration Options
 #### glean.jsModuleSystem (Default: 'esm')
