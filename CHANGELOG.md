@@ -5,6 +5,13 @@
 
 * implementation for refactoring stateful to stateless component ([90a33a6](https://github.com/wix-incubator/vscode-glean/commit/90a33a6))
 
+# [3.1.0](https://github.com/wix-incubator/vscode-glean/compare/v3.0.5...v3.1.0) (2018-07-01)
+
+
+### Features
+
+* implementation for refactoring stateful to stateless component ([90a33a6](https://github.com/wix-incubator/vscode-glean/commit/90a33a6))
+
 ## [3.0.5](https://github.com/wix-incubator/vscode-glean/compare/v3.0.4...v3.0.5) (2018-06-28)
 
 
