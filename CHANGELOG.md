@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/wix-incubator/vscode-glean/compare/v3.1.0...v3.2.0) (2018-07-01)
+
+
+### Features
+
+* trigger release ([afc516e](https://github.com/wix-incubator/vscode-glean/commit/afc516e))
+
 # [3.1.0](https://github.com/wix-incubator/vscode-glean/compare/v3.0.5...v3.1.0) (2018-07-01)
 
 
