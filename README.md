@@ -8,25 +8,20 @@
 [![Build Status](https://travis-ci.org/wix-incubator/vscode-glean.svg?branch=master)](https://travis-ci.org/wix-incubator/vscode-glean)
 [![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
-The extention allows extracting Javascript/Typescript/JSX into a new or existing file.
-The extention automatically exports all exported declarations from target file and imports them in the origin file.
-This is super useful while refactoring your code - just select the code you would like to extract and choose the destination.
+The extention provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
 
-Copying between non-js files is supported as well.
+## Highlights
+- JSX Support
+- Typescript support
+- ES2015 modules support
+- CommonJS modules support
+- Plain Text support
 
 ## Installation
 
 Go to the link below and click `Install`.
 
 [Visual Studio Code Market Place: Glean](https://marketplace.visualstudio.com/items?itemName=wix.glean)
-
-
-## Highlights
-- Typescript support
-- JSX Support (extract JSX strings into new components!)
-- ES2015 modules support
-- CommonJS modules support
-- Plain Text support
 
 Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
 
