@@ -1,3 +1,10 @@
+## [3.2.3](https://github.com/wix-incubator/vscode-glean/compare/v3.2.2...v3.2.3) (2018-07-02)
+
+
+### Bug Fixes
+
+* docs ([884d49f](https://github.com/wix-incubator/vscode-glean/commit/884d49f))
+
 ## [3.2.2](https://github.com/wix-incubator/vscode-glean/compare/v3.2.1...v3.2.2) (2018-07-02)
 
 
