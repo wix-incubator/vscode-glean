@@ -125,5 +125,5 @@
         "type": "git",
         "url": "https://github.com/wix-incubator/vscode-glean.git"
     },
-    "icon": "assets/icon.png",
+    "icon": "assets/icon.png"
 }
