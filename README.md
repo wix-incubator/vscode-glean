@@ -1,8 +1,9 @@
 <p align="center">
   <img src="https://github.com/wix-incubator/vscode-glean/blob/master/assets/github_logo.png?raw=true">
 </p>
+
 # VSCode Glean
-> Extract Javascript/Typescript/JSX into a new or existing file.
+> The extention provides refactoring tools for your React/Javascript/Typescript codebase
 
 
 [![Build Status](https://travis-ci.org/wix-incubator/vscode-glean.svg?branch=master)](https://travis-ci.org/wix-incubator/vscode-glean)
