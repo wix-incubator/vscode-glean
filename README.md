@@ -1,7 +1,6 @@
 <p align="center">
-  <img src="assets/github_logo.png">
+  <img src="https://github.com/wix-incubator/vscode-glean/blob/master/assets/github_logo.png?raw=true">
 </p>
-
 # VSCode Glean
 > Extract Javascript/Typescript/JSX into a new or existing file.
 
