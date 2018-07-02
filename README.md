@@ -14,7 +14,11 @@ This is super useful while refactoring your code - just select the code you woul
 
 Copying between non-js files is supported as well.
 
+## Installation
 
+Go to the link below and click `Install`.
+
+[Visual Studio Code Market Place: Glean](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
 
 ## Highlights
