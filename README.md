@@ -12,7 +12,8 @@
 The extention provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
 
 ## Highlights
-- JSX Support
+- Allows extracing JSX into new component as well as other React code refactoring options
+- Moving code between files
 - Typescript support
 - ES2015 modules support
 - CommonJS modules support
@@ -24,14 +25,18 @@ Go to the link below and click `Install`.
 
 [Visual Studio Code Market Place: Glean](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
+## Features
+
+### Extract to file
+
 Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
 
 
 ![Example of Javascript Extraction](https://media.giphy.com/media/5QI4abbeZqWpWN0nP8/giphy.gif)
 
 
-## JSX Support
-### Extracting JSX into a new Component
+### JSX Support
+#### Extracting JSX into a new Component
 Glean allows easy extraction of JSX into new React components. Just select the JSX to extract, and Glean will handle all the rest:
 
 - Generate Stateful or Stateless Component, such that the extracted JSX will continue to function.
@@ -40,12 +45,12 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 
 ![Example of JSX extraction](https://media.giphy.com/media/22Q7TtNqCIqM7j8Ph6/giphy.gif)
 
-### Converting Functional Component to Stateful Component
+#### Converting Functional Component to Stateful Component
 
 ![Example of Stateless to Stateful Component Conversion](https://media.giphy.com/media/fipQDtl5shXdzxqPjB/giphy.gif)
 
 
-### Converting Stateful Component to Functional Component
+#### Converting Stateful Component to Functional Component
 
 ![Example of Stateless to Stateful Component Conversion](https://media.giphy.com/media/BHuT6tJuJGqldCTFGe/giphy.gif)
 
