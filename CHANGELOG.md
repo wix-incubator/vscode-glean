@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/wix-incubator/vscode-glean/compare/v3.2.0...v3.2.1) (2018-07-02)
+
+
+### Bug Fixes
+
+* **docs:** added icon ([78a1470](https://github.com/wix-incubator/vscode-glean/commit/78a1470))
+
 # [3.2.0](https://github.com/wix-incubator/vscode-glean/compare/v3.1.0...v3.2.0) (2018-07-01)
 
 
