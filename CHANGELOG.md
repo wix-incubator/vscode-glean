@@ -5,6 +5,13 @@
 
 * **docs:** added logo ([61ef292](https://github.com/wix-incubator/vscode-glean/commit/61ef292))
 
+## [3.2.2](https://github.com/wix-incubator/vscode-glean/compare/v3.2.1...v3.2.2) (2018-07-02)
+
+
+### Bug Fixes
+
+* **docs:** added logo ([61ef292](https://github.com/wix-incubator/vscode-glean/commit/61ef292))
+
 ## [3.2.1](https://github.com/wix-incubator/vscode-glean/compare/v3.2.0...v3.2.1) (2018-07-02)
 
 
