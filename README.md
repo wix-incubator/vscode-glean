@@ -3,7 +3,8 @@
 </p>
 
 # VSCode Glean
-> The extention provides refactoring tools for your React/Javascript/Typescript codebase
+> The extension provides refactoring tools for your React/Javascript/Typescript codebase
+
 
 
 [![Build Status](https://travis-ci.org/wix-incubator/vscode-glean.svg?branch=master)](https://travis-ci.org/wix-incubator/vscode-glean)
