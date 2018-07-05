@@ -26,8 +26,10 @@ export function statelessToStateful(component) {
 
         } else {
           path.scope.bindings[path.node.params[0].name].referencePaths.forEach(refPath => {
-            const membershipExpr = t.memberExpression(t.memberExpression(t.thisExpression(), refPath.parent.object), refPath.parent.property);
-            refPath.parentPath.replaceWith(membershipExpr)
+            if (t.isIdentifier(refPath)) {
+              const membershipExpr = t.memberExpression(t.thisExpression(), refPath.node);
+              refPath.replaceWith(membershipExpr)
+            }
           });
 
         }
