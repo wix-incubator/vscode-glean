@@ -28,7 +28,7 @@ export function statelessToStateful(component) {
           path.scope.bindings[path.node.params[0].name].referencePaths.forEach(refPath => {
             if (t.isIdentifier(refPath)) {
               const membershipExpr = t.memberExpression(t.thisExpression(), refPath.node);
-              refPath.replaceWith(membershipExpr)
+              (<any>refPath).replaceWith(membershipExpr)
             }
           });
 
