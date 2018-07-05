@@ -1,3 +1,10 @@
+## [3.2.4](https://github.com/wix-incubator/vscode-glean/compare/v3.2.3...v3.2.4) (2018-07-05)
+
+
+### Bug Fixes
+
+* **statless-to-stateful:** Fixed [#14](https://github.com/wix-incubator/vscode-glean/issues/14) ([13431d3](https://github.com/wix-incubator/vscode-glean/commit/13431d3))
+
 ## [3.2.3](https://github.com/wix-incubator/vscode-glean/compare/v3.2.2...v3.2.3) (2018-07-02)
 
 
