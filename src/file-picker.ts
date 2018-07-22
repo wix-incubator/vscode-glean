@@ -6,7 +6,8 @@ function completeToFullFilePath(file, folder) {
     if (file === NEW_FILE_OPTION) {
       return promptFileNameInput(folder).then(createFileIfDoesntExist);
     } else {
-      return `${workspaceRoot()}${folder}/${file}`;
+      const root = workspaceRoot();
+      return `${root || ''}${folder}/${file}`;
     }
   };
   

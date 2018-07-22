@@ -59,7 +59,10 @@ export function showQuickPicksList(choices: QuickPickItem[], placeHolder = '') {
   })
 };
 
-export const convertRelativeToFullPath = relativePath => path.join(workspaceRoot(), relativePath);
+export const convertRelativeToFullPath = relativePath => {
+  const root = workspaceRoot();
+  return root ? path.join(root, relativePath) : relativePath;  
+}
 
 export const extractQuickPickValue = selection => {
   if (!selection)
