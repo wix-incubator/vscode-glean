@@ -17,14 +17,16 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       title: 'Export to File'
     };
 
-    if (isJSX(selectedText())) {
+    const text = selectedText()
+
+    if (isJSX(text)) {
       return [{
         command: 'extension.glean.react.extract-component',
         title: 'Extract Component'
       }];
     }
 
-    if (isStatelessComp(selectedText())) {
+    if (isStatelessComp(text)) {
       return [
         exportToFileAction,
         {
@@ -33,7 +35,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
         }]
     }
 
-    if (isStatefulComp(selectedText())) {
+    if (isStatefulComp(text)) {
       return [exportToFileAction, {
         command: 'extension.glean.react.stateful-to-stateless',
         title: 'Convert Stateful to Stateless Component'
