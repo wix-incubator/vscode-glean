@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/wix-incubator/vscode-glean/blob/master/assets/github_logo.png?raw=true">
+  <img src="https://github.com/wix/vscode-glean/blob/master/assets/github_logo.png?raw=true">
 </p>
 
 # VSCode Glean
@@ -7,7 +7,7 @@
 
 
 
-[![Build Status](https://travis-ci.org/wix-incubator/vscode-glean.svg?branch=master)](https://travis-ci.org/wix-incubator/vscode-glean)
+[![Build Status](https://travis-ci.org/wix/vscode-glean.svg?branch=master)](https://travis-ci.org/wix/vscode-glean)
 [![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
 The extention provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
@@ -76,7 +76,7 @@ Feel free to open issues or PRs!
 
 In order to start working all you need to do is:
 ```sh
-$ https://github.com/wix-incubator/vscode-glean
+$ git clone git@github.com:wix/vscode-glean.git
 $ cd vscode-glean
 $ npm install
 $ code .
