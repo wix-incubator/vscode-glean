@@ -4,25 +4,15 @@ import { buildComponent } from "./component-builder";
 import { transformFromAst } from '@babel/core';
 import * as path from 'path';
 import { ProcessedSelection } from "../code-actions";
-import template from "@babel/template";
 import * as t from '@babel/types';
-
-const defaultTemplateOptions = {
-  plugins: [
-    "classProperties",
-    "typescript",
-    "jsx"
-  ],
-  sourceType: "module"
-}
 
 export function isJSX(code) {
   let ast;
   try {
-    ast = template.ast(code, defaultTemplateOptions);
+    ast = codeToAst(code);
 
   } catch (e) {
-    ast = template.ast(`<>${code}</>`, defaultTemplateOptions);
+    ast = jsxToAst(code);
   }
 
   return ast.expression && t.isJSX(ast.expression);
@@ -106,7 +96,7 @@ export function createComponentInstance(name, props) {
 }
 
 export function isStatelessComp(code) {
-  const ast = template.ast(code, defaultTemplateOptions);
+  const ast = codeToAst(code);
 
   return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
     (t.isExportDeclaration(ast) && t.isFunction(ast.declaration)) ||
@@ -115,7 +105,7 @@ export function isStatelessComp(code) {
 }
 
 export function isStatefulComp(code) {
-  const ast = template.ast(code, defaultTemplateOptions);
+  const ast = codeToAst(code);
 
   const isSupportedComponent = (classPath) => {
     const supportedComponents = ['Component', 'PureComponent'];
