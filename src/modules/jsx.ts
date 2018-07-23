@@ -7,28 +7,22 @@ import { ProcessedSelection } from "../code-actions";
 import template from "@babel/template";
 import * as t from '@babel/types';
 
+const defaultTemplateOptions = {
+  plugins: [
+    "classProperties",
+    "typescript",
+    "jsx"
+  ],
+  sourceType: "module"
+}
 
 export function isJSX(code) {
   let ast;
   try {
-    ast = template.smart(code, {
-      plugins: [
-        "classProperties",
-        "typescript",
-        "jsx"
-      ],
-      sourceType: "module"
-    })();
+    ast = template.ast(code, defaultTemplateOptions);
 
   } catch (e) {
-    ast = template.smart(`<>${code}</>`, {
-      plugins: [
-        "classProperties",
-        "typescript",
-        "jsx"
-      ],
-      sourceType: "module"
-    })();
+    ast = template.ast(`<>${code}</>`, defaultTemplateOptions);
   }
 
   return ast.expression && t.isJSX(ast.expression);
@@ -112,14 +106,7 @@ export function createComponentInstance(name, props) {
 }
 
 export function isStatelessComp(code) {
-  const ast = template.ast(code, {
-    plugins: [
-      "classProperties",
-      "typescript",
-      "jsx"
-    ],
-    sourceType: "module"
-  });
+  const ast = template.ast(code, defaultTemplateOptions);
 
   return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
     (t.isExportDeclaration(ast) && t.isFunction(ast.declaration)) ||
@@ -128,14 +115,7 @@ export function isStatelessComp(code) {
 }
 
 export function isStatefulComp(code) {
-  const ast = template.smart(code, {
-    plugins: [
-      "classProperties",
-      "typescript",
-      "jsx"
-    ],
-    sourceType: "module"
-  })();
+  const ast = template.ast(code, defaultTemplateOptions);
 
   const isSupportedComponent = (classPath) => {
     const supportedComponents = ['Component', 'PureComponent'];

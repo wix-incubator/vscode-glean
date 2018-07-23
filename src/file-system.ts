@@ -21,6 +21,9 @@ export function createFileIfDoesntExist(absolutePath: string): string {
 }
 
 export function subfoldersListOf(root: string, ignoreList): string[] {
+  if (!root) {
+    return [];
+  }
 
   const results = globSync('**', { cwd: root, ignore: ignoreList })
     .filter(f => fs.statSync(path.join(root, f)).isDirectory())
@@ -31,7 +34,7 @@ export function subfoldersListOf(root: string, ignoreList): string[] {
 
 export function filesInFolder(folder): string[] {
   const root = workspaceRoot();
-  const fullPathToFolder = `${root}${folder}`;
+  const fullPathToFolder = root ? `${root}${folder}` : folder;
   const results = globSync('**', { cwd: fullPathToFolder })
     .filter(f => !fs.statSync(path.join(fullPathToFolder, f)).isDirectory());
 
