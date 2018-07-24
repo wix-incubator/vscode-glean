@@ -82,11 +82,11 @@
         "vscode": "^1.1.6"
     },
     "dependencies": {
-        "@babel/core": "^7.0.0-beta.40",
+        "@babel/core": "^7.0.0-beta.54",
         "@babel/parser": "^7.0.0-beta.54",
-        "@babel/template": "^7.0.0-beta.51",
-        "@babel/traverse": "^7.0.0-beta.40",
-        "@babel/types": "^7.0.0-beta.40",
+        "@babel/template": "^7.0.0-beta.54",
+        "@babel/traverse": "^7.0.0-beta.54",
+        "@babel/types": "^7.0.0-beta.54",
         "gitignore-globs": "^0.1.1",
         "gitignore-to-glob": "^0.3.0",
         "glob": "^7.1.2",
