@@ -4,6 +4,14 @@
 ### Bug Fixes
 
 * "Extract" operations in no-workspace scenario ([8f4c933](https://github.com/wix-incubator/vscode-glean/commit/8f4c933))
+* Simpler and more resilient generation of component name from file name ([ee6c4d6](https://github.com/wix-incubator/vscode-glean/commit/ee6c4d6))
+
+## [3.2.5](https://github.com/wix-incubator/vscode-glean/compare/v3.2.4...v3.2.5) (2018-07-24)
+
+
+### Bug Fixes
+
+* "Extract" operations in no-workspace scenario ([8f4c933](https://github.com/wix-incubator/vscode-glean/commit/8f4c933))
 
 ## [3.2.4](https://github.com/wix-incubator/vscode-glean/compare/v3.2.3...v3.2.4) (2018-07-05)
 
