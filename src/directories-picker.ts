@@ -25,7 +25,12 @@ function getWorkspaceFolderStructure(): Promise<string[]> {
     ]; 
   };  
 
-const getQuickPicksForWorkspaceFolderStructure = () => getWorkspaceFolderStructure().then(toQuickPicksList);
+const getQuickPicksForWorkspaceFolderStructure = () => {
+  if (!workspaceRoot()) {
+    return Promise.resolve([]);
+  }
+  return getWorkspaceFolderStructure().then(toQuickPicksList);
+}
 
 export function showDirectoryPicker(): any {
     
