@@ -34,7 +34,8 @@ function capitalizeFirstLetter(string) {
 }
 
 function produceComponentNameFrom(fullPath: any) {
-  return capitalizeFirstLetter(path.basename(fullPath, path.extname(fullPath)).replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); }));
+  const baseName = path.basename(fullPath, path.extname(fullPath));
+  return baseName.split('-').map(capitalizeFirstLetter).join('');
 }
 
 export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
