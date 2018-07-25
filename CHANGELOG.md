@@ -1,3 +1,10 @@
+## [3.2.7](https://github.com/wix/vscode-glean/compare/v3.2.6...v3.2.7) (2018-07-25)
+
+
+### Bug Fixes
+
+* dummy commit to check if publishing was fixed ([ac18d6e](https://github.com/wix/vscode-glean/commit/ac18d6e))
+
 ## [3.2.6](https://github.com/wix-incubator/vscode-glean/compare/v3.2.5...v3.2.6) (2018-07-25)
 
 
