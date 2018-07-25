@@ -6,10 +6,6 @@ import { selectedText } from './editor';
 import { isStatelessComp, isStatefulComp, isJSX } from './modules/jsx';
 import { ProviderResult } from 'vscode';
 
-
-
-
-
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {
     const exportToFileAction = {
