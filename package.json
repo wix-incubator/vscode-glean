@@ -123,7 +123,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/wix-incubator/vscode-glean.git"
+        "url": "https://github.com/wix/vscode-glean.git"
     },
     "icon": "assets/icon.png"
 }
