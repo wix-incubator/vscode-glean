@@ -1,3 +1,10 @@
+## [3.2.6](https://github.com/wix-incubator/vscode-glean/compare/v3.2.5...v3.2.6) (2018-07-25)
+
+
+### Bug Fixes
+
+* Avoid throwing exceptions to extension container when selection is not parseable ([e4706b9](https://github.com/wix-incubator/vscode-glean/commit/e4706b9))
+
 ## [3.2.5](https://github.com/wix-incubator/vscode-glean/compare/v3.2.4...v3.2.5) (2018-07-24)
 
 
