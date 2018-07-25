@@ -20,13 +20,15 @@ export function isJSX(code) {
   let ast;
   try {
     ast = template.ast(code, defaultTemplateOptions);
-
   } catch (e) {
-    ast = template.ast(`<>${code}</>`, defaultTemplateOptions);
+    try {
+      ast = template.ast(`<>${code}</>`, defaultTemplateOptions);
+    } catch (e2) {
+      return false;
+    }
   }
 
   return ast.expression && t.isJSX(ast.expression);
-
 }
 
 function capitalizeFirstLetter(string) {
