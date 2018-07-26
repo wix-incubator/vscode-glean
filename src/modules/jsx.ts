@@ -28,7 +28,7 @@ export function isJSX(code) {
     }
   }
 
-  return ast.expression && t.isJSX(ast.expression);
+  return ast && ast.expression && t.isJSX(ast.expression);
 }
 
 function capitalizeFirstLetter(string) {
