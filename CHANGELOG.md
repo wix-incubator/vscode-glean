@@ -1,3 +1,10 @@
+## [3.2.8](https://github.com/wix/vscode-glean/compare/v3.2.7...v3.2.8) (2018-07-26)
+
+
+### Bug Fixes
+
+* Avoid throwing exceptions to extension container on empty selection ([cc94be7](https://github.com/wix/vscode-glean/commit/cc94be7))
+
 ## [3.2.7](https://github.com/wix/vscode-glean/compare/v3.2.6...v3.2.7) (2018-07-25)
 
 
