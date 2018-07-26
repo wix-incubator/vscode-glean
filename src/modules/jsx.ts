@@ -31,6 +31,46 @@ export function isJSX(code) {
   return ast && ast.expression && t.isJSX(ast.expression);
 }
 
+export function isJSXExpression(code) {
+  try {
+    const ast = template.ast(code, defaultTemplateOptions);
+    return ast && ast.expression && t.isJSX(ast.expression);
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isRangeContainedInJSXExpression(code, start, end) {
+  try {
+    const ast = codeToAst(code)
+    const path = findContainerPath(ast, start, end)
+    return path && t.isJSX(path.node) && t.isExpression(path.node);
+  } catch (e) {
+    return false
+  }
+}
+
+function findContainerPath(ast, start, end) {
+  let foundPath = null;
+  const visitor = {
+    exit(path) {
+      if (!foundPath && pathContains(path, start, end)) {
+        foundPath = path
+      }
+    }
+  }
+
+  traverse(ast, visitor);
+  return foundPath;
+}
+
+function pathContains(path, start, end) {
+  const pathStart = path.node.loc.start
+  const pathEnd = path.node.loc.end
+  return ((pathStart.line < start.line) || (pathStart.line === start.line && pathStart.column < start.character))
+    && ((pathEnd.line > end.line) || (pathEnd.line === end.line && pathEnd.column > end.character))
+}
+
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }

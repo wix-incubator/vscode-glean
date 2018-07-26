@@ -1,4 +1,4 @@
-import { extractToFile, statelessToStatefulComponent, statefulToStatelessComponent, extractJSXToComponent } from './code-actions';
+import { extractToFile, statelessToStatefulComponent, statefulToStatelessComponent, extractJSXToComponent, wrapJSXWithCondition } from './code-actions';
 'use strict';
 
 import * as vscode from 'vscode';
@@ -19,6 +19,9 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       return [{
         command: 'extension.glean.react.extract-component',
         title: 'Extract Component'
+      }, {
+        command: 'extension.glean.react.render-conditionally',
+        title: 'Render Conditionally'
       }];
     }
 
@@ -50,6 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('extension.glean', extractToFile);
 
   vscode.commands.registerCommand('extension.glean.react.extract-component', extractJSXToComponent);
+
+  vscode.commands.registerCommand('extension.glean.react.render-conditionally', wrapJSXWithCondition);
 
   vscode.commands.registerCommand('extension.glean.react.stateless-to-stateful', statelessToStatefulComponent);
 
