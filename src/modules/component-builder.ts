@@ -24,7 +24,7 @@ function buildStatefulComponent(name, code, attributes) {
 
 export function buildComponent(name, code, attributes) {
 
-  if (attributes.memberProps.size) {
+  if (attributes.memberProps.size || attributes.state.size) {
     return buildStatefulComponent(name, code, attributes);
   } else {
     return buildFunctionalComponent(name, code, attributes.argumentProps);
