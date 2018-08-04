@@ -1,3 +1,10 @@
+## [3.2.9](https://github.com/wix/vscode-glean/compare/v3.2.8...v3.2.9) (2018-08-04)
+
+
+### Bug Fixes
+
+* **extract-component:** fixed component generation that includes instance references ([d6b240b](https://github.com/wix/vscode-glean/commit/d6b240b))
+
 ## [3.2.8](https://github.com/wix/vscode-glean/compare/v3.2.7...v3.2.8) (2018-07-26)
 
 
