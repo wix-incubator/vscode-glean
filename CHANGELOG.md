@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/wix/vscode-glean/compare/v3.2.9...v3.3.0) (2018-08-05)
+
+
+### Features
+
+* "Render Conditionally" command for JSX ([#16](https://github.com/wix/vscode-glean/issues/16)) ([ab8a7cf](https://github.com/wix/vscode-glean/commit/ab8a7cf))
+
 ## [3.2.9](https://github.com/wix/vscode-glean/compare/v3.2.8...v3.2.9) (2018-08-04)
 
 
