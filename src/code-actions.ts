@@ -1,12 +1,13 @@
+import { SnippetString } from 'vscode';
 import { showDirectoryPicker } from "./directories-picker";
 import { showFilePicker } from "./file-picker";
-import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage } from "./editor";
+import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage, allText } from "./editor";
 import { statelessToStateful } from "./modules/statless-to-stateful";
 import { statefulToStateless } from './modules/stateful-to-stateless'
 import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from "./settings";
 import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn } from "./file-system";
 import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions } from "./parsing";
-import { createComponentInstance, wrapWithComponent } from "./modules/jsx";
+import { createComponentInstance, wrapWithComponent, isRangeContainedInJSXExpression, isJSXExpression } from "./modules/jsx";
 import * as relative from 'relative';
 import * as path from 'path';
 
@@ -26,6 +27,24 @@ export async function extractJSXToComponent() {
     const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
     await replaceSelectionWith(componentInstance);
     await switchToDestinationFileIfRequired(filePath);
+  } catch (e) {
+    handleError(e);
+  }
+}
+
+export async function wrapJSXWithCondition() {
+  var editor = activeEditor();
+  if (!editor) {
+    return; // No open text editor
+  }
+
+  try {
+    const selText = selectedText();
+    const isParentJSXExpression = isRangeContainedInJSXExpression(allText(), selectedTextStart(), selectedTextEnd());
+    const conditionalJSX = isJSXExpression(selText) ? selText : `<>${selText}</>`;
+    const snippetInnerText = `\n$\{1:true\}\n? ${conditionalJSX}\n: $\{2:null\}\n`;
+    const snippetText = isParentJSXExpression ? `{${snippetInnerText}}` : `(${snippetInnerText})`;
+    await editor.insertSnippet(new SnippetString(snippetText));
   } catch (e) {
     handleError(e);
   }

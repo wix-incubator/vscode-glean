@@ -44,6 +44,10 @@ export function selectedText() {
   return editor.document.getText(selection);
 }
 
+export function allText() {
+  const editor = vscode.window.activeTextEditor;
+  return editor.document.getText();
+}
 
 export function showInputBox(defaultValue, placeHolder) {
   return vscode.window.showInputBox({
