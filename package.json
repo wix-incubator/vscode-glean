@@ -10,7 +10,14 @@
     "categories": [
         "Programming Languages"
     ],
-    "keywords": ["javascript", "react", "jsx", "refactoring", "typescript", "cleancode"],
+    "keywords": [
+        "javascript",
+        "react",
+        "jsx",
+        "refactoring",
+        "typescript",
+        "cleancode"
+    ],
     "activationEvents": [
         "*"
     ],
