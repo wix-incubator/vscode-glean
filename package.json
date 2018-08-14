@@ -8,8 +8,9 @@
         "vscode": "^1.23.0"
     },
     "categories": [
-        "Other"
+        "Programming Languages"
     ],
+    "keywords": ["javascript", "react", "jsx", "refactoring", "typescript", "cleancode"],
     "activationEvents": [
         "*"
     ],
