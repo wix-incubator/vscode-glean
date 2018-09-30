@@ -57,6 +57,10 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 
 **WARNING!!! This refactoring will delete all Lifecycle methods and setState calls!**
 
+#### Render Conditionally
+
+![Example of Render Conditionally](https://github.com/wix/vscode-glean/blob/master/assets/glean-conditional.gif?raw=true)
+
 ## Configuration Options
 #### glean.jsModuleSystem (Default: 'esm')
 Determines how the selected code will be exported/imported. Valid options are 'esm' and 'commonjs'.
