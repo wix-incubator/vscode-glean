@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/wix/vscode-glean/compare/v3.3.1...v3.3.2) (2018-10-08)
+
+
+### Bug Fixes
+
+* **deps:** updated vulnerable deps ([0393e45](https://github.com/wix/vscode-glean/commit/0393e45))
+
 ## [3.3.1](https://github.com/wix/vscode-glean/compare/v3.3.0...v3.3.1) (2018-08-14)
 
 
