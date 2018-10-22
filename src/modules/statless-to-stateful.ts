@@ -12,6 +12,19 @@ function isReferenced(node, parent) {
   return parent.id !== node;
 }
 
+function getRenderFunctionBody(statelessComponentBody) {
+  if(t.isBlockStatement(statelessComponentBody)) {
+    const returnStatementContent = statelessComponentBody.body[0].argument;
+    if(!t.isParenthesizedExpression(returnStatementContent)){
+      statelessComponentBody.body[0].argument = t.parenthesizedExpression(returnStatementContent);
+    }
+    return statelessComponentBody;
+  } else if(t.isJSXElement(statelessComponentBody)) {
+    const body  = t.isParenthesizedExpression(statelessComponentBody) ? statelessComponentBody : t.parenthesizedExpression(statelessComponentBody);
+    return t.blockStatement([t.returnStatement(body)]);
+  }
+}
+
 export function statelessToStateful(component) {
   const visitor = {
     Function(path) {
@@ -49,7 +62,7 @@ export function statelessToStateful(component) {
 
       }
 
-      const render = t.classMethod('method', t.identifier('render'), [], path.node.body);
+      const render = t.classMethod('method', t.identifier('render'), [], getRenderFunctionBody(path.node.body));
       const superCall = t.expressionStatement(t.callExpression((<any>t).super(), [t.identifier('props')]))
       const ctor = t.classMethod('constructor', t.identifier('constructor'), [t.identifier('props')], t.blockStatement([superCall]));
       const classDefinition = t.classDeclaration(name, t.identifier('Component'), t.classBody([ctor, render]))
