@@ -10,7 +10,7 @@
 [![Build Status](https://travis-ci.org/wix/vscode-glean.svg?branch=master)](https://travis-ci.org/wix/vscode-glean)
 [![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
-The extention provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
+The extension provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
 
 ## Highlights
 - Allows extracing JSX into new component as well as other React code refactoring options
@@ -65,8 +65,8 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 #### glean.jsModuleSystem (Default: 'esm')
 Determines how the selected code will be exported/imported. Valid options are 'esm' and 'commonjs'.
 
-#### glean.jsFilesExtentions (Default: [ "js", "jsx", "ts", "tsx" ])
-List of extentions of files that should be treated as javascript files. This determines whether or not the snippet will be exported and imported. The snippet will be treated as javascript only if the extention of both origin and target files appears in this list.
+#### glean.jsFilesExtensions (Default: [ "js", "jsx", "ts", "tsx" ])
+List of extensions of files that should be treated as javascript files. This determines whether or not the snippet will be exported and imported. The snippet will be treated as javascript only if the extension of both origin and target files appears in this list.
 
 #### glean.switchToTarget (Default: false)
 Determines whether VSCode should switch to target file after extracting.
@@ -86,13 +86,13 @@ $ npm install
 $ code .
 ```
 
-### Running Extention
+### Running Extension
 * Go to VSCode debug sidebar
-* Select `Extention` from the dropdown
+* Select `Extension` from the dropdown
 * Hit `F5`
 
 ### Running Tests
 * Go to VSCode debug sidebar
-* Select `Extention Tests` from the dropdown
+* Select `Extension Tests` from the dropdown
 * Hit `F5`
 

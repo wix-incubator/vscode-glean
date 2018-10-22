@@ -37,7 +37,7 @@
             "type": "object",
             "title": "Glean Configuration",
             "properties": {
-                "glean.jsFilesExtentions": {
+                "glean.jsFilesExtensions": {
                     "type": [
                         "string"
                     ],
