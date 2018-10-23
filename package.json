@@ -37,7 +37,7 @@
             "type": "object",
             "title": "Glean Configuration",
             "properties": {
-                "glean.jsFilesExtentions": {
+                "glean.jsFilesExtensions": {
                     "type": [
                         "string"
                     ],
@@ -47,7 +47,7 @@
                         "ts",
                         "tsx"
                     ],
-                    "description": "File extentions to be treated as Javascript files"
+                    "description": "File extensions to be treated as Javascript files"
                 },
                 "glean.jsModuleSystem": {
                     "type": "string",
