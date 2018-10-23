@@ -14,9 +14,9 @@ function isReferenced(node, parent) {
 
 function getRenderFunctionBody(statelessComponentBody) {
   if(t.isBlockStatement(statelessComponentBody)) {
-    const returnStatementContent = statelessComponentBody.body[0].argument;
+    const returnStatementContent = (<t.ReturnStatement>statelessComponentBody.body[0]).argument;
     if(!t.isParenthesizedExpression(returnStatementContent)){
-      statelessComponentBody.body[0].argument = t.parenthesizedExpression(returnStatementContent);
+      (<t.ReturnStatement>statelessComponentBody.body[0]).argument = t.parenthesizedExpression(returnStatementContent);
     }
     return statelessComponentBody;
   } else if(t.isJSXElement(statelessComponentBody)) {
