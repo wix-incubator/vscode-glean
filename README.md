@@ -33,7 +33,7 @@ Go to the link below and click `Install`.
 Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
 
 
-![Example of Javascript Extraction](https://media.giphy.com/media/5QI4abbeZqWpWN0nP8/giphy.gif)
+![Example of Javascript Extraction](https://github.com/wix/vscode-glean/blob/master/assets/extract-to-file.gif?raw=true)
 
 
 ### JSX Support
@@ -44,16 +44,16 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 - It will identify all inputs to the newly created component.
 - Replace extracted JSX will newly created component, while providing it with all the props.
 
-![Example of JSX extraction](https://media.giphy.com/media/22Q7TtNqCIqM7j8Ph6/giphy.gif)
+![Example of JSX extraction](https://github.com/wix/vscode-glean/blob/master/assets/extract-to-comp.gif?raw=true)
 
 #### Converting Functional Component to Stateful Component
 
-![Example of Stateless to Stateful Component Conversion](https://media.giphy.com/media/fipQDtl5shXdzxqPjB/giphy.gif)
+![Example of Stateless to Stateful Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateful-to-stateless.gif?raw=true)
 
 
 #### Converting Stateful Component to Functional Component
 
-![Example of Stateless to Stateful Component Conversion](https://media.giphy.com/media/BHuT6tJuJGqldCTFGe/giphy.gif)
+![Example of Stateless to Stateful Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateless-to-stateful.gif?raw=true)
 
 **WARNING!!! This refactoring will delete all Lifecycle methods and setState calls!**
 
