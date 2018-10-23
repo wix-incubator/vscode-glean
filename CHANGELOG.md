@@ -1,3 +1,10 @@
+## [3.3.3](https://github.com/wix/vscode-glean/compare/v3.3.2...v3.3.3) (2018-10-23)
+
+
+### Bug Fixes
+
+* **Stateless-to-Stateful:** Fix refactoring components declared through variable declaration. ([c936135](https://github.com/wix/vscode-glean/commit/c936135))
+
 ## [3.3.2](https://github.com/wix/vscode-glean/compare/v3.3.1...v3.3.2) (2018-10-08)
 
 
