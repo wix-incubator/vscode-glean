@@ -1,3 +1,10 @@
+## [3.3.4](https://github.com/wix/vscode-glean/compare/v3.3.3...v3.3.4) (2018-10-23)
+
+
+### Bug Fixes
+
+* **docs:** fixed docs ([5ff1737](https://github.com/wix/vscode-glean/commit/5ff1737))
+
 ## [3.3.3](https://github.com/wix/vscode-glean/compare/v3.3.2...v3.3.3) (2018-10-23)
 
 
