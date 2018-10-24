@@ -29,7 +29,7 @@ describe('esm support', function () {
         sandbox.stub(fileSystem, 'prependTextToFile').returns(Promise.resolve())
         sandbox.stub(editor, 'config').returns({
             jsModuleSystem: 'esm',
-            jsFilesExtentions: ['js'],
+            jsFilesExtensions: ['js'],
             switchToTarget: true
         });
         sandbox.stub(fileSystem, 'appendTextToFile').returns(Promise.resolve());
