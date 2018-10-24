@@ -1,3 +1,11 @@
+## [4.0.1](https://github.com/wix/vscode-glean/compare/v4.0.0...v4.0.1) (2018-10-24)
+
+
+### Bug Fixes
+
+* **configuration:** jsFilesExtensions type fix ([de7e878](https://github.com/wix/vscode-glean/commit/de7e878))
+* **configuration:** jsFilesExtensions type fix ([602efce](https://github.com/wix/vscode-glean/commit/602efce))
+
 # [4.0.0](https://github.com/wix/vscode-glean/compare/v3.3.4...v4.0.0) (2018-10-24)
 
 
