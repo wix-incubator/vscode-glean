@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/wix/vscode-glean/compare/v3.3.4...v4.0.0) (2018-10-24)
+
+
+### Bug Fixes
+
+* **configuration:** fixed typo in configuration that caused a crash ([6aa25bc](https://github.com/wix/vscode-glean/commit/6aa25bc))
+
+
+### BREAKING CHANGES
+
+* **configuration:** changed configuration name for JS file extensions
+
 ## [3.3.4](https://github.com/wix/vscode-glean/compare/v3.3.3...v3.3.4) (2018-10-23)
 
 
