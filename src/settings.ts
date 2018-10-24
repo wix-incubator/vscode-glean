@@ -3,7 +3,7 @@ import * as path from 'path';
 import { config } from './editor';
 
 export const shouldBeConsideredJsFiles = (...files) => {
-    const extentionsToBeConsideredJS = config().jsFilesExtensions;
+    const extentionsToBeConsideredJS = config().jsFilesExtentions;
     return files.every(file => extentionsToBeConsideredJS.includes(path.extname(file).replace('.', '')));
 }
 
