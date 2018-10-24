@@ -13,7 +13,7 @@
 The extension provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
 
 ## Highlights
-- Allows extracing JSX into new component as well as other React code refactoring options
+- Allows extracting JSX into new component as well as other React code refactoring options
 - Moving code between files
 - Typescript support
 - ES2015 modules support
