@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/wix/vscode-glean/compare/v4.0.2...v4.0.3) (2018-10-25)
+
+
+### Bug Fixes
+
+* **stateless-to-stateful:** added support for rest operator in props ([b268951](https://github.com/wix/vscode-glean/commit/b268951))
+
 ## [4.0.2](https://github.com/wix/vscode-glean/compare/v4.0.1...v4.0.2) (2018-10-25)
 
 
