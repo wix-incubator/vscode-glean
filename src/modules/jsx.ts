@@ -9,6 +9,7 @@ import * as t from '@babel/types';
 
 const defaultTemplateOptions = {
   plugins: [
+    "objectRestSpread",
     "classProperties",
     "typescript",
     "jsx"

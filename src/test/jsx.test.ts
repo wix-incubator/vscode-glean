@@ -151,6 +151,18 @@ describe('jsx module', function () {
             expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
         });
 
+        it('supports rest operation in props', async () => {
+          sandbox.stub(editor, 'selectedText').returns(`
+          function Foo({...rest}) {
+              return (<div {...rest}></div>);
+          }
+          `);
+
+        await statelessToStatefulComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div {...this.props.rest}></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+        })
+
         it('creates stateful component from variable declaration', async () => {
           sandbox.stub(editor, 'selectedText').returns(`
               const Foo = (props) => (<div></div>)

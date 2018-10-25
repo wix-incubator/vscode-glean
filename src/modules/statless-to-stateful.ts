@@ -32,8 +32,9 @@ export function statelessToStateful(component) {
         if (path.node.params[0].type === 'ObjectPattern') {
           path.node.params[0].properties.map(prop => {
             if (isReferenced(prop.value, path.node)) {
-              const membershipExpr = t.memberExpression(t.memberExpression(t.thisExpression(), t.identifier('props')), t.identifier(prop.value.name));
-              path.scope.bindings[prop.value.name].referencePaths.forEach(refPath => refPath.replaceWith(membershipExpr));
+              const name = prop.value? prop.value.name : prop.argument.name;
+              const membershipExpr = t.memberExpression(t.memberExpression(t.thisExpression(), t.identifier('props')), t.identifier(name));
+              path.scope.bindings[name].referencePaths.forEach(refPath => refPath.replaceWith(membershipExpr));
             }
           });
 
