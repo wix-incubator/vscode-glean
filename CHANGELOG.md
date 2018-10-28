@@ -1,3 +1,10 @@
+## [4.0.4](https://github.com/wix/vscode-glean/compare/v4.0.3...v4.0.4) (2018-10-28)
+
+
+### Bug Fixes
+
+* **stateless-to-stateful:** faced component name becoming lowercase after applying the refactoring ([ac551b6](https://github.com/wix/vscode-glean/commit/ac551b6))
+
 ## [4.0.3](https://github.com/wix/vscode-glean/compare/v4.0.2...v4.0.3) (2018-10-25)
 
 
