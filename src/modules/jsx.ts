@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from './../utils';
 import { codeToAst, jsxToAst } from "../parsing";
 import traverse from "@babel/traverse";
 import { buildComponent } from "./component-builder";
@@ -72,9 +73,6 @@ function pathContains(path, start, end) {
     && ((pathEnd.line > end.line) || (pathEnd.line === end.line && pathEnd.column > end.character))
 }
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 function produceComponentNameFrom(fullPath: any) {
   const baseName = path.basename(fullPath, path.extname(fullPath));
@@ -149,14 +147,18 @@ export function createComponentInstance(name, props) {
   return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps} ${componentMembersToInputProps}/>`;
 }
 
+function isExportedDeclaration(ast){
+  return t.isExportNamedDeclaration(ast) || t.isExportDefaultDeclaration(ast);
+}
+
 export function isStatelessComp(code) {
   const ast = template.ast(code, defaultTemplateOptions);
 
   return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
-    (t.isExportDeclaration(ast) && t.isFunction(ast.declaration)) ||
+    (isExportedDeclaration(ast) && t.isFunction(ast.declaration)) ||
     t.isFunction(ast);
-
 }
+
 
 export function isStatefulComp(code) {
   const ast = template.ast(code, defaultTemplateOptions);
@@ -170,8 +172,7 @@ export function isStatefulComp(code) {
   }
 
   return (
-    (t.isExportNamedDeclaration(ast) && isSupportedComponent(ast.declaration)) ||
-    (t.isExportDefaultDeclaration(ast) && isSupportedComponent(ast.declaration)) ||
+    (isExportedDeclaration(ast) && isSupportedComponent(ast.declaration)) ||
     isSupportedComponent(ast));
 
 }

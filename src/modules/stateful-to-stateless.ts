@@ -103,14 +103,13 @@ export function statefulToStateless(component) {
 
   const visitor = {
     ClassDeclaration(path) {
-      const className = path.node.id.name;
-      const statelessComponentName = className.slice(0, 1).toLowerCase() + className.slice(1);
+      const statelessComponentName = path.node.id.name;
       const defaultPropsPath = path.get('body').get('body').find(property => {
         return t.isClassProperty(property) && property['node'].key.name === 'defaultProps'
       });
 
       const statelessComponent = arrowFunction({
-        name: statelessComponentName,
+        name: (statelessComponentName),
         params: ['props'],
         paramTypes: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? [path.node.superTypeParameters.params[0]]: [],
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
