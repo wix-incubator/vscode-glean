@@ -214,7 +214,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = props => {\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = props => {\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates a stateless component without lifecycle methods and instance references', async () => {
@@ -236,7 +236,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = props => {\n  return <div>\n                  {props.foo} + {props.bar}\n                </div>;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = props => {\n  return <div>\n                  {props.foo} + {props.bar}\n                </div>;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component including instance methods without state functions', async () => {
@@ -256,7 +256,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with props type interface and default props', async () => {
@@ -277,7 +277,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = (props: MyProps = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props: MyProps = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with props type literal and default props', async () => {
@@ -298,7 +298,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with default export', async () => {
@@ -319,7 +319,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const someComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default someComponent;', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with named export', async () => {
@@ -340,7 +340,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('export const someComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('export const SomeComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       const givenApprovedWarning = () => {
