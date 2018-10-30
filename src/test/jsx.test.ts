@@ -175,7 +175,7 @@ describe('jsx module', function () {
 
 
 
-      it.only('maintains prop type annotation', async () => {
+      it('maintains prop type annotation', async () => {
         sandbox.stub(editor, 'selectedText').returns(`
             const Foo = (props: Props) => (<div></div>)
         `);
