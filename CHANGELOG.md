@@ -1,3 +1,10 @@
+## [4.0.5](https://github.com/wix/vscode-glean/compare/v4.0.4...v4.0.5) (2018-10-30)
+
+
+### Bug Fixes
+
+* **stateless-to-stateful:** fixed crash when retun statement wasnt the first statement in function body ([e3bafd9](https://github.com/wix/vscode-glean/commit/e3bafd9))
+
 ## [4.0.4](https://github.com/wix/vscode-glean/compare/v4.0.3...v4.0.4) (2018-10-28)
 
 
