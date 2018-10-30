@@ -1,3 +1,10 @@
+## [4.0.6](https://github.com/wix/vscode-glean/compare/v4.0.5...v4.0.6) (2018-10-30)
+
+
+### Bug Fixes
+
+* **statless-to-stateful:** typescript annotation of props will be maintained when refactoring ([a6ac8a9](https://github.com/wix/vscode-glean/commit/a6ac8a9))
+
 ## [4.0.5](https://github.com/wix/vscode-glean/compare/v4.0.4...v4.0.5) (2018-10-30)
 
 
