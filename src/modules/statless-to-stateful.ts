@@ -14,9 +14,11 @@ function isReferenced(node, parent) {
 
 function getRenderFunctionBody(statelessComponentBody) {
   if(t.isBlockStatement(statelessComponentBody)) {
-    const returnStatementContent = (<t.ReturnStatement>statelessComponentBody.body[0]).argument;
+    const returnStatement = < t.ReturnStatement >statelessComponentBody.body.find(bodyContent => bodyContent.type === 'ReturnStatement');
+    const returnStatementContent = returnStatement.argument;
     if(!t.isParenthesizedExpression(returnStatementContent)){
-      (<t.ReturnStatement>statelessComponentBody.body[0]).argument = t.parenthesizedExpression(returnStatementContent);
+      const parenthesizedReturnStatement = t.parenthesizedExpression(returnStatementContent);
+      returnStatement.argument = parenthesizedReturnStatement
     }
     return statelessComponentBody;
   } else if(t.isJSXElement(statelessComponentBody)) {
@@ -70,7 +72,7 @@ export function statelessToStateful(component) {
       replacementPath.replaceWith(classDefinition)
       replacementPath.skip()
 
-
+      path.skip();
     }
   }
 
