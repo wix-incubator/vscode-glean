@@ -27,6 +27,10 @@ function getRenderFunctionBody(statelessComponentBody) {
   }
 }
 
+const getParamTypeAnnotation = (param) => {
+  return param && param.typeAnnotation? t.tsTypeParameterInstantiation([param.typeAnnotation.typeAnnotation]): null;
+}
+
 export function statelessToStateful(component) {
   const visitor = {
     Function(path) {
@@ -50,7 +54,6 @@ export function statelessToStateful(component) {
 
         }
 
-
       }
 
       let name;
@@ -68,7 +71,8 @@ export function statelessToStateful(component) {
       const render = t.classMethod('method', t.identifier('render'), [], getRenderFunctionBody(path.node.body));
       const superCall = t.expressionStatement(t.callExpression((<any>t).super(), [t.identifier('props')]))
       const ctor = t.classMethod('constructor', t.identifier('constructor'), [t.identifier('props')], t.blockStatement([superCall]));
-      const classDefinition = t.classDeclaration(name, t.identifier('Component'), t.classBody([ctor, render]))
+      const classDefinition = t.classDeclaration(name, t.identifier('Component'), t.classBody([ctor, render]));
+      classDefinition.superTypeParameters = getParamTypeAnnotation(path.node.params[0]);
       replacementPath.replaceWith(classDefinition)
       replacementPath.skip()
 

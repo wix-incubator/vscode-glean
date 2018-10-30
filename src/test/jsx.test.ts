@@ -173,6 +173,17 @@ describe('jsx module', function () {
           expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
+
+
+      it.only('maintains prop type annotation', async () => {
+        sandbox.stub(editor, 'selectedText').returns(`
+            const Foo = (props: Props) => (<div></div>)
+        `);
+
+        await statelessToStatefulComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+    });
         
       it('should not convert functions and function calls in the body', async () => {
         sandbox.stub(editor, 'selectedText').returns(`
