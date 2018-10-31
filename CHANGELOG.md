@@ -1,3 +1,10 @@
+## [4.0.7](https://github.com/wix/vscode-glean/compare/v4.0.6...v4.0.7) (2018-10-31)
+
+
+### Bug Fixes
+
+* **extract-component:** the snippet will be wrapped with fragment only if it contains multiple lines ([24ff2b0](https://github.com/wix/vscode-glean/commit/24ff2b0))
+
 ## [4.0.6](https://github.com/wix/vscode-glean/compare/v4.0.5...v4.0.6) (2018-10-30)
 
 
