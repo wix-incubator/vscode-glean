@@ -1,22 +1,26 @@
-import { parse } from '@babel/parser';
+import { parse, ParserOptions } from '@babel/parser';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import { transformFromAst } from '@babel/core';
 import { esmModuleSystemUsed, commonJSModuleSystemUsed } from './settings';
+import template from "@babel/template";
 
-
-export const codeToAst = code => parse(code, {
-    startLine: 0,
+export const parsingOptions = {
     plugins: [
-        "objectRestSpread",
-        "classProperties",
-        "typescript",
-        "jsx"
+      "objectRestSpread",
+      "classProperties",
+      "typescript",
+      "jsx"
     ],
     sourceType: "module"
+  }
+
+export const codeToAst = code => parse(code, <ParserOptions>{
+    startLine: 0,
+    ...parsingOptions
 });
 
-export const jsxToAst = code => codeToAst(`<>${code}</>`);
+export const templateToAst = (code) => template.ast(code, parsingOptions)
 
 export function getIdentifier(code) {
     const identifiers = [];

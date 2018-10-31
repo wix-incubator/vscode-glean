@@ -53,7 +53,7 @@ describe('jsx module', function () {
 
         await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    return <>\n        <div>{this.props.foo}</div>\n    </>;\n  }\n\n}\n  ', '/target.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    return <div>{this.props.foo}</div>;\n  }\n\n}\n  ', '/target.js');
     });
 
     it('creates functional component if there are no "this" references', async () => {
@@ -63,11 +63,45 @@ describe('jsx module', function () {
 
         await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <>\n        <div>{foo}</div>\n    </>;\n}\n  ', '/target.js');
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
     });
 
 
     describe('When extracting JSX to component', () => {
+
+      it('doesnt wrap the extracted jsx with a Fragment if its a single line', async () => {
+        sandbox.stub(editor, 'selectedText').returns(`
+        <div>{foo}</div>
+    `);
+  
+        await extractJSXToComponent();
+  
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
+    });
+
+    it('wraps extracted jsx with a fragment if its multiline', async () => {
+      sandbox.stub(editor, 'selectedText').returns(`
+      <div>{foo}</div>
+      <div>{bar}</div>
+  `);
+
+      await extractJSXToComponent();
+
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo,\n  bar\n}) {\n  return <>\n      <div>{foo}</div>\n      <div>{bar}</div>\n  </>;\n}\n  ', '/target.js');
+  });
+
+
+        it('creates functional component if there are no "this" references', async () => {
+        sandbox.stub(editor, 'selectedText').returns(`
+        <div>{foo}</div>
+    `);
+
+        await extractJSXToComponent();
+
+        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
+    });
+
+
         it('replaces all state references to props', async () => {
             sandbox.stub(editor, 'selectedText').returns(`
                 <div>{this.state.foo}</div>
@@ -87,8 +121,18 @@ describe('jsx module', function () {
 
             await extractJSXToComponent();
 
-            expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <>\n                <Wrapper bar={bar}>{this.props.foo}</Wrapper>\n            </>;\n  }\n\n}\n  ', '/target.js');
+            expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ', '/target.js');
         });
+
+        it('instantiates referenced variables by destructring them from props object', async () => {
+          sandbox.stub(editor, 'selectedText').returns(`
+              <Wrapper bar={bar}>{this.props.foo}</Wrapper>
+          `);
+
+          await extractJSXToComponent();
+
+          expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ', '/target.js');
+      });
 
         it('replaces selected jsx code with an instance of newly created component', async () => {
             sandbox.stub(editor, 'selectedText').returns(`

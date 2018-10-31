@@ -1,30 +1,19 @@
 import { capitalizeFirstLetter } from './../utils';
-import { codeToAst, jsxToAst } from "../parsing";
+import { codeToAst, parsingOptions, templateToAst } from "../parsing";
 import traverse from "@babel/traverse";
 import { buildComponent } from "./component-builder";
 import { transformFromAst } from '@babel/core';
 import * as path from 'path';
 import { ProcessedSelection } from "../code-actions";
-import template from "@babel/template";
 import * as t from '@babel/types';
-
-const defaultTemplateOptions = {
-  plugins: [
-    "objectRestSpread",
-    "classProperties",
-    "typescript",
-    "jsx"
-  ],
-  sourceType: "module"
-}
 
 export function isJSX(code) {
   let ast;
   try {
-    ast = template.ast(code, defaultTemplateOptions);
+    ast = templateToAst(code);
   } catch (e) {
     try {
-      ast = template.ast(`<>${code}</>`, defaultTemplateOptions);
+      ast = templateToAst(`<>${code}</>`);
     } catch (e2) {
       return false;
     }
@@ -33,9 +22,18 @@ export function isJSX(code) {
   return ast && ast.expression && t.isJSX(ast.expression);
 }
 
+export const jsxToAst = code => {
+  try {
+      return codeToAst(code);
+  } catch (e) {
+      return codeToAst(`<>${code}</>`);
+  }
+};
+
+
 export function isJSXExpression(code) {
   try {
-    const ast = template.ast(code, defaultTemplateOptions);
+    const ast = templateToAst(code);
     return ast && ast.expression && t.isJSX(ast.expression);
   } catch (e) {
     return false;
@@ -152,7 +150,7 @@ function isExportedDeclaration(ast){
 }
 
 export function isStatelessComp(code) {
-  const ast = template.ast(code, defaultTemplateOptions);
+  const ast = templateToAst(code);
 
   return (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
     (isExportedDeclaration(ast) && t.isFunction(ast.declaration)) ||
@@ -161,7 +159,7 @@ export function isStatelessComp(code) {
 
 
 export function isStatefulComp(code) {
-  const ast = template.ast(code, defaultTemplateOptions);
+  const ast = templateToAst(code);
 
   const isSupportedComponent = (classPath) => {
     const supportedComponents = ['Component', 'PureComponent'];
