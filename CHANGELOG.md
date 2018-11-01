@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/wix/vscode-glean/compare/v4.0.7...v4.1.0) (2018-11-01)
+
+
+### Features
+
+* **stateful-to-stateless:** The type annotation of generated component will now use official React typings (SFC<T>) ([f7c27f8](https://github.com/wix/vscode-glean/commit/f7c27f8))
+
 ## [4.0.7](https://github.com/wix/vscode-glean/compare/v4.0.6...v4.0.7) (2018-10-31)
 
 
