@@ -355,7 +355,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props: MyProps = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent: SFC<MyProps> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with props type literal and default props', async () => {
@@ -376,13 +376,13 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent: SFC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with default export', async () => {
         givenApprovedWarning();
         sandbox.stub(editor, 'selectedText').returns(`
-          export default class SomeComponent extends React.Component<{a: number}> {
+          export default class SomeComponent extends React.Component {
             static defaultProps = {a: 3};
             someMethod() {
               this.setState({a: 3});
@@ -397,13 +397,13 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       it('creates stateless component with named export', async () => {
         givenApprovedWarning();
         sandbox.stub(editor, 'selectedText').returns(`
-          export class SomeComponent extends React.Component<{a: number}> {
+          export class SomeComponent extends React.Component {
             static defaultProps = {a: 3};
             someMethod() {
               this.setState({a: 3});
@@ -418,7 +418,7 @@ describe('jsx module', function () {
 
         await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('export const SomeComponent = (props: {\n  a: number;\n} = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
       });
 
       const givenApprovedWarning = () => {

@@ -19,17 +19,19 @@ export function statefulToStateless(component) {
     'getDerivedStateFromProps'
   ];
 
-  const arrowFunction = ({name, params = [], paramTypes = [], paramDefaults = [], body = []}) => {
+  const arrowFunction = ({name, params = [], propType, paramDefaults = [], body = []}) => {
+    const identifier = t.identifier(name);
+    identifier.typeAnnotation = propType?  t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'),t.tsTypeParameterInstantiation([propType]))) :null;
     return t.variableDeclaration('const', [
       t.variableDeclarator(
-        t.identifier(name), 
+        identifier, 
         t.arrowFunctionExpression(
           params.map((param, idx) => {
             const paramIdentifier = t.identifier(param);
       
-            if (paramTypes[idx]) {
-				      paramIdentifier.typeAnnotation = t.tsTypeAnnotation(paramTypes[idx]);
-            }
+            // if (paramTypes[idx]) {
+				    //   paramIdentifier.typeAnnotation = t.tsTypeAnnotation(paramTypes[idx]);
+            // }
             
             let paramObj: any = paramIdentifier;
             
@@ -111,7 +113,7 @@ export function statefulToStateless(component) {
       const statelessComponent = arrowFunction({
         name: (statelessComponentName),
         params: ['props'],
-        paramTypes: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? [path.node.superTypeParameters.params[0]]: [],
+        propType: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? path.node.superTypeParameters.params[0]: null,
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
         body: []
       });
