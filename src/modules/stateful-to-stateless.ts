@@ -19,7 +19,7 @@ export function statefulToStateless(component) {
     'getDerivedStateFromProps'
   ];
 
-  const arrowFunction = ({name, params = [], propType, paramDefaults = [], body = []}) => {
+  const arrowFunction = ({name, params = [], propType = null, paramDefaults = [], body = []}) => {
     const identifier = t.identifier(name);
     identifier.typeAnnotation = propType?  t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'),t.tsTypeParameterInstantiation([propType]))) :null;
     return t.variableDeclaration('const', [
