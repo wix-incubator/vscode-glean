@@ -28,10 +28,6 @@ export function statefulToStateless(component) {
         t.arrowFunctionExpression(
           params.map((param, idx) => {
             const paramIdentifier = t.identifier(param);
-      
-            // if (paramTypes[idx]) {
-				    //   paramIdentifier.typeAnnotation = t.tsTypeAnnotation(paramTypes[idx]);
-            // }
             
             let paramObj: any = paramIdentifier;
             

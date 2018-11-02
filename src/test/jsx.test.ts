@@ -7,7 +7,6 @@ import * as fileSystem from '../file-system';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { extractJSXToComponent, statelessToStatefulComponent, statefulToStatelessComponent } from '../code-actions';
-import { toASCII } from 'punycode';
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -227,6 +226,16 @@ describe('jsx module', function () {
         await statelessToStatefulComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+    });
+
+    it('maintains prop type annotation', async () => {
+      sandbox.stub(editor, 'selectedText').returns(`
+          const Foo: SFC<Props> = (props) => (<div></div>)
+      `);
+
+      await statelessToStatefulComponent();
+
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
     });
         
       it('should not convert functions and function calls in the body', async () => {
