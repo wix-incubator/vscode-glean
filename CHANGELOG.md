@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/wix/vscode-glean/compare/v4.1.0...v4.2.0) (2018-11-02)
+
+
+### Features
+
+* **stateless-to-stateful:** Type annotation can now be extracted from variable declaration annontation (SFC<T>) in addition to prop argument annotation ([8f572c3](https://github.com/wix/vscode-glean/commit/8f572c3))
+
 # [4.1.0](https://github.com/wix/vscode-glean/compare/v4.0.7...v4.1.0) (2018-11-01)
 
 
