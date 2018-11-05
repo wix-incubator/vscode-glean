@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/wix/vscode-glean/compare/v4.2.0...v4.2.1) (2018-11-05)
+
+
+### Bug Fixes
+
+* **extract-component:** Fixed feature on Windows 10. Changed URI resolution API used to resolve path while using the refactoring ([29b808a](https://github.com/wix/vscode-glean/commit/29b808a))
+
 # [4.2.0](https://github.com/wix/vscode-glean/compare/v4.1.0...v4.2.0) (2018-11-02)
 
 
