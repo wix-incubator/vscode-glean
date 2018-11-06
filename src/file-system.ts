@@ -4,10 +4,7 @@ import * as mkdirp from 'mkdirp';
 import { sync as globSync } from 'glob';
 import * as gitignoreToGlob from 'gitignore-to-glob';
 import { workspaceRoot, activeURI } from './editor';
-import * as lineColumn from 'line-column';
-import * as prependFile from 'prepend-file';
 import * as vscode from 'vscode';
-import { SSL_OP_CISCO_ANYCONNECT } from 'constants';
 import { Position, Uri } from 'vscode';
 
 export function createFileIfDoesntExist(absolutePath: string): string {
@@ -43,7 +40,7 @@ export function filesInFolder(folder): string[] {
 
 export function replaceTextInFile(text, start: vscode.Position, end: vscode.Position, path) {
   const edit = new vscode.WorkspaceEdit();
-  edit.replace(vscode.Uri.parse(`file://${path}`), new vscode.Range(start, end), text);
+  edit.replace(Uri.file(path), new vscode.Range(start, end), text);
   return vscode.workspace.applyEdit(edit);
 
 }
@@ -51,7 +48,7 @@ export async function appendTextToFile(text, absolutePath) {
   const edit = new vscode.WorkspaceEdit();
   const linesInFile = await countLineInFile(absolutePath);
 
-  edit.insert(Uri.parse(`file://${absolutePath}`), new Position(linesInFile, 0), text);
+  edit.insert(Uri.file(absolutePath), new Position(linesInFile, 0), text);
   return vscode.workspace.applyEdit(edit);
 
   // return new Promise((resolve, reject) => {
@@ -65,7 +62,7 @@ export async function appendTextToFile(text, absolutePath) {
 
 export function prependTextToFile(text, absolutePath) {
   let edit = new vscode.WorkspaceEdit();
-  edit.insert(vscode.Uri.parse(`file://${absolutePath}`), new vscode.Position(0, 0), text);
+  edit.insert(Uri.file(absolutePath), new vscode.Position(0, 0), text);
   return vscode.workspace.applyEdit(edit);
 }
 
