@@ -1,3 +1,10 @@
+## [4.2.2](https://github.com/wix/vscode-glean/compare/v4.2.1...v4.2.2) (2018-11-06)
+
+
+### Bug Fixes
+
+* **export-component:** Windows 10 support ([96f875c](https://github.com/wix/vscode-glean/commit/96f875c))
+
 ## [4.2.1](https://github.com/wix/vscode-glean/compare/v4.2.0...v4.2.1) (2018-11-05)
 
 
