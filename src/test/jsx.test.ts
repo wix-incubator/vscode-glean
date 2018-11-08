@@ -260,6 +260,28 @@ describe('jsx module', function () {
             expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
         });
 
+        it('creates stateful component from arrow function', async () => {
+          sandbox.stub(editor, 'selectedText').returns(`
+              const foo = (props) => {
+                  return (<div></div>);
+              }
+          `);
+
+          await statelessToStatefulComponent();
+
+          expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+      });
+
+      it('creates stateful component from arrow function with JSX element being behind an AND operator', async () => {
+        sandbox.stub(editor, 'selectedText').returns(`
+            const foo = (props) => true && <div></div>;
+        `);
+
+        await statelessToStatefulComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return true && <div></div>;\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+    });
+
         it('wraps returned JSX in parenthesis if they are missing ', async () => {
           sandbox.stub(editor, 'selectedText').returns(`
               const foo = (props) => {

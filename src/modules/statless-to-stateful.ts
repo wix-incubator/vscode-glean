@@ -24,6 +24,8 @@ function getRenderFunctionBody(statelessComponentBody) {
   } else if(t.isJSXElement(statelessComponentBody)) {
     const body  = t.isParenthesizedExpression(statelessComponentBody) ? statelessComponentBody : t.parenthesizedExpression(statelessComponentBody);
     return t.blockStatement([t.returnStatement(body)]);
+  } else {
+    return t.blockStatement([t.returnStatement(statelessComponentBody)]);
   }
 }
 
