@@ -1,3 +1,10 @@
+## [4.2.3](https://github.com/wix/vscode-glean/compare/v4.2.2...v4.2.3) (2018-11-08)
+
+
+### Bug Fixes
+
+* **stateless-to-stateful:** fixed crash when converting component with JSX behind logical opetator ([9427e5e](https://github.com/wix/vscode-glean/commit/9427e5e))
+
 ## [4.2.2](https://github.com/wix/vscode-glean/compare/v4.2.1...v4.2.2) (2018-11-06)
 
 
