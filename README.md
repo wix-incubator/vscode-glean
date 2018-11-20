@@ -10,10 +10,10 @@
 [![Build Status](https://travis-ci.org/wix/vscode-glean.svg?branch=master)](https://travis-ci.org/wix/vscode-glean)
 [![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
-The extension provides refactoring tools for your React codebase: extract JSX into a new component, convert Function to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
+The extension provides refactoring tools for your React codebase: extract JSX into a new component, convert Functions to Stateful React Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
 
 ## Highlights
-- Allows extracting JSX into new component as well as other React code refactoring options
+- Allows extracting JSX into new components as well as other React code refactoring options
 - Moving code between files
 - Typescript support
 - ES2015 modules support
@@ -30,7 +30,7 @@ Go to the link below and click `Install`.
 
 ### Extract to file
 
-Select text and  either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
+Select text and use either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
 
 
 ![Example of Javascript Extraction](https://github.com/wix/vscode-glean/blob/master/assets/extract-to-file.gif?raw=true)
@@ -42,7 +42,7 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 
 - Generate Stateful or Stateless Component, such that the extracted JSX will continue to function.
 - It will identify all inputs to the newly created component.
-- Replace extracted JSX will newly created component, while providing it with all the props.
+- Replace extracted JSX with newly created component, while providing it with all the props.
 
 ![Example of JSX extraction](https://github.com/wix/vscode-glean/blob/master/assets/extract-to-comp.gif?raw=true)
 
