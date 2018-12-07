@@ -10,16 +10,18 @@ export const activeFileName = () => vscode.window.activeTextEditor.document.file
 
 export const selectedTextStart = () => vscode.window.activeTextEditor.selection.start;
 export const selectedTextEnd = () => vscode.window.activeTextEditor.selection.end;
+
+
 export const activeEditor = () => vscode.window.activeTextEditor;
 
 export const config = () => vscode.workspace.getConfiguration('glean');
 
 
 export function currentEditorPath(): string {
-  const activeEditor = vscode.window.activeTextEditor;
-  if (!activeEditor) return;
+  const actEditor = vscode.window.activeTextEditor;
+  if (!actEditor) return;
 
-  const currentFilePath = path.dirname(activeEditor.document.fileName);
+  const currentFilePath = path.dirname(actEditor.document.fileName);
   const rootMatcher = new RegExp(`^${workspaceRoot()}`);
   const relativeCurrentFilePath = currentFilePath.replace(rootMatcher, '');
 
@@ -52,21 +54,21 @@ export function allText() {
 export function showInputBox(defaultValue, placeHolder) {
   return vscode.window.showInputBox({
     value: defaultValue,
-    placeHolder
+    placeHolder,
   });
 }
 
 
 export function showQuickPicksList(choices: QuickPickItem[], placeHolder = '') {
   return vscode.window.showQuickPick<vscode.QuickPickItem>(choices, {
-    placeHolder
-  })
-};
+    placeHolder,
+  });
+}
 
 export const convertRelativeToFullPath = relativePath => {
   const root = workspaceRoot();
-  return root ? path.join(root, relativePath) : relativePath;  
-}
+  return root ? path.join(root, relativePath) : relativePath;
+};
 
 export const extractQuickPickValue = selection => {
   if (!selection)

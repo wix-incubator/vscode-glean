@@ -1,26 +1,27 @@
 import { SnippetString } from 'vscode';
-import { showDirectoryPicker } from "./directories-picker";
-import { showFilePicker } from "./file-picker";
-import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage, allText } from "./editor";
-import { statelessToStateful } from "./modules/statless-to-stateful";
-import { statefulToStateless } from './modules/stateful-to-stateless'
-import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from "./settings";
-import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn } from "./file-system";
-import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions } from "./parsing";
-import { createComponentInstance, wrapWithComponent, isRangeContainedInJSXExpression, isJSXExpression } from "./modules/jsx";
+import { showDirectoryPicker } from './directories-picker';
+import { showFilePicker } from './file-picker';
+// tslint:disable-next-line:max-line-length
+import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage, allText } from './editor';
+import { statelessToStateful } from './modules/statless-to-stateful';
+import { statefulToStateless } from './modules/stateful-to-stateless';
+import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from './settings';
+import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn } from './file-system';
+import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions } from './parsing';
+import { createComponentInstance, wrapWithComponent, isRangeContainedInJSXExpression, isJSXExpression } from './modules/jsx';
 import * as relative from 'relative';
 import * as path from 'path';
 import getImports from './get-imports';
-import * as prettier from "prettier";
+import * as prettier from 'prettier';
 
 export async function extractJSXToComponent() {
-  var editor = activeEditor();
+  let editor = activeEditor();
   if (!editor) {
     return; // No open text editor
   }
 
   try {
-    const folderPath = await showDirectoryPicker()
+    const folderPath = await showDirectoryPicker();
     const filePath = await showFilePicker(folderPath);
 
     const selectionProccessingResult = await wrapWithComponent(filePath, selectedText());
@@ -28,6 +29,7 @@ export async function extractJSXToComponent() {
     await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
     const destinationImports: string = getImports(selectionProccessingResult.text);
     prependTextToFile(destinationImports, filePath);
+    // tslint:disable-next-line:max-line-length
     const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
     await replaceSelectionWith(componentInstance);
     await switchToDestinationFileIfRequired(filePath);
@@ -37,7 +39,7 @@ export async function extractJSXToComponent() {
 }
 
 export async function wrapJSXWithCondition() {
-  var editor = activeEditor();
+  let editor = activeEditor();
   if (!editor) {
     return; // No open text editor
   }
@@ -55,18 +57,18 @@ export async function wrapJSXWithCondition() {
 }
 
 export async function extractToFile() {
-  var editor = activeEditor();
+  let editor = activeEditor();
   if (!editor) {
     return; // No open text editor
   }
 
   try {
-    const folderPath = await showDirectoryPicker()
+    const folderPath = await showDirectoryPicker();
     const filePath = await showFilePicker(folderPath);
 
     const selectionProccessingResult: ProcessedSelection = {
       text: selectedText(),
-      metadata: {}
+      metadata: {},
     };
     await appendSelectedTextToFile(selectionProccessingResult, filePath);
     await removeSelectedTextFromOriginalFile(selectionProccessingResult);
@@ -81,7 +83,7 @@ export async function extractToFile() {
 
 export async function statelessToStatefulComponent() {
   try {
-    const selectionProccessingResult = statelessToStateful(selectedText())
+    const selectionProccessingResult = statelessToStateful(selectedText());
     await replaceSelectionWith(selectionProccessingResult.text);
 
   } catch (e) {
@@ -91,9 +93,11 @@ export async function statelessToStatefulComponent() {
 
 export async function statefulToStatelessComponent() {
   try {
-    await showInformationMessage('WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?', ['Yes', 'No']).then(async res => {
+    await showInformationMessage(
+      'WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?', ['Yes', 'No'],
+    ).then(async res => {
       if (res === 'Yes') {
-        const selectionProccessingResult = statefulToStateless(selectedText())
+        const selectionProccessingResult = statefulToStateless(selectedText());
         await replaceSelectionWith(selectionProccessingResult.text);
       }
     });
@@ -108,7 +112,7 @@ export async function switchToDestinationFileIfRequired(destinationFilePath: any
   }
 }
 
-export async function replaceSelectionWith(text: string, path = activeFileName()) {
+export async function replaceSelectionWith(text: string, filepath = activeFileName()) {
   await replaceTextInFile(text, selectedTextStart(), selectedTextEnd(), activeFileName());
 }
 
@@ -117,9 +121,7 @@ export type ProcessedSelection = {
   metadata: any;
 };
 
-export const appendSelectedTextToFile = ({
-  text: selection
-}, destinationPath) => {
+export const appendSelectedTextToFile = ({ text: selection }, destinationPath) => {
   let text;
 
   if (isOperationBetweenJSFiles(destinationPath)) {
@@ -132,9 +134,7 @@ export const appendSelectedTextToFile = ({
   return appendTextToFile(`${prettyText}`, destinationPath);
 };
 
-export const prependImportsToFileIfNeeded = ({
-  text: selection
-}, destinationFilePath) => {
+export const prependImportsToFileIfNeeded = ({text: selection }, destinationFilePath) => {
   if (!isOperationBetweenJSFiles(destinationFilePath)) return;
   const originFilePath = activeFileName();
   const identifiers = getIdentifier(selection);
