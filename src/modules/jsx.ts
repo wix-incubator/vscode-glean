@@ -7,6 +7,13 @@ import * as path from 'path';
 import { ProcessedSelection } from '../code-actions';
 import * as t from '@babel/types';
 
+export type ComponentProperties = {
+  argumentProps: Set<string>,
+  memberProps: Set<string>,
+  state: Set<string>,
+  componentMembers: Set<string>,
+};
+
 export function isJSX(code) {
   let ast;
   try {
@@ -43,8 +50,8 @@ export function isJSXExpression(code) {
 export function isRangeContainedInJSXExpression(code, start, end) {
   try {
     const ast = codeToAst(code);
-    const path = findContainerPath(ast, start, end);
-    return path && t.isJSX(path.node) && t.isExpression(path.node);
+    const containerPath = findContainerPath(ast, start, end);
+    return containerPath && t.isJSX(containerPath.node) && t.isExpression(containerPath.node);
   } catch (e) {
     return false;
   }
@@ -53,9 +60,9 @@ export function isRangeContainedInJSXExpression(code, start, end) {
 function findContainerPath(ast, start, end) {
   let foundPath = null;
   const visitor = {
-    exit(path) {
-      if (!foundPath && pathContains(path, start, end)) {
-        foundPath = path;
+    exit(astPath) {
+      if (!foundPath && pathContains(astPath, start, end)) {
+        foundPath = astPath;
       }
     },
   };
@@ -64,9 +71,9 @@ function findContainerPath(ast, start, end) {
   return foundPath;
 }
 
-function pathContains(path, start, end) {
-  const pathStart = path.node.loc.start;
-  const pathEnd = path.node.loc.end;
+function pathContains(astPath, start, end) {
+  const pathStart = astPath.node.loc.start;
+  const pathEnd = astPath.node.loc.end;
   return ((pathStart.line < start.line) || (pathStart.line === start.line && pathStart.column < start.character))
     && ((pathEnd.line > end.line) || (pathEnd.line === end.line && pathEnd.column > end.character));
 }
@@ -86,6 +93,7 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
     componentMembers: new Set(),
   };
 
+  // TODO Requires Review
   const visitor = {
     Identifier(astPath) {
       let isMember = !!astPath.findParent(() => (
@@ -93,31 +101,37 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
         (astPath.parent.type === 'ObjectProperty' && astPath.parent.value.type !== 'Identifier') ||
         astPath.isArrowFunctionExpression(astPath.node)
       ));
-      if (!isMember) {
+      if (!isMember && !astPath.node.wasVisited) {
         componentProperties.argumentProps.add(astPath.node.name);
       }
     },
-    MemberExpression(path) {
-      if (!path.node.wasVisited && t.isThisExpression(path.node.object)) {
-        if (path.parent.property && (path.node.property.name === 'props' || path.node.property.name === 'state')) {
+    MemberExpression(astPath) {
+      if (!astPath.node.wasVisited && t.isThisExpression(astPath.node.object)) {
+        if (astPath.parent.property && (astPath.node.property.name === 'props' || astPath.node.property.name === 'state')) {
           // props or state = path.node.property.name;
-          if (path.node.property.name === 'props') {
-            componentProperties.memberProps.add(path.parent.property.name);
+          if (astPath.node.property.name === 'props') {
+            componentProperties.memberProps.add(astPath.parent.property.name);
           } else {
-            path.node.property.name = 'props';
-            componentProperties.state.add(path.parent.property.name);
+            astPath.node.property.name = 'props';
+            componentProperties.state.add(astPath.parent.property.name);
           }
+        } else if (t.isThisExpression(astPath.node.object)) {
+          componentProperties.componentMembers.add(astPath.node.property.name);
+          let identifier = t.identifier(astPath.node.property.name);
+          (<any>identifier).wasVisited = true;
+          astPath.replaceWith(identifier);
         } else {
-          componentProperties.componentMembers.add(path.node.property.name);
-          const membershipExpr = t.memberExpression(
-            t.memberExpression(path.node.object, t.identifier('props')), t.identifier(path.node.property.name),
+          componentProperties.componentMembers.add(astPath.node.property.name);
+          let membershipExpr = t.memberExpression(
+            t.memberExpression(astPath.node.object, t.identifier('props')), t.identifier(astPath.node.property.name),
           );
+          // TODO Should Be membershipExpr.node.wasVisited?
           (<any>membershipExpr).wasVisited = true;
-          path.replaceWith(membershipExpr);
-          path.skip();
+          astPath.replaceWith(membershipExpr);
+          astPath.skip();
         }
 
-        path.node.wasVisited = true;
+        astPath.node.wasVisited = true;
       }
 
     },
@@ -142,7 +156,7 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
   };
 }
 
-export function createComponentInstance(name, props) {
+export function createComponentInstance(name, props: ComponentProperties) {
   const stateToInputProps = Array.from(props.state).map(prop => `${prop}={this.state.${prop}}`).join(' ');
   const argPropsToInputProps = Array.from(props.argumentProps).map(prop => `${prop}={${prop}}`).join(' ');
   const memberPropsToInputProps = Array.from(props.memberProps).map(prop => `${prop}={this.props.${prop}}`).join(' ');
