@@ -1,10 +1,10 @@
 import { capitalizeFirstLetter } from './../utils';
-import { codeToAst, parsingOptions, templateToAst } from "../parsing";
-import traverse from "@babel/traverse";
-import { buildComponent } from "./component-builder";
+import { codeToAst, parsingOptions, templateToAst } from '../parsing';
+import traverse from '@babel/traverse';
+import { buildComponent } from './component-builder';
 import { transformFromAst } from '@babel/core';
 import * as path from 'path';
-import { ProcessedSelection } from "../code-actions";
+import { ProcessedSelection } from '../code-actions';
 import * as t from '@babel/types';
 
 export function isJSX(code) {
@@ -42,11 +42,11 @@ export function isJSXExpression(code) {
 
 export function isRangeContainedInJSXExpression(code, start, end) {
   try {
-    const ast = codeToAst(code)
-    const path = findContainerPath(ast, start, end)
+    const ast = codeToAst(code);
+    const path = findContainerPath(ast, start, end);
     return path && t.isJSX(path.node) && t.isExpression(path.node);
   } catch (e) {
-    return false
+    return false;
   }
 }
 
@@ -55,20 +55,20 @@ function findContainerPath(ast, start, end) {
   const visitor = {
     exit(path) {
       if (!foundPath && pathContains(path, start, end)) {
-        foundPath = path
+        foundPath = path;
       }
-    }
-  }
+    },
+  };
 
   traverse(ast, visitor);
   return foundPath;
 }
 
 function pathContains(path, start, end) {
-  const pathStart = path.node.loc.start
-  const pathEnd = path.node.loc.end
+  const pathStart = path.node.loc.start;
+  const pathEnd = path.node.loc.end;
   return ((pathStart.line < start.line) || (pathStart.line === start.line && pathStart.column < start.character))
-    && ((pathEnd.line > end.line) || (pathEnd.line === end.line && pathEnd.column > end.character))
+    && ((pathEnd.line > end.line) || (pathEnd.line === end.line && pathEnd.column > end.character));
 }
 
 
@@ -83,20 +83,24 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
     argumentProps: new Set(),
     memberProps: new Set(),
     state: new Set(),
-    componentMembers: new Set()
+    componentMembers: new Set(),
   };
 
   const visitor = {
-    Identifier(path) {
-      let isMember = !!path.findParent(path => path.node.type === 'MemberExpression' || path.isArrowFunctionExpression(path.node));
+    Identifier(astPath) {
+      let isMember = !!astPath.findParent(() => (
+        (astPath.node.type === 'MemberExpression') ||
+        (astPath.parent.type === 'ObjectProperty' && astPath.parent.value.type !== 'Identifier') ||
+        astPath.isArrowFunctionExpression(astPath.node)
+      ));
       if (!isMember) {
-        componentProperties.argumentProps.add(path.node.name);
+        componentProperties.argumentProps.add(astPath.node.name);
       }
     },
     MemberExpression(path) {
       if (!path.node.wasVisited && t.isThisExpression(path.node.object)) {
         if (path.parent.property && (path.node.property.name === 'props' || path.node.property.name === 'state')) {
-          //props or state = path.node.property.name;
+          // props or state = path.node.property.name;
           if (path.node.property.name === 'props') {
             componentProperties.memberProps.add(path.parent.property.name);
           } else {
@@ -105,7 +109,9 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
           }
         } else {
           componentProperties.componentMembers.add(path.node.property.name);
-          const membershipExpr = t.memberExpression(t.memberExpression(path.node.object, t.identifier('props')), t.identifier(path.node.property.name));
+          const membershipExpr = t.memberExpression(
+            t.memberExpression(path.node.object, t.identifier('props')), t.identifier(path.node.property.name),
+          );
           (<any>membershipExpr).wasVisited = true;
           path.replaceWith(membershipExpr);
           path.skip();
@@ -114,8 +120,8 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
         path.node.wasVisited = true;
       }
 
-    }
-  }
+    },
+  };
 
   const ast = jsxToAst(jsx);
 
@@ -131,8 +137,8 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
     metadata: {
       isJSX: true,
       componentProperties,
-      name: componentName
-    }
+      name: componentName,
+    },
   };
 }
 
@@ -145,7 +151,7 @@ export function createComponentInstance(name, props) {
   return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps} ${componentMembersToInputProps}/>`;
 }
 
-function isExportedDeclaration(ast){
+function isExportedDeclaration(ast) {
   return t.isExportNamedDeclaration(ast) || t.isExportDefaultDeclaration(ast);
 }
 
@@ -163,11 +169,11 @@ export function isStatefulComp(code) {
 
   const isSupportedComponent = (classPath) => {
     const supportedComponents = ['Component', 'PureComponent'];
-      return ((classPath.superClass.object && 
-          classPath.superClass.object.name === 'React' && 
+    return ((classPath.superClass.object &&
+          classPath.superClass.object.name === 'React' &&
           supportedComponents.indexOf(classPath.superClass.property.name) !== -1)  ||
           (supportedComponents.indexOf(classPath.superClass.name) !== -1));
-  }
+  };
 
   return (
     (isExportedDeclaration(ast) && isSupportedComponent(ast.declaration)) ||

@@ -83,11 +83,7 @@ export function exportAllDeclarationsCommonJS(code) {
     const identifiers = getIdentifier(code).map(id => t.objectProperty(t.identifier(id), t.identifier(id), false, true));
     const exportExpression = generateExportsExpr(t.objectExpression(identifiers));
     const ast = t.file(t.program([exportExpression]), '', '');
-    return `
-${code}
-    
-${transformFromAst(ast).code}
-        `;
+    return `${code} ${transformFromAst(ast).code}`;
 }
 
 
