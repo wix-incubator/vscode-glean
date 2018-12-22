@@ -1,7 +1,9 @@
 import { codeToAst } from "../parsing";
 import traverse from "@babel/traverse";
+import template from "@babel/template";
 import * as t from '@babel/types';
 import { transformFromAst } from '@babel/core';
+import { capitalizeFirstLetter } from "../utils";
 
 
 export function statefulToStateless(component) {
@@ -19,29 +21,29 @@ export function statefulToStateless(component) {
     'getDerivedStateFromProps'
   ];
 
-  const arrowFunction = ({name, params = [], propType = null, paramDefaults = [], body = []}) => {
+  const arrowFunction = ({ name, params = [], propType = null, paramDefaults = [], body = [] }) => {
     const identifier = t.identifier(name);
-    identifier.typeAnnotation = propType?  t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'),t.tsTypeParameterInstantiation([propType]))) :null;
+    identifier.typeAnnotation = propType ? t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'), t.tsTypeParameterInstantiation([propType]))) : null;
     return t.variableDeclaration('const', [
       t.variableDeclarator(
-        identifier, 
+        identifier,
         t.arrowFunctionExpression(
           params.map((param, idx) => {
             const paramIdentifier = t.identifier(param);
-            
+
             let paramObj: any = paramIdentifier;
-            
+
             if (paramDefaults[idx]) {
-              	paramObj = t.assignmentPattern(paramIdentifier, paramDefaults[idx]);
+              paramObj = t.assignmentPattern(paramIdentifier, paramDefaults[idx]);
             }
-            
+
             return paramObj;
           }),
           t.blockStatement(body))
       )
     ])
   };
-  
+
   const copyNonLifeCycleMethods = (path) => {
     const className = path.node.key.name;
     const classBody = t.isClassMethod(path) ? path['node'].body.body : path.node.value.body.body;
@@ -60,43 +62,73 @@ export function statefulToStateless(component) {
       }
     }
   };
-  
+
   const ReplaceStateWithPropsVisitor = {
     MemberExpression(path) {
-      if (t.isThisExpression(path.node.object) && path.node.property.name === 'state') {
-        path.node.property.name = 'props';
+
+      if (true) {
+        if (t.isThisExpression(path.node.object.object) && path.node.object.property.name === 'state') {
+          path.replaceWith(t.identifier(path.node.property.name));
+        }
+      } else {
+        if (t.isThisExpression(path.node.object) && path.node.property.name === 'state') {
+          path.node.property.name = 'props';
+        }
       }
     }
   };
-  
+
   const RemoveSetStateAndForceUpdateVisitor = {
-  	CallExpression(path) {
-    	if (t.isMemberExpression(path.node.callee)) {
-        	if (t.isThisExpression(path.node.callee.object)) {
-              if (['setState', 'forceUpdate'].indexOf(path.node.callee.property.name) !== -1) {
-              	path.remove();
-              }
+    CallExpression(path) {
+      if (t.isMemberExpression(path.node.callee)) {
+        if (t.isThisExpression(path.node.callee.object)) {
+          if(true) {
+            if(path.node.callee.property.name === 'forceUpdate') {
+              path.remove();
+            } else if(path.node.callee.property.name === 'setState') {
+              const buildRequire = template(`
+              STATE_SETTER(STATE_VALUE);
+            `);
+              path.node.arguments[0].properties.forEach(({key, value}) => {
+                path.insertBefore(buildRequire({
+                  STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
+                  STATE_VALUE: value
+                }));
+              });
+
+              path.remove();
             }
+          } else {
+            if (['setState', 'forceUpdate'].indexOf(path.node.callee.property.name) !== -1) {
+              path.remove();
+            }
+          }
+  
         }
+      }
     }
   }
-  
+
   const appendFunctionBodyToStatelessComponent = (name, body) => {
+
+
+
     let statelessComponentBodyBlock;
-    
+
     if (t.isExportDefaultDeclaration(statelessComponentPath)) {
       statelessComponentBodyBlock = statelessComponentPath['node'].declaration.body.body;
     } else if (t.isExportNamedDeclaration(statelessComponentPath)) {
       statelessComponentBodyBlock = statelessComponentPath['node'].declaration.declarations[0].init.body.body
     } else {
-      statelessComponentBodyBlock =  statelessComponentPath.node.declarations[0].init.body.body;
+      statelessComponentBodyBlock = statelessComponentPath.node.declarations[0].init.body.body;
     }
-    
+
     if (name !== 'render') {
-      statelessComponentBodyBlock.push(arrowFunction({name, body}));
+      statelessComponentBodyBlock.push(arrowFunction({ name, body }));
     } else {
       statelessComponentBodyBlock.push(...body);
     }
+
   };
 
   const visitor = {
@@ -109,19 +141,19 @@ export function statefulToStateless(component) {
       const statelessComponent = arrowFunction({
         name: (statelessComponentName),
         params: ['props'],
-        propType: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? path.node.superTypeParameters.params[0]: null,
+        propType: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? path.node.superTypeParameters.params[0] : null,
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
         body: []
       });
- 
+
       const isExportDefaultDeclaration = t.isExportDefaultDeclaration(path.container);
       const isExportNamedDeclaration = t.isExportNamedDeclaration(path.container);
-      
+
       const exportDefaultStatelessComponent = t.exportDefaultDeclaration(t.identifier(statelessComponentName));
       const exportNamedStatelessComponent = t.exportNamedDeclaration(statelessComponent, []);
-      
+
       const mainPath = t.isExportDeclaration(path.container) ? path.findParent(p => t.isExportDeclaration(p)) : path;
-     
+
       if (isExportDefaultDeclaration) {
         mainPath.insertBefore(statelessComponent);
         mainPath.insertBefore(exportDefaultStatelessComponent);
@@ -130,10 +162,53 @@ export function statefulToStateless(component) {
       } else {
         mainPath.insertBefore(statelessComponent);
       }
-       
+
       statelessComponentPath = mainPath.getSibling(0);
     },
     ClassMethod(path) {
+      const stateVars = {}
+
+      if (true) {
+        if (path.node.kind === "constructor") {
+          const { expression } = path.node.body.body.find((bodyStatement => {
+            return t.isAssignmentExpression(bodyStatement.expression)
+          }));
+
+          if (expression.left.property.name === "state") {
+            expression.right.properties.forEach(prop => {
+              stateVars[prop.key.name] = prop.value;
+            });
+          }
+
+
+          let statelessComponentBodyBlock;
+
+          if (t.isExportDefaultDeclaration(statelessComponentPath)) {
+            statelessComponentBodyBlock = statelessComponentPath['node'].declaration.body.body;
+          } else if (t.isExportNamedDeclaration(statelessComponentPath)) {
+            statelessComponentBodyBlock = statelessComponentPath['node'].declaration.declarations[0].init.body.body
+          } else {
+            statelessComponentBodyBlock = statelessComponentPath.node.declarations[0].init.body.body;
+          }
+
+          const buildRequire = template(`
+        const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
+      `);
+
+
+          Object.entries(stateVars).forEach(([key, val]) => {
+            const ast = buildRequire({
+              STATE_PROP: t.identifier(key),
+              STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key)}`),
+              STATE_VALUE: val
+            });
+
+            statelessComponentBodyBlock.push(ast);
+          })
+        }
+
+      }
+
       copyNonLifeCycleMethods(path);
     },
     ClassProperty(path) {
