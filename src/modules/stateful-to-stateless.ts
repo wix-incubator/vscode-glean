@@ -4,6 +4,7 @@ import template from "@babel/template";
 import * as t from '@babel/types';
 import { transformFromAst } from '@babel/core';
 import { capitalizeFirstLetter } from "../utils";
+import { isHooksForFunctionalComponentsExperimentOn } from "../settings";
 
 
 export function statefulToStateless(component) {
@@ -66,7 +67,7 @@ export function statefulToStateless(component) {
   const ReplaceStateWithPropsVisitor = {
     MemberExpression(path) {
 
-      if (true) {
+      if (isHooksForFunctionalComponentsExperimentOn()) {
         if (t.isThisExpression(path.node.object.object) && path.node.object.property.name === 'state') {
           path.replaceWith(t.identifier(path.node.property.name));
         }
@@ -82,7 +83,7 @@ export function statefulToStateless(component) {
     CallExpression(path) {
       if (t.isMemberExpression(path.node.callee)) {
         if (t.isThisExpression(path.node.callee.object)) {
-          if(true) {
+          if(isHooksForFunctionalComponentsExperimentOn()) {
             if(path.node.callee.property.name === 'forceUpdate') {
               path.remove();
             } else if(path.node.callee.property.name === 'setState') {
@@ -166,9 +167,9 @@ export function statefulToStateless(component) {
       statelessComponentPath = mainPath.getSibling(0);
     },
     ClassMethod(path) {
-      const stateVars = {}
-
-      if (true) {
+   
+      if (isHooksForFunctionalComponentsExperimentOn()) {
+        const stateVars = {}
         if (path.node.kind === "constructor") {
           const { expression } = path.node.body.body.find((bodyStatement => {
             return t.isAssignmentExpression(bodyStatement.expression)
@@ -191,7 +192,7 @@ export function statefulToStateless(component) {
             statelessComponentBodyBlock = statelessComponentPath.node.declarations[0].init.body.body;
           }
 
-          const buildRequire = template(`
+      const buildRequire = template(`
         const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
       `);
 

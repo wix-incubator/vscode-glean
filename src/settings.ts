@@ -9,6 +9,9 @@ export const shouldBeConsideredJsFiles = (...files) => {
 
 export const commonJSModuleSystemUsed = () => config().jsModuleSystem === 'commonjs'
 
+const isExperimentOn = (experiment) => (config().experiments || []).includes(experiment);
+
+export const isHooksForFunctionalComponentsExperimentOn = () => isExperimentOn('hooksForFunctionalComponents');
 
 export const esmModuleSystemUsed = () => config().jsModuleSystem === 'esm';
 

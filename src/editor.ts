@@ -14,7 +14,6 @@ export const activeEditor = () => vscode.window.activeTextEditor;
 
 export const config = () => vscode.workspace.getConfiguration('glean');
 
-
 export function currentEditorPath(): string {
   const activeEditor = vscode.window.activeTextEditor;
   if (!activeEditor) return;

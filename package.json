@@ -58,6 +58,13 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Specifies whether to switch to the target file after extracting the content or not"
+                },
+                "glean.experiments": {
+                    "type": [
+                        "string"
+                    ],
+                    "default": [],
+                    "description": "Active experimental features. Please see https://github.com/wix/vscode-glean/ for list of experimental features"
                 }
             }
         }
