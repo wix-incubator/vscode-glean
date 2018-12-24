@@ -8,7 +8,8 @@ import { isHooksForFunctionalComponentsExperimentOn } from "../settings";
 
 
 export function statefulToStateless(component) {
-  let statelessComponentPath;
+  const functionBody = []
+
   const lifecycleMethods = [
     'constructor',
     'componentWillMount',
@@ -112,22 +113,10 @@ export function statefulToStateless(component) {
 
   const appendFunctionBodyToStatelessComponent = (name, body) => {
 
-
-
-    let statelessComponentBodyBlock;
-
-    if (t.isExportDefaultDeclaration(statelessComponentPath)) {
-      statelessComponentBodyBlock = statelessComponentPath['node'].declaration.body.body;
-    } else if (t.isExportNamedDeclaration(statelessComponentPath)) {
-      statelessComponentBodyBlock = statelessComponentPath['node'].declaration.declarations[0].init.body.body
-    } else {
-      statelessComponentBodyBlock = statelessComponentPath.node.declarations[0].init.body.body;
-    }
-
     if (name !== 'render') {
-      statelessComponentBodyBlock.push(arrowFunction({ name, body }));
+      functionBody.push(arrowFunction({ name, body }));
     } else {
-      statelessComponentBodyBlock.push(...body);
+      functionBody.push(...body);
     }
 
   };
@@ -144,7 +133,7 @@ export function statefulToStateless(component) {
         params: ['props'],
         propType: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? path.node.superTypeParameters.params[0] : null,
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
-        body: []
+        body: functionBody
       });
 
       const isExportDefaultDeclaration = t.isExportDefaultDeclaration(path.container);
@@ -163,49 +152,29 @@ export function statefulToStateless(component) {
       } else {
         mainPath.insertBefore(statelessComponent);
       }
-
-      statelessComponentPath = mainPath.getSibling(0);
     },
     ClassMethod(path) {
    
       if (isHooksForFunctionalComponentsExperimentOn()) {
-        const stateVars = {}
         if (path.node.kind === "constructor") {
           const { expression } = path.node.body.body.find((bodyStatement => {
             return t.isAssignmentExpression(bodyStatement.expression)
           }));
 
+          const buildRequire = template(`
+          const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
+        `);
+
           if (expression.left.property.name === "state") {
-            expression.right.properties.forEach(prop => {
-              stateVars[prop.key.name] = prop.value;
+            const stateHooksExpressions = expression.right.properties.map(({key, value}) => {
+              return buildRequire({
+                STATE_PROP: t.identifier(key.name),
+                STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
+                STATE_VALUE: value
+              });
             });
+            functionBody.push(...stateHooksExpressions);
           }
-
-
-          let statelessComponentBodyBlock;
-
-          if (t.isExportDefaultDeclaration(statelessComponentPath)) {
-            statelessComponentBodyBlock = statelessComponentPath['node'].declaration.body.body;
-          } else if (t.isExportNamedDeclaration(statelessComponentPath)) {
-            statelessComponentBodyBlock = statelessComponentPath['node'].declaration.declarations[0].init.body.body
-          } else {
-            statelessComponentBodyBlock = statelessComponentPath.node.declarations[0].init.body.body;
-          }
-
-      const buildRequire = template(`
-        const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
-      `);
-
-
-          Object.entries(stateVars).forEach(([key, val]) => {
-            const ast = buildRequire({
-              STATE_PROP: t.identifier(key),
-              STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key)}`),
-              STATE_VALUE: val
-            });
-
-            statelessComponentBodyBlock.push(ast);
-          })
         }
 
       }
