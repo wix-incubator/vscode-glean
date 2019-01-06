@@ -78,7 +78,7 @@ export function statelessToStateful(component) {
       const classDefinition = t.classDeclaration(name, t.identifier('Component'), t.classBody([ctor, render]));
       classDefinition.superTypeParameters = typeAnnotation;
       
-      if (t.isArrowFunctionExpression(path) && !t.isExportDefaultDeclaration(path.parentPath)) {
+      if (t.isArrowFunctionExpression(path) && !t.isExportDefaultDeclaration((<any>path).parentPath)) {
         replacementPath = (<any>path).parentPath.parentPath;
       } else {
         replacementPath = path;
