@@ -17,6 +17,10 @@ export function createFileIfDoesntExist(absolutePath: string): string {
   return absolutePath;
 }
 
+export function readFileContent(absolutePath) {
+  return fs.readFileSync(absolutePath, 'utf8');
+}
+
 export function subfoldersListOf(root: string, ignoreList): string[] {
   if (!root) {
     return [];

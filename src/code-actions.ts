@@ -5,11 +5,11 @@ import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart
 import { statelessToStateful } from "./modules/statless-to-stateful";
 import { statefulToStateless } from './modules/stateful-to-stateless'
 import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from "./settings";
-import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn } from "./file-system";
-import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions } from "./parsing";
-import { createComponentInstance, wrapWithComponent, isRangeContainedInJSXExpression, isJSXExpression } from "./modules/jsx";
+import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn, readFileContent } from "./file-system";
+import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions, codeToAst } from "./parsing";
+import { createComponentInstance, wrapWithComponent, isRangeContainedInJSXExpression, isJSXExpression, importReactIfNeeded } from "./modules/jsx";
 import * as relative from 'relative';
-import * as path from 'path';
+import * as path from 'path'
 
 export async function extractJSXToComponent() {
   var editor = activeEditor();
@@ -23,6 +23,7 @@ export async function extractJSXToComponent() {
 
     const selectionProccessingResult = await wrapWithComponent(filePath, selectedText());
     await appendSelectedTextToFile(selectionProccessingResult, filePath);
+    await importReactIfNeeded(filePath);
     await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
     const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
     await replaceSelectionWith(componentInstance);

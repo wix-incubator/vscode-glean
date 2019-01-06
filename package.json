@@ -78,6 +78,7 @@
         "semantic-release": "semantic-release"
     },
     "devDependencies": {
+        "@babel/helper-module-imports": "^7.0.0",
         "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
         "@semantic-release/changelog": "^2.1.2",
         "@semantic-release/git": "^5.0.0",

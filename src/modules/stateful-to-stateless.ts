@@ -186,6 +186,12 @@ export function statefulToStateless(component) {
       if (t.isFunctionExpression(propValue) || t.isArrowFunctionExpression(propValue)) {
         copyNonLifeCycleMethods(path);
       }
+    },
+
+    ImportDeclaration(path) {
+      if(path.node.source.value === 'react') {
+        
+      }
     }
   };
 

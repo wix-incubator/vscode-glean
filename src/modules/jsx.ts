@@ -6,6 +6,9 @@ import { transformFromAst } from '@babel/core';
 import * as path from 'path';
 import { ProcessedSelection } from "../code-actions";
 import * as t from '@babel/types';
+import { readFileContent, prependTextToFile } from '../file-system';
+import { addDefault, addNamed } from "@babel/helper-module-imports";
+import { program } from 'babel-types';
 
 export function isJSX(code) {
   let ast;
@@ -38,6 +41,22 @@ export function isJSXExpression(code) {
   } catch (e) {
     return false;
   }
+}
+
+export async function importReactIfNeeded(filePath) {
+  const file = readFileContent(filePath);
+  const ast = codeToAst(file);
+
+  const reactImport = ast.program.body.find(statement => {
+    return t.isImportDeclaration(statement) && statement.source.value === 'react';
+  });
+
+  if(!reactImport) {
+    ast.program.body.unshift(t.importDeclaration([t.importDefaultSpecifier(t.identifier('React'))], t.stringLiteral('react')))
+  }
+  const code = transformFromAst(ast).code;
+
+  return prependTextToFile(code, filePath);
 }
 
 export function isRangeContainedInJSXExpression(code, start, end) {
