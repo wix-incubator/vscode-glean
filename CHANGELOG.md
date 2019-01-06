@@ -1,3 +1,10 @@
+## [4.2.4](https://github.com/wix/vscode-glean/compare/v4.2.3...v4.2.4) (2019-01-06)
+
+
+### Bug Fixes
+
+* **stateless-to-stateful:** Closes [#50](https://github.com/wix/vscode-glean/issues/50) ([e555ff0](https://github.com/wix/vscode-glean/commit/e555ff0))
+
 ## [4.2.3](https://github.com/wix/vscode-glean/compare/v4.2.2...v4.2.3) (2018-11-08)
 
 
