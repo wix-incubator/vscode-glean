@@ -1,3 +1,10 @@
+## [4.2.5](https://github.com/wix/vscode-glean/compare/v4.2.4...v4.2.5) (2019-01-10)
+
+
+### Bug Fixes
+
+* **docs:** fixed the description in the market ([f6d8cf7](https://github.com/wix/vscode-glean/commit/f6d8cf7))
+
 ## [4.2.4](https://github.com/wix/vscode-glean/compare/v4.2.3...v4.2.4) (2019-01-06)
 
 
