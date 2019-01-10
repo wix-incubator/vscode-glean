@@ -1,7 +1,7 @@
 {
     "name": "glean",
     "displayName": "glean",
-    "description": "Allows extracting typescript and javascript code into separate module, as well as extracting JSX into new components",
+    "description": "The extension provides refactoring tools for your React codebase",
     "version": "2.0.0",
     "publisher": "wix",
     "engines": {
