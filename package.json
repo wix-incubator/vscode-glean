@@ -1,146 +1,148 @@
 {
-    "name": "glean",
-    "displayName": "glean",
-    "description": "Allows extracting typescript and javascript code into separate module, as well as extracting JSX into new components",
-    "version": "2.0.0",
-    "publisher": "wix",
-    "engines": {
-        "vscode": "^1.23.0"
-    },
-    "categories": [
-        "Programming Languages"
+  "name": "glean",
+  "displayName": "glean",
+  "description": "Allows extracting typescript and javascript code into separate module, as well as extracting JSX into new components",
+  "version": "2.0.0",
+  "publisher": "wix",
+  "engines": {
+    "vscode": "^1.23.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "javascript",
+    "react",
+    "jsx",
+    "refactoring",
+    "typescript",
+    "cleancode"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.glean",
+        "title": "Extract to File"
+      },
+      {
+        "command": "extension.glean.react.stateless-to-stateful",
+        "title": "Convert to Stateful Component"
+      }
     ],
-    "keywords": [
-        "javascript",
-        "react",
-        "jsx",
-        "refactoring",
-        "typescript",
-        "cleancode"
-    ],
-    "activationEvents": [
-        "*"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.glean",
-                "title": "Extract to File"
-            },
-            {
-                "command": "extension.glean.react.stateless-to-stateful",
-                "title": "Convert to Stateful Component"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "Glean Configuration",
-            "properties": {
-                "glean.jsFilesExtensions": {
-                    "type": [
-                        "string"
-                    ],
-                    "default": [
-                        "js",
-                        "jsx",
-                        "ts",
-                        "tsx"
-                    ],
-                    "description": "File extensions to be treated as Javascript files"
-                },
-                "glean.jsModuleSystem": {
-                    "type": "string",
-                    "default": "esm",
-                    "description": "Module system to be used whem extracting Javascript"
-                },
-                "glean.switchToTarget": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Specifies whether to switch to the target file after extracting the content or not"
-                },
-                "glean.experiments": {
-                    "type": [
-                        "string"
-                    ],
-                    "default": [],
-                    "description": "Active experimental features. Please see https://github.com/wix/vscode-glean/ for list of experimental features"
-                }
-            }
+    "configuration": {
+      "type": "object",
+      "title": "Glean Configuration",
+      "properties": {
+        "glean.jsFilesExtensions": {
+          "type": [
+            "string"
+          ],
+          "default": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx"
+          ],
+          "description": "File extensions to be treated as Javascript files"
+        },
+        "glean.jsModuleSystem": {
+          "type": "string",
+          "default": "esm",
+          "description": "Module system to be used whem extracting Javascript"
+        },
+        "glean.switchToTarget": {
+          "type": "boolean",
+          "default": false,
+          "description": "Specifies whether to switch to the target file after extracting the content or not"
+        },
+        "glean.experiments": {
+          "type": [
+            "string"
+          ],
+          "default": [],
+          "description": "Active experimental features. Please see https://github.com/wix/vscode-glean/ for list of experimental features"
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test",
-        "semantic-release": "semantic-release"
-    },
-    "devDependencies": {
-        "@babel/helper-module-imports": "^7.0.0",
-        "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-        "@semantic-release/changelog": "^2.1.2",
-        "@semantic-release/git": "^5.0.0",
-        "@semantic-release/github": "^4.4.2",
-        "@types/babel-traverse": "^6.25.4",
-        "@types/babel-types": "^7.0.4",
-        "@types/chai": "^4.1.6",
-        "@types/mocha": "^2.2.48",
-        "@types/node": "^7.0.71",
-        "@types/sinon": "^4.3.0",
-        "@types/sinon-chai": "^2.7.29",
-        "chai": "^4.2.0",
-        "semantic-release": "^15.10.0",
-        "semantic-release-vsce": "^2.1.2",
-        "sinon": "^4.5.0",
-        "sinon-chai": "^3.0.0",
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.21"
-    },
-    "dependencies": {
-        "@babel/core": "^7.1.2",
-        "@babel/parser": "^7.1.2",
-        "@babel/template": "^7.1.2",
-        "@babel/traverse": "^7.1.0",
-        "@babel/types": "^7.1.2",
-        "gitignore-globs": "^0.1.1",
-        "gitignore-to-glob": "^0.3.0",
-        "glob": "^7.1.3",
-        "line-column": "^1.0.2",
-        "mkdirp": "^0.5.1",
-        "prepend": "^1.0.2",
-        "prepend-file": "^1.3.1",
-        "relative": "^3.0.2",
-        "vscode-cache": "^0.3.0"
-    },
-    "release": {
-        "verifyConditions": [
-            "semantic-release-vsce",
-            "@semantic-release/github"
-        ],
-        "prepare": [
-            {
-                "path": "@semantic-release/changelog",
-                "changelogFile": "CHANGELOG.md"
-            },
-            "@semantic-release/git",
-            {
-                "path": "semantic-release-vsce",
-                "packageVsix": "vscode-glean.vsix"
-            }
-        ],
-        "publish": [
-            "semantic-release-vsce",
-            {
-                "path": "@semantic-release/github",
-                "assets": "vscode-glean.vsix"
-            }
-        ]
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/wix/vscode-glean.git"
-    },
-    "icon": "assets/icon.png"
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "npx prettier --write && tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "semantic-release": "semantic-release"
+  },
+  "devDependencies": {
+    "@babel/helper-module-imports": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@semantic-release/changelog": "^2.1.2",
+    "@semantic-release/git": "^5.0.0",
+    "@semantic-release/github": "^4.4.2",
+    "@types/babel-traverse": "^6.25.4",
+    "@types/babel-types": "^7.0.4",
+    "@types/chai": "^4.1.6",
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^7.0.71",
+    "@types/sinon": "^4.3.0",
+    "@types/sinon-chai": "^2.7.29",
+    "chai": "^4.2.0",
+    "prettier": "1.15.3",
+    "semantic-release": "^15.10.0",
+    "semantic-release-vsce": "^2.1.2",
+    "sinon": "^4.5.0",
+    "sinon-chai": "^3.0.0",
+    "tslint-config-prettier": "^1.17.0",
+    "typescript": "^2.6.1",
+    "vscode": "^1.1.21"
+  },
+  "dependencies": {
+    "@babel/core": "^7.1.2",
+    "@babel/parser": "^7.1.2",
+    "@babel/template": "^7.1.2",
+    "@babel/traverse": "^7.1.0",
+    "@babel/types": "^7.1.2",
+    "gitignore-globs": "^0.1.1",
+    "gitignore-to-glob": "^0.3.0",
+    "glob": "^7.1.3",
+    "line-column": "^1.0.2",
+    "mkdirp": "^0.5.1",
+    "prepend": "^1.0.2",
+    "prepend-file": "^1.3.1",
+    "relative": "^3.0.2",
+    "vscode-cache": "^0.3.0"
+  },
+  "release": {
+    "verifyConditions": [
+      "semantic-release-vsce",
+      "@semantic-release/github"
+    ],
+    "prepare": [
+      {
+        "path": "@semantic-release/changelog",
+        "changelogFile": "CHANGELOG.md"
+      },
+      "@semantic-release/git",
+      {
+        "path": "semantic-release-vsce",
+        "packageVsix": "vscode-glean.vsix"
+      }
+    ],
+    "publish": [
+      "semantic-release-vsce",
+      {
+        "path": "@semantic-release/github",
+        "assets": "vscode-glean.vsix"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wix/vscode-glean.git"
+  },
+  "icon": "assets/icon.png"
 }
