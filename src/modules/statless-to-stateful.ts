@@ -66,10 +66,8 @@ export function statelessToStateful(component) {
       let replacementPath;
 
       if (t.isArrowFunctionExpression(path)) {
-        replacementPath = (<any>path).parentPath.parentPath;
         name = (<any>path).container.id;
       } else {
-        replacementPath = path;
         name = path.node.id;
       }
 
@@ -79,6 +77,13 @@ export function statelessToStateful(component) {
       const ctor = t.classMethod('constructor', t.identifier('constructor'), [t.identifier('props')], t.blockStatement([superCall]));
       const classDefinition = t.classDeclaration(name, t.identifier('Component'), t.classBody([ctor, render]));
       classDefinition.superTypeParameters = typeAnnotation;
+      
+      if (t.isArrowFunctionExpression(path) && !t.isExportDefaultDeclaration((<any>path).parentPath)) {
+        replacementPath = (<any>path).parentPath.parentPath;
+      } else {
+        replacementPath = path;
+      }
+      
       replacementPath.replaceWith(classDefinition)
       replacementPath.skip()
 
