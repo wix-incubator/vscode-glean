@@ -10,6 +10,13 @@ import { readFileContent, prependTextToFile } from "../file-system";
 import { addDefault, addNamed } from "@babel/helper-module-imports";
 import { program } from "babel-types";
 
+export type ComponentProperties = {
+  argumentProps: Set<string>;
+  memberProps: Set<string>;
+  state: Set<string>;
+  componentMembers: Set<string>;
+};
+
 export function isJSX(code) {
   let ast;
   try {
@@ -124,7 +131,7 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
             path.node.type === "MemberExpression" ||
             path.isArrowFunctionExpression(path.node)
         ) || t.isObjectProperty(path.parent);
-      if (!isMember) {
+      if (!isMember && !path.node.wasVisited) {
         componentProperties.argumentProps.add(path.node.name);
       }
     },
@@ -143,14 +150,21 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
             componentProperties.state.add(path.parent.property.name);
           }
         } else {
-          componentProperties.componentMembers.add(path.node.property.name);
-          const membershipExpr = t.memberExpression(
-            t.memberExpression(path.node.object, t.identifier("props")),
-            t.identifier(path.node.property.name)
-          );
-          (<any>membershipExpr).wasVisited = true;
-          path.replaceWith(membershipExpr);
-          path.skip();
+          if (t.isThisExpression(path.node.object)) {
+            componentProperties.componentMembers.add(path.node.property.name);
+            let identifier = t.identifier(path.node.property.name);
+            (<any>identifier).wasVisited = true;
+            path.replaceWith(identifier);
+          } else {
+            componentProperties.componentMembers.add(path.node.property.name);
+            const membershipExpr = t.memberExpression(
+              t.memberExpression(path.node.object, t.identifier("props")),
+              t.identifier(path.node.property.name)
+            );
+            (<any>membershipExpr).wasVisited = true;
+            path.replaceWith(membershipExpr);
+            path.skip();
+          }
         }
 
         path.node.wasVisited = true;

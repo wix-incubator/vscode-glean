@@ -147,6 +147,19 @@ describe("jsx module", function() {
       );
     });
 
+    it("replaces references to class methods with props", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
+        <Wrapper handleClick={this.handleClick}/>
+    `);
+
+      await extractJSXToComponent();
+
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+        "\nexport function Target({\n  handleClick\n}) {\n  return <Wrapper handleClick={handleClick} />;\n}\n  ",
+        "/target.js"
+      );
+    });
+
     it("instantiates referenced variables by destructring them from props object", async () => {
       sandbox.stub(editor, "selectedText").returns(`
                 <Wrapper bar={bar}>{this.props.foo}</Wrapper>
