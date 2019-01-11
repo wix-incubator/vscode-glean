@@ -113,3 +113,7 @@ $ code .
 - Go to VSCode debug sidebar
 - Select `Extension Tests` from the dropdown
 - Hit `F5`
+
+### Commit messages
+
+Please refer to to the following [guide](https://marketplace.visualstudio.com/items?itemName=wix.glean).
