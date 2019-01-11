@@ -65,7 +65,7 @@ All the experimental features are opt-in and need to be enabled through the conf
 
 ### Hooks Support for Class Component to Functional Component Refactoring
 
-(https://github.com/wix/vscode-glean/blob/master/assets/hooks.gif?raw=true)
+![Example of Hooks Support](https://github.com/wix/vscode-glean/blob/master/assets/hooks.gif?raw=true)
 
 ## Configuration Options
 
