@@ -35,7 +35,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Glean Configuration",
+      "title": "Glean",
       "properties": {
         "glean.jsFilesExtensions": {
           "type": [
@@ -71,7 +71,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "npx prettier --write && tsc -p ./",
+    "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
