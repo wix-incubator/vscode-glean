@@ -2,7 +2,7 @@
     "name": "glean",
     "displayName": "glean",
     "description": "The extension provides refactoring tools for your React codebase",
-    "version": "5.0.1",
+    "version": "5.0.2",
     "publisher": "williamluke4",
     "engines": {
         "vscode": "^1.23.0"
