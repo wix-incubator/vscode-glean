@@ -1,9 +1,12 @@
 import { jsxToAst } from './modules/jsx';
 import { allText } from './editor';
 import traverse from '@babel/traverse';
-import { File } from '@babel/types';
+import { File, Statement, BlockStatement } from '@babel/types';
 import { transformFromAstSync } from '@babel/core';
 
+interface ExtendedStatement extends BlockStatement {
+  specifiers?: any;
+}
 export default function getImports(code: string): string {
   let imports: Array<string> = [];
   let sourceAst: File = jsxToAst(allText());
@@ -23,7 +26,7 @@ export default function getImports(code: string): string {
 
   traverse(ast, visitor);
 
-  sourceAst.program.body = sourceAst.program.body.filter(imp => {
+  sourceAst.program.body = sourceAst.program.body.filter((imp: ExtendedStatement) => {
     imp.specifiers = imp.specifiers.filter(spec => imports.includes(spec.local.name));
     if (imp.specifiers.length > 0) { return true; }
     return false;

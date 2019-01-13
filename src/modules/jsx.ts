@@ -95,25 +95,23 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
 
   // TODO Requires Review
   const visitor = {
-    Identifier(astPath) {
-      let isMember = !!astPath.findParent(() => (
-        (astPath.node.type === 'MemberExpression') ||
-        (astPath.parent.type === 'ObjectProperty' && astPath.parent.value.type !== 'Identifier') ||
-        astPath.isArrowFunctionExpression(astPath.node)
-      ));
-      if (!isMember && !astPath.node.wasVisited) {
-        componentProperties.argumentProps.add(astPath.node.name);
-      }
-    },
     MemberExpression(astPath) {
       if (!astPath.node.wasVisited && t.isThisExpression(astPath.node.object)) {
         if (astPath.parent.property && (astPath.node.property.name === 'props' || astPath.node.property.name === 'state')) {
           // props or state = path.node.property.name;
           if (astPath.node.property.name === 'props') {
             componentProperties.memberProps.add(astPath.parent.property.name);
+            let identifier = t.identifier(astPath.parent.property.name);
+            (<any>identifier).wasVisited = true;
+            astPath.parentPath.replaceWith(identifier);
+            astPath.skip();
           } else {
-            astPath.node.property.name = 'props';
+            // astPath.node.property.name = 'props';
             componentProperties.state.add(astPath.parent.property.name);
+            let identifier = t.identifier(astPath.parent.property.name);
+            (<any>identifier).wasVisited = true;
+            astPath.parentPath.replaceWith(identifier);
+            astPath.skip();
           }
         } else if (t.isThisExpression(astPath.node.object)) {
           componentProperties.componentMembers.add(astPath.node.property.name);

@@ -140,7 +140,7 @@ export const prependImportsToFileIfNeeded = ({text: selection }, destinationFile
   const identifiers = getIdentifier(selection);
   const destinationPathRelativeToOrigin = relative(originFilePath, destinationFilePath);
   const destinationFileName = path.parse(destinationPathRelativeToOrigin).name;
-  const destinationModule = [...destinationPathRelativeToOrigin.split('/').slice(0, -1), destinationFileName].join('/');
+  const destinationModule = [...destinationPathRelativeToOrigin.split(path.sep).slice(0, -1), destinationFileName].join('/');
   const importStatement = generateImportStatementFromFile(identifiers, destinationModule);
   return prependTextToFile(importStatement, originFilePath);
 };

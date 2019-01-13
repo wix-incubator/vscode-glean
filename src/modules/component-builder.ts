@@ -11,10 +11,11 @@ function buildFunctionalComponent(name, code, attributes: ComponentProperties) {
 }
 
 function buildStatefulComponent(name, code, attributes: ComponentProperties) {
+  const componentProps = new Set([...attributes.state, ...attributes.componentMembers]);
   return `class ${name} extends React.Component {
       render() {
-        ${attributes.argumentProps && attributes.argumentProps.size ?
-          `const {${Array.from(attributes.argumentProps).join(',')}} = this.props`
+        ${componentProps && componentProps.size ?
+          `const {${Array.from(componentProps).join(',')}} = this.props`
           : ''
     }
 

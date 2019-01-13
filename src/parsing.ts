@@ -47,9 +47,9 @@ function generateExportsExpr(value) {
 export function generateImportStatementFromFile(identifiers, modulePath) {
   const identifiersString = identifiers.join(', ');
   if (esmModuleSystemUsed()) {
-    return `import { ${identifiersString} } from './${modulePath}';\n`;
+    return `import { ${identifiersString} } from '${modulePath}';\n`;
   } else if (commonJSModuleSystemUsed()) {
-    return `const { ${identifiersString} } = require('./${modulePath}');\n`;
+    return `const { ${identifiersString} } = require('${modulePath}');\n`;
   }
 }
 
