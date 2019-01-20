@@ -1,16 +1,16 @@
 import * as sinon from "sinon";
-import * as directoryPicker from "../directories-picker";
-import * as filePicker from "../file-picker";
-import * as editor from "../editor";
-import * as fileSystem from "../file-system";
+import * as directoryPicker from "../../directories-picker";
+import * as filePicker from "../../file-picker";
+import * as editor from "../../editor";
+import * as fileSystem from "../../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
-import { extractToFile } from "../code-actions";
+import { extractToFile } from "../../code-actions";
 const expect = chai.expect;
 
 chai.use(sinonChai);
 
-describe("commonjs support", function() {
+describe("esm support", function() {
   let sandbox;
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe("commonjs support", function() {
     sandbox
       .stub(filePicker, "showFilePicker")
       .returns(Promise.resolve("./target.js"));
-    sandbox.stub(editor, "activeFileName").returns("./source.js");
+    sandbox.stub(editor, "activeFileName").returns("source.js");
     sandbox.stub(editor, "activeEditor").returns("67676");
     sandbox.stub(editor, "selectedTextStart").returns({});
     sandbox.stub(editor, "selectedTextEnd").returns({});
@@ -33,7 +33,7 @@ describe("commonjs support", function() {
       .returns(Promise.resolve());
     sandbox.stub(fileSystem, "prependTextToFile").returns(Promise.resolve());
     sandbox.stub(editor, "config").returns({
-      jsModuleSystem: "commonjs",
+      jsModuleSystem: "esm",
       jsFilesExtensions: ["js"],
       switchToTarget: true
     });
@@ -55,7 +55,7 @@ describe("commonjs support", function() {
     await extractToFile();
 
     expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-      "\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ",
+      "\nexport class Foo {}\n  ",
       "./target.js"
     );
   });
@@ -70,11 +70,11 @@ describe("commonjs support", function() {
     await extractToFile();
 
     expect(fileSystem.prependTextToFile).to.have.been.calledWith(
-      `const { Foo } = require('./target');\n`
+      `import { Foo } from './target';\n`
     );
   });
 
-  it("should switches to the target file", async () => {
+  it("should switches to the target file if defined by the user", async () => {
     await extractToFile();
 
     expect(editor.openFile).to.have.calledWith("./target.js");
