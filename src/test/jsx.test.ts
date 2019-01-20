@@ -1,319 +1,414 @@
-
-import * as sinon from 'sinon';
-import * as directoryPicker from '../directories-picker';
-import * as filePicker from '../file-picker';
-import * as editor from '../editor';
-import * as fileSystem from '../file-system';
-import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import { extractJSXToComponent, statelessToStatefulComponent, statefulToStatelessComponent } from '../code-actions';
+import * as sinon from "sinon";
+import * as directoryPicker from "../directories-picker";
+import * as filePicker from "../file-picker";
+import * as editor from "../editor";
+import * as fileSystem from "../file-system";
+import * as chai from "chai";
+import * as sinonChai from "sinon-chai";
+import {
+  extractJSXToComponent,
+  statelessToStatefulComponent,
+  statefulToStatelessComponent
+} from "../code-actions";
 const expect = chai.expect;
 
 chai.use(sinonChai);
 
-describe('jsx module', function () {
-    let sandbox;
-    let selectedTextStart = {},
-        selectedTextEnd = {};
+describe("jsx module", function() {
+  let sandbox;
+  let selectedTextStart = {},
+    selectedTextEnd = {};
 
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  beforeEach(() => {
+    sandbox
+      .stub(directoryPicker, "showDirectoryPicker")
+      .returns(Promise.resolve("/folder"));
+    sandbox
+      .stub(filePicker, "showFilePicker")
+      .returns(Promise.resolve("/target.js"));
+    sandbox.stub(editor, "activeFileName").returns("/source.js");
+    sandbox.stub(editor, "activeEditor").returns("67676");
+    sandbox.stub(editor, "selectedTextStart").returns(selectedTextStart);
+    sandbox.stub(editor, "selectedTextEnd").returns(selectedTextEnd);
+    sandbox.stub(fileSystem, "replaceTextInFile").returns(Promise.resolve());
+    sandbox.stub(fileSystem, "prependTextToFile").returns(Promise.resolve());
+    sandbox.stub(editor, "config").returns({
+      jsModuleSystem: "esm",
+      jsFilesExtensions: ["js"],
+      switchToTarget: true
     });
+    sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
 
-    beforeEach(() => {
-        sandbox.stub(directoryPicker, 'showDirectoryPicker').returns(Promise.resolve('/folder'));
-        sandbox.stub(filePicker, 'showFilePicker').returns(Promise.resolve('/target.js'));
-        sandbox.stub(editor, 'activeFileName').returns('/source.js');
-        sandbox.stub(editor, 'activeEditor').returns('67676');
-        sandbox.stub(editor, 'selectedTextStart').returns(selectedTextStart);
-        sandbox.stub(editor, 'selectedTextEnd').returns(selectedTextEnd);
-        sandbox.stub(fileSystem, 'replaceTextInFile').returns(Promise.resolve());
-        sandbox.stub(fileSystem, 'prependTextToFile').returns(Promise.resolve())
-        sandbox.stub(editor, 'config').returns({
-            jsModuleSystem: 'esm',
-            jsFilesExtensions: ['js'],
-            switchToTarget: true
-        });
-        sandbox.stub(fileSystem, 'appendTextToFile').returns(Promise.resolve());
+    sandbox.stub(editor, "openFile");
+  });
 
+  afterEach(function() {
+    sandbox.restore();
+  });
 
-        sandbox.stub(editor, 'openFile');
-    })
-
-    afterEach(function () {
-        sandbox.restore();
-    });
-
-
-    it('creates stateful component if the JSX string contains "this" references', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+  it('creates stateful component if the JSX string contains "this" references', async () => {
+    sandbox.stub(editor, "selectedText").returns(`
         <div>{this.props.foo}</div>
     `);
 
-        await extractJSXToComponent();
+    await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    return <div>{this.props.foo}</div>;\n  }\n\n}\n  ', '/target.js');
-    });
+    expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+      "\nexport class Target extends React.Component {\n  render() {\n    return <div>{this.props.foo}</div>;\n  }\n\n}\n  ",
+      "/target.js"
+    );
+  });
 
-    it('creates functional component if there are no "this" references', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+  it('creates functional component if there are no "this" references', async () => {
+    sandbox.stub(editor, "selectedText").returns(`
         <div>{foo}</div>
     `);
 
-        await extractJSXToComponent();
+    await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
-    });
+    expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+      "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
+      "/target.js"
+    );
+  });
 
-
-    describe('When extracting JSX to component', () => {
-
-      it('doesnt wrap the extracted jsx with a Fragment if its a single line', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+  describe("When extracting JSX to component", () => {
+    it("doesnt wrap the extracted jsx with a Fragment if its a single line", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
         <div>{foo}</div>
     `);
-  
-        await extractJSXToComponent();
-  
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
+
+      await extractJSXToComponent();
+
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+        "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
+        "/target.js"
+      );
     });
 
-    it('wraps extracted jsx with a fragment if its multiline', async () => {
-      sandbox.stub(editor, 'selectedText').returns(`
+    it("wraps extracted jsx with a fragment if its multiline", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
       <div>{foo}</div>
       <div>{bar}</div>
   `);
 
       await extractJSXToComponent();
 
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo,\n  bar\n}) {\n  return <>\n      <div>{foo}</div>\n      <div>{bar}</div>\n  </>;\n}\n  ', '/target.js');
-  });
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+        "\nexport function Target({\n  foo,\n  bar\n}) {\n  return <>\n      <div>{foo}</div>\n      <div>{bar}</div>\n  </>;\n}\n  ",
+        "/target.js"
+      );
+    });
 
-
-        it('creates functional component if there are no "this" references', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+    it('creates functional component if there are no "this" references', async () => {
+      sandbox.stub(editor, "selectedText").returns(`
         <div>{foo}</div>
     `);
 
-        await extractJSXToComponent();
+      await extractJSXToComponent();
 
-        expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ', '/target.js');
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+        "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
+        "/target.js"
+      );
     });
 
-
-        it('replaces all state references to props', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("replaces all state references to props", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 <div>{this.state.foo}</div>
         `);
 
-            await extractJSXToComponent();
+      await extractJSXToComponent();
 
-            expect((<any>fileSystem.appendTextToFile).args[0][0]).to.contain('this.props.foo');
-            expect((<any>fileSystem.appendTextToFile).args[0][0]).not.to.contain('this.state.foo');
+      expect((<any>fileSystem.appendTextToFile).args[0][0]).to.contain(
+        "this.props.foo"
+      );
+      expect((<any>fileSystem.appendTextToFile).args[0][0]).not.to.contain(
+        "this.state.foo"
+      );
+    });
 
-        });
-
-        it('instantiates referenced variables by destructring them from props object', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("instantiates referenced variables by destructring them from props object", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 <Wrapper bar={bar}>{this.props.foo}</Wrapper>
             `);
 
-            await extractJSXToComponent();
+      await extractJSXToComponent();
 
-            expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ', '/target.js');
-        });
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+        "\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ",
+        "/target.js"
+      );
+    });
 
-        it('instantiates referenced variables by destructring them from props object', async () => {
-          sandbox.stub(editor, 'selectedText').returns(`
+    it("instantiates referenced variables by destructring them from props object", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
               <Wrapper bar={bar}>{this.props.foo}</Wrapper>
           `);
 
-          await extractJSXToComponent();
+      await extractJSXToComponent();
 
-          expect(fileSystem.appendTextToFile).to.have.been.calledWith('\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ', '/target.js');
-      });
+      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
+        "\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ",
+        "/target.js"
+      );
+    });
 
-        it('replaces selected jsx code with an instance of newly created component', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("replaces selected jsx code with an instance of newly created component", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 <Wrapper></Wrapper>
             `);
 
-            await extractJSXToComponent();
+      await extractJSXToComponent();
 
-            expect(fileSystem.replaceTextInFile).to.have.been.calledWith('<Target     />', selectedTextStart, selectedTextStart, '/source.js');
-        });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "<Target     />",
+        selectedTextStart,
+        selectedTextStart,
+        "/source.js"
+      );
+    });
 
-        it('should pass original references used by original jsx to the new component instance', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("should pass original references used by original jsx to the new component instance", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 <div>{x}</div>
                 <div>{this.state.foo}</div>
                 <div>{this.props.bar}</div>
                 <div>{this.getZoo()}</div>
             `);
 
-            await extractJSXToComponent();
+      await extractJSXToComponent();
 
-            expect((<any>fileSystem.replaceTextInFile).args[0][0]).to.be.equal('<Target  foo={this.state.foo} x={x} bar={this.props.bar} getZoo={this.getZoo}/>');
-        });
+      expect((<any>fileSystem.replaceTextInFile).args[0][0]).to.be.equal(
+        "<Target  foo={this.state.foo} x={x} bar={this.props.bar} getZoo={this.getZoo}/>"
+      );
     });
+  });
 
-    describe('when refactoring stateless component into stateful component', () => {
-        it('turn all references to destructed props to references to props object', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+  describe("when refactoring stateless component into stateful component", () => {
+    it("turn all references to destructed props to references to props object", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 function Foo({x}) {
                     return (<div>{x}</div>);
                 }
             `);
 
-            await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-            expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-        });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-        it('turn all references to props parameter', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("turn all references to props parameter", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 function Foo(props) {
                     return (<div>{props.x}</div>);
                 }
             `);
 
-            await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-            expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-        });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-        it('creates stateful component from functional declaration', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateful component from functional declaration", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 function Foo(props) {
                     return (<div></div>);
                 }
             `);
 
-            await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-            expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-        });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-        it('supports rest operation in props', async () => {
-          sandbox.stub(editor, 'selectedText').returns(`
+    it("supports rest operation in props", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
           function Foo({...rest}) {
               return (<div {...rest}></div>);
           }
           `);
 
-        await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div {...this.props.rest}></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-        })
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div {...this.props.rest}></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-        it('creates stateful component from variable declaration', async () => {
-          sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateful component from variable declaration", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
               const Foo = (props) => (<div></div>)
           `);
 
-          await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-          expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-
-
-      it('maintains prop type annotation', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("maintains prop type annotation", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
             const Foo = (props: Props) => (<div></div>)
         `);
 
-        await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
     });
 
-    it('maintains prop type annotation', async () => {
-      sandbox.stub(editor, 'selectedText').returns(`
+    it("maintains prop type annotation", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
           const Foo: SFC<Props> = (props) => (<div></div>)
       `);
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
     });
-        
-      it('should not convert functions and function calls in the body', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+
+    it("should not convert functions and function calls in the body", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
             const Foo = ({handleUpdate}) => (<input onChange={e => handleUpdate(e)} />)
         `);
 
-        await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<input onChange={e => this.props.handleUpdate(e)} />);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<input onChange={e => this.props.handleUpdate(e)} />);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
     });
 
-        it('creates stateful component from arrow function', async () => {
-            sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateful component from arrow function", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
                 const foo = (props) => {
                     return (<div></div>);
                 }
             `);
 
-            await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-            expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-        });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-        it('creates stateful component from arrow function', async () => {
-          sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateful component from arrow function", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
               const foo = (props) => {
                   return (<div></div>);
               }
           `);
 
-          await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-          expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates stateful component from arrow function with JSX element being behind an AND operator', async () => {
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateful component from arrow function with JSX element being behind an AND operator", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
             const foo = (props) => true && <div></div>;
         `);
 
-        await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return true && <div></div>;\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return true && <div></div>;\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
     });
 
-        it('wraps returned JSX in parenthesis if they are missing ', async () => {
-          sandbox.stub(editor, 'selectedText').returns(`
+    it("wraps returned JSX in parenthesis if they are missing ", async () => {
+      sandbox.stub(editor, "selectedText").returns(`
               const foo = (props) => {
                   return <div></div>;
               }
           `);
 
-          await statelessToStatefulComponent();
+      await statelessToStatefulComponent();
 
-          expect(fileSystem.replaceTextInFile).to.have.been.calledWith('class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}', selectedTextStart, selectedTextEnd, '/source.js');
-      });
-    })
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
+  });
 
-    describe('when refactoring stateful component into stateless component', () => {
-      it('shows the warning dialog before making a change', async () => {
-        givenApprovedWarning();
-        await statefulToStatelessComponent();
+  describe("when refactoring stateful component into stateless component", () => {
+    it("shows the warning dialog before making a change", async () => {
+      givenApprovedWarning();
+      await statefulToStatelessComponent();
 
-        expect((<any>editor.showInformationMessage).args[0][0]).to.equal('WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?');
-        expect((<any>editor.showInformationMessage).args[0][1]).to.deep.equal(['Yes', 'No']);
-      });
+      expect((<any>editor.showInformationMessage).args[0][0]).to.equal(
+        "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?"
+      );
+      expect((<any>editor.showInformationMessage).args[0][1]).to.deep.equal([
+        "Yes",
+        "No"
+      ]);
+    });
 
-      it('does not refactor when the user does not accept the warning message', async () => {
-        givenDeclinedWarning();
-        await statefulToStatelessComponent();
+    it("does not refactor when the user does not accept the warning message", async () => {
+      givenDeclinedWarning();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).not.to.have.been.called;
-      });
+      expect(fileSystem.replaceTextInFile).not.to.have.been.called;
+    });
 
-      it('creates a stateless component from a class component ', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates a stateless component from a class component ", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             render() {
               return <div />;
@@ -321,14 +416,19 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = props => {\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates a stateless component without lifecycle methods and instance references', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates a stateless component without lifecycle methods and instance references", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             componentWillMount() {
               console.log(2);
@@ -343,14 +443,19 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = props => {\n  return <div>\n                  {props.foo} + {props.bar}\n                </div>;\n};', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  return <div>\n                  {props.foo} + {props.bar}\n                </div>;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates stateless component including instance methods without state functions', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateless component including instance methods without state functions", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             someMethod() {
               this.setState({a: 3});
@@ -363,14 +468,19 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates stateless component with props type interface and default props', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateless component with props type interface and default props", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component<MyProps> {
             static defaultProps = {a: 3};
             someMethod() {
@@ -384,14 +494,19 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent: SFC<MyProps> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent: SFC<MyProps> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates stateless component with props type literal and default props', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateless component with props type literal and default props", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component<{a: number}> {
             static defaultProps = {a: 3};
             someMethod() {
@@ -405,14 +520,19 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent: SFC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent: SFC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates stateless component with default export', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateless component with default export", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           export default class SomeComponent extends React.Component {
             static defaultProps = {a: 3};
             someMethod() {
@@ -426,14 +546,19 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it('creates stateless component with named export', async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, 'selectedText').returns(`
+    it("creates stateless component with named export", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
           export class SomeComponent extends React.Component {
             static defaultProps = {a: 3};
             someMethod() {
@@ -447,17 +572,25 @@ describe('jsx module', function () {
           }
         `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith('export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};', selectedTextStart, selectedTextEnd, '/source.js');
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      const givenApprovedWarning = () => {
-        sandbox.stub(editor, 'showInformationMessage').returns(Promise.resolve('Yes'));
-      }
-      const givenDeclinedWarning = () => {
-        sandbox.stub(editor, 'showInformationMessage').returns(Promise.resolve('No'));
-      }
-    })
-
+    const givenApprovedWarning = () => {
+      sandbox
+        .stub(editor, "showInformationMessage")
+        .returns(Promise.resolve("Yes"));
+    };
+    const givenDeclinedWarning = () => {
+      sandbox
+        .stub(editor, "showInformationMessage")
+        .returns(Promise.resolve("No"));
+    };
+  });
 });
