@@ -1,15 +1,15 @@
 import * as sinon from "sinon";
-import * as directoryPicker from "../directories-picker";
-import * as filePicker from "../file-picker";
-import * as editor from "../editor";
-import * as fileSystem from "../file-system";
+import * as directoryPicker from "../../directories-picker";
+import * as filePicker from "../../file-picker";
+import * as editor from "../../editor";
+import * as fileSystem from "../../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
 import {
   extractJSXToComponent,
   statelessToStatefulComponent,
   statefulToStatelessComponent
-} from "../code-actions";
+} from "../../code-actions";
 const expect = chai.expect;
 
 chai.use(sinonChai);
