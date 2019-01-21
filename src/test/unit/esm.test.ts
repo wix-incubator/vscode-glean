@@ -33,6 +33,8 @@ describe("esm support", function() {
       .stub(fileSystem, "removeContentFromFileAtLineAndColumn")
       .returns(Promise.resolve());
     sandbox.stub(fileSystem, "prependTextToFile").returns(Promise.resolve());
+    sandbox.stub(fileSystem, "createFileIfDoesntExist");
+    sandbox.stub(fileSystem, "doesFileExist").returns(Promise.resolve(false));
     sandbox.stub(editor, "config").returns({
       jsModuleSystem: "esm",
       jsFilesExtensions: ["js"],

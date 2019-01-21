@@ -24,7 +24,7 @@ export function currentEditorPath(): string {
   const rootMatcher = new RegExp(`^${workspaceRoot()}`);
   const relativeCurrentFilePath = currentFilePath.replace(rootMatcher, "");
 
-  return relativeCurrentFilePath;
+  return relativeCurrentFilePath || ".";
 }
 
 export function openFile(absolutePath: string): PromiseLike<string> {
@@ -40,7 +40,8 @@ export function openFile(absolutePath: string): PromiseLike<string> {
 
 export function selectedText() {
   const editor = vscode.window.activeTextEditor;
-  const selection = editor.selection;
+  if (!editor) return "";
+  const selection = editor && editor.selection;
   return editor.document.getText(selection);
 }
 

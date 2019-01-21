@@ -74,7 +74,7 @@ function pathContains(path, start, end) {
   );
 }
 
-function produceComponentNameFrom(fullPath: any) {
+export function produceComponentNameFrom(fullPath: any) {
   const baseName = path.basename(fullPath, path.extname(fullPath));
   return baseName
     .split("-")
@@ -82,7 +82,7 @@ function produceComponentNameFrom(fullPath: any) {
     .join("");
 }
 
-export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
+export function wrapWithComponent(componentName, jsx): ProcessedSelection {
   const componentProperties = {
     argumentProps: new Set(),
     memberProps: new Set(),
@@ -140,7 +140,6 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
   const code =
     processedJSX.slice(0, indexOfLastSemicolon) +
     processedJSX.slice(indexOfLastSemicolon + 1);
-  const componentName = produceComponentNameFrom(fullPath);
 
   return {
     text: buildComponent(componentName, code, componentProperties),

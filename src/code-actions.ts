@@ -1,6 +1,6 @@
 import { SnippetString } from "vscode";
 import { showDirectoryPicker } from "./directories-picker";
-import { showFilePicker } from "./file-picker";
+import { showFilePicker, promptComponentNameInput } from "./file-picker";
 import {
   activeEditor,
   selectedText,
@@ -19,7 +19,9 @@ import {
   replaceTextInFile,
   appendTextToFile,
   prependTextToFile,
-  removeContentFromFileAtLineAndColumn
+  removeContentFromFileAtLineAndColumn,
+  createFileIfDoesntExist,
+  doesFileExist
 } from "./file-system";
 import {
   getIdentifier,
@@ -30,7 +32,8 @@ import {
   createComponentInstance,
   wrapWithComponent,
   isRangeContainedInJSXExpression,
-  isJSXExpression
+  isJSXExpression,
+  produceComponentNameFrom
 } from "./modules/jsx";
 import * as relative from "relative";
 import * as path from "path";
@@ -45,8 +48,13 @@ export async function extractJSXToComponent() {
     const folderPath = await showDirectoryPicker();
     const filePath = await showFilePicker(folderPath);
 
+    const fileExists = await doesFileExist(filePath);
+    const componentName = fileExists
+      ? await promptComponentNameInput()
+      : produceComponentNameFrom(filePath);
+
     const selectionProccessingResult = await wrapWithComponent(
-      filePath,
+      componentName,
       selectedText()
     );
     await appendSelectedTextToFile(selectionProccessingResult, filePath);
@@ -57,6 +65,8 @@ export async function extractJSXToComponent() {
     );
     await replaceSelectionWith(componentInstance);
     await switchToDestinationFileIfRequired(filePath);
+
+    return "Hello";
   } catch (e) {
     handleError(e);
   }
