@@ -10,7 +10,7 @@ import { e2eSetup, TEST_TEMP_PATH } from "./setup.test";
 chai.use(sinonChai);
 const expect = chai.expect;
 
-describe("extract to component", function() {
+describe.only("extract to component", function() {
   let sandbox;
 
   e2eSetup();
@@ -51,10 +51,9 @@ describe("extract to component", function() {
       `;
 
     const sourceFilePath = path.join(TEST_TEMP_PATH, "source.jsx");
-    const targetFilePath = path.join(TEST_TEMP_PATH, "extracted", "target.jsx");
+    const targetFilePath = path.join(TEST_TEMP_PATH, "target.jsx");
 
     fs.writeFileSync(sourceFilePath, sourceFileContents);
-    fs.emptyDirSync(path.dirname(targetFilePath));
 
     openWorksapce(TEST_TEMP_PATH);
     const document = await vscode.workspace.openTextDocument(sourceFilePath);
@@ -65,14 +64,14 @@ describe("extract to component", function() {
     sandbox
       .stub(vscode.window, "showQuickPick")
       .onFirstCall()
-      .returns(Promise.resolve({ label: "/extracted" }))
+      .returns(Promise.resolve({ label: "/" }))
       .onSecondCall()
       .returns(Promise.resolve({ label: "Create New File" }));
 
     sandbox
       .stub(vscode.window, "showInputBox")
       .onFirstCall()
-      .returns(Promise.resolve("/extracted/target.jsx"));
+      .returns(Promise.resolve("target.jsx"));
 
     await vscode.commands.executeCommand(
       "extension.glean.react.extract-component"
