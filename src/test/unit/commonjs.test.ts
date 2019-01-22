@@ -6,6 +6,7 @@ import * as fileSystem from "../../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
 import { extractToFile } from "../../code-actions";
+import outdent from "outdent";
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -38,11 +39,11 @@ describe("commonjs support", function() {
       switchToTarget: true
     });
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
-    sandbox.stub(editor, "selectedText").returns(`
-            class Foo {
+    sandbox.stub(editor, "selectedText").returns(outdent`
+      class Foo {
 
-            }
-        `);
+      }
+    `);
 
     sandbox.stub(editor, "openFile");
   });
@@ -55,7 +56,15 @@ describe("commonjs support", function() {
     await extractToFile();
 
     expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-      "\n\n\n            class Foo {\n\n            }\n        \n    \nmodule.exports = {\n  Foo\n};\n        \n  ",
+      outdent`
+        class Foo {
+
+        }
+        
+        module.exports = {
+          Foo
+        };
+      `,
       "./target.js"
     );
   });
@@ -70,7 +79,9 @@ describe("commonjs support", function() {
     await extractToFile();
 
     expect(fileSystem.prependTextToFile).to.have.been.calledWith(
-      `const { Foo } = require('./target');\n`
+      outdent`
+        const { Foo } = require('./target');
+      `
     );
   });
 

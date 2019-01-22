@@ -6,6 +6,7 @@ import * as fileSystem from "../../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
 import { extractToFile } from "../../code-actions";
+import outdent from "outdent";
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -38,11 +39,11 @@ describe("esm support", function() {
       switchToTarget: true
     });
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
-    sandbox.stub(editor, "selectedText").returns(`
-            class Foo {
+    sandbox.stub(editor, "selectedText").returns(outdent`
+      class Foo {
 
-            }
-        `);
+      }
+    `);
 
     sandbox.stub(editor, "openFile");
   });
@@ -55,7 +56,9 @@ describe("esm support", function() {
     await extractToFile();
 
     expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-      "\nexport class Foo {}\n  ",
+      outdent`
+        export class Foo {}
+      `,
       "./target.js"
     );
   });
@@ -70,7 +73,9 @@ describe("esm support", function() {
     await extractToFile();
 
     expect(fileSystem.prependTextToFile).to.have.been.calledWith(
-      `import { Foo } from './target';\n`
+      outdent`
+        import { Foo } from './target';
+      `
     );
   });
 

@@ -1,7 +1,8 @@
 import template from "@babel/template";
+import outdent from "outdent";
 
 function buildFunctionalComponent(name, code, props) {
-  return `
+  return outdent`
     function ${name}({${Array.from(props).join(", ")}}) {
       return (${code});
     } 
@@ -9,9 +10,9 @@ function buildFunctionalComponent(name, code, props) {
 }
 
 function buildStatefulComponent(name, code, attributes) {
-  return `class ${name} extends React.Component {
+  return outdent`
+    class ${name} extends React.Component {
       render() {
-
         ${
           attributes.argumentProps && attributes.argumentProps.size
             ? `const {${Array.from(attributes.argumentProps).join(
@@ -23,7 +24,7 @@ function buildStatefulComponent(name, code, attributes) {
         return (${code})
       }
     }
-    `;
+  `;
 }
 
 export function buildComponent(name, code, attributes) {

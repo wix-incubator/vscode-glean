@@ -10,6 +10,7 @@ import {
   statelessToStatefulComponent,
   statefulToStatelessComponent
 } from "../../code-actions";
+import outdent from "outdent";
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -57,10 +58,19 @@ describe("jsx module", function() {
 
     await extractJSXToComponent();
 
-    expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-      "\nexport class Target extends React.Component {\n  render() {\n    return <div>{this.props.foo}</div>;\n  }\n\n}\n  ",
+    expect(
+      (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+    ).to.deep.equal([
+      outdent`
+        export class Target extends React.Component {
+          render() {
+            return <div>{this.props.foo}</div>;
+          }
+        
+        }
+      `,
       "/target.js"
-    );
+    ]);
   });
 
   it('creates functional component if there are no "this" references', async () => {
@@ -70,10 +80,18 @@ describe("jsx module", function() {
 
     await extractJSXToComponent();
 
-    expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-      "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
+    expect(
+      (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+    ).to.deep.equal([
+      outdent`
+        export function Target({
+          foo
+        }) {
+          return <div>{foo}</div>;
+        }
+      `,
       "/target.js"
-    );
+    ]);
   });
 
   describe("When extracting JSX to component", () => {
@@ -84,10 +102,18 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
+      expect(
+        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          export function Target({
+            foo
+          }) {
+            return <div>{foo}</div>;
+          }
+        `,
         "/target.js"
-      );
+      ]);
     });
 
     it("wraps extracted jsx with a fragment if its multiline", async () => {
@@ -98,10 +124,22 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport function Target({\n  foo,\n  bar\n}) {\n  return <>\n      <div>{foo}</div>\n      <div>{bar}</div>\n  </>;\n}\n  ",
+      expect(
+        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          export function Target({
+            foo,
+            bar
+          }) {
+            return <>
+                <div>{foo}</div>
+                <div>{bar}</div>
+            </>;
+          }
+        `,
         "/target.js"
-      );
+      ]);
     });
 
     it('creates functional component if there are no "this" references', async () => {
@@ -111,10 +149,18 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
+      expect(
+        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          export function Target({
+            foo
+          }) {
+            return <div>{foo}</div>;
+          }
+        `,
         "/target.js"
-      );
+      ]);
     });
 
     it("replaces all state references to props", async () => {
@@ -139,10 +185,22 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ",
+      expect(
+        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          export class Target extends React.Component {
+            render() {
+              const {
+                bar
+              } = this.props;
+              return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;
+            }
+
+          }
+        `,
         "/target.js"
-      );
+      ]);
     });
 
     it("instantiates referenced variables by destructring them from props object", async () => {
@@ -152,10 +210,22 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ",
+      expect(
+        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          export class Target extends React.Component {
+            render() {
+              const {
+                bar
+              } = this.props;
+              return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;
+            }
+
+          }
+        `,
         "/target.js"
-      );
+      ]);
     });
 
     it("replaces selected jsx code with an instance of newly created component", async () => {
@@ -165,12 +235,14 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "<Target     />",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`<Target     />`,
         selectedTextStart,
         selectedTextStart,
         "/source.js"
-      );
+      ]);
     });
 
     it("should pass original references used by original jsx to the new component instance", async () => {
@@ -199,12 +271,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div>{this.props.x}</div>);
+            }
+
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("turn all references to props parameter", async () => {
@@ -216,12 +301,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div>{this.props.x}</div>);
+            }
+
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateful component from functional declaration", async () => {
@@ -233,12 +331,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("supports rest operation in props", async () => {
@@ -250,12 +361,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div {...this.props.rest}></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div {...this.props.rest}></div>);
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateful component from variable declaration", async () => {
@@ -265,12 +389,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("maintains prop type annotation", async () => {
@@ -280,12 +417,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component<Props> {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("maintains prop type annotation", async () => {
@@ -295,12 +445,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component<Props> {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("should not convert functions and function calls in the body", async () => {
@@ -310,12 +473,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<input onChange={e => this.props.handleUpdate(e)} />);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class Foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<input onChange={e => this.props.handleUpdate(e)} />);
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateful component from arrow function", async () => {
@@ -327,12 +503,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateful component from arrow function", async () => {
@@ -344,12 +533,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateful component from arrow function with JSX element being behind an AND operator", async () => {
@@ -359,12 +561,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return true && <div></div>;\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return true && <div></div>;
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("wraps returned JSX in parenthesis if they are missing ", async () => {
@@ -376,12 +591,25 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          class foo extends Component {
+            constructor(props) {
+              super(props);
+            }
+
+            render() {
+              return (<div></div>);
+            }
+          
+          }
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
   });
 
@@ -418,12 +646,18 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  return <div />;\n};",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          const SomeComponent = props => {
+            return <div />;
+          };
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates a stateless component without lifecycle methods and instance references", async () => {
@@ -445,12 +679,20 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  return <div>\n                  {props.foo} + {props.bar}\n                </div>;\n};",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+            const SomeComponent = props => {
+              return <div>
+                              {props.foo} + {props.bar}
+                            </div>;
+            };
+          `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateless component including instance methods without state functions", async () => {
@@ -470,12 +712,22 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          const SomeComponent = props => {
+            const someMethod = () => {
+              console.log(2);
+            };
+          
+            return <div />;
+          };
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateless component with props type interface and default props", async () => {
@@ -496,12 +748,24 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent: SFC<MyProps> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          const SomeComponent: SFC<MyProps> = (props = {
+            a: 3
+          }) => {
+            const someMethod = () => {
+              console.log(2);
+            };
+          
+            return <div />;
+          };
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateless component with props type literal and default props", async () => {
@@ -522,12 +786,26 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent: SFC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          const SomeComponent: SFC<{
+            a: number;
+          }> = (props = {
+            a: 3
+          }) => {
+            const someMethod = () => {
+              console.log(2);
+            };
+          
+            return <div />;
+          };
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateless component with default export", async () => {
@@ -548,12 +826,26 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          const SomeComponent = (props = {
+            a: 3
+          }) => {
+            const someMethod = () => {
+              console.log(2);
+            };
+
+            return <div />;
+          };
+
+          export default SomeComponent;
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     it("creates stateless component with named export", async () => {
@@ -574,12 +866,24 @@ describe("jsx module", function() {
 
       await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args
+      ).to.deep.equal([
+        outdent`
+          export const SomeComponent = (props = {
+            a: 3
+          }) => {
+            const someMethod = () => {
+              console.log(2);
+            };
+
+            return <div />;
+          };
+        `,
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
-      );
+      ]);
     });
 
     const givenApprovedWarning = () => {

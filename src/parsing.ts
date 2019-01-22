@@ -4,6 +4,7 @@ import * as t from "@babel/types";
 import { transformFromAst } from "@babel/core";
 import { esmModuleSystemUsed, commonJSModuleSystemUsed } from "./settings";
 import template from "@babel/template";
+import outdent from "outdent";
 
 export const parsingOptions = {
   plugins: ["objectRestSpread", "classProperties", "typescript", "jsx"],
@@ -54,9 +55,13 @@ function generateExportsExpr(value) {
 export function generateImportStatementFromFile(identifiers, modulePath) {
   const identifiersString = identifiers.join(", ");
   if (esmModuleSystemUsed()) {
-    return `import { ${identifiersString} } from './${modulePath}';\n`;
+    return outdent`
+      import { ${identifiersString} } from './${modulePath}';
+    `;
   } else if (commonJSModuleSystemUsed()) {
-    return `const { ${identifiersString} } = require('./${modulePath}');\n`;
+    return outdent`
+      const { ${identifiersString} } = require('./${modulePath}');
+    `;
   }
 }
 
@@ -85,11 +90,11 @@ export function exportAllDeclarationsCommonJS(code) {
   );
   const exportExpression = generateExportsExpr(t.objectExpression(identifiers));
   const ast = t.file(t.program([exportExpression]), "", "");
-  return `
-${code}
+  return outdent`
+    ${code}
     
-${transformFromAst(ast).code}
-        `;
+    ${transformFromAst(ast).code}
+  `;
 }
 
 export function transformJSIntoExportExpressions(code) {

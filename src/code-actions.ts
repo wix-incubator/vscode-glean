@@ -174,12 +174,7 @@ export const appendSelectedTextToFile = (
     text = selection;
   }
 
-  return appendTextToFile(
-    `
-${text}
-  `,
-    destinationPath
-  );
+  return appendTextToFile(text, destinationPath);
 };
 
 export const prependImportsToFileIfNeeded = (
