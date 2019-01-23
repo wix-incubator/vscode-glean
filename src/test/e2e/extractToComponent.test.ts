@@ -7,6 +7,8 @@ import { extensionDriver } from "./extensionDriver";
 
 const expect = chai.expect;
 
+const stripSpaces = str => str.replace(/[\s\n]/g, ""); // TODO: stop using once formatting is defined and fixed
+
 describe("extract to component", function() {
   let env: environment.Environment;
 
@@ -22,69 +24,107 @@ describe("extract to component", function() {
     const sourceFileName = "ExtractToNewFile_Source.jsx";
     const targetFileName = "ExtractToNewFile_Target.jsx";
 
-    const sourceFileContents = outdent`
+    const originalSourceFileContent = outdent`
         const ParentComp = () => (
             <div>
                 <div>let's extract this div</div>
             </div>
         )
     `;
-    const expectedTargetFileContents = outdent`
+
+    const expectedSourceFileContent = outdent`
+        import { ExtractToNewFile_Target } from './ExtractToNewFile_Target';
+
+        const ParentComp = () => (
+            <div>
+               <ExtractToNewFile_Target />
+            </div>
+        )
+      `;
+
+    const expectedTargetFileContent = outdent`
         export function ExtractToNewFile_Target({}) {
           return <div>let's extract this div</div>;
         }
       `;
 
-    fs.writeFileSync(env.getAbsolutePath(sourceFileName), sourceFileContents);
+    fs.writeFileSync(
+      env.getAbsolutePath(sourceFileName),
+      originalSourceFileContent
+    );
 
     const driver = extensionDriver(vscode, env);
     await driver
       .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
       .toNewFile(".", targetFileName);
 
-    const targetDocumentText = await driver.getDocumentText(targetFileName);
-    expect(targetDocumentText).to.equal(expectedTargetFileContents);
+    const sourceFileContent = await driver.getDocumentText(sourceFileName);
+    expect(stripSpaces(sourceFileContent)).to.equal(
+      stripSpaces(expectedSourceFileContent)
+    );
+
+    const targetFileContent = await driver.getDocumentText(targetFileName);
+    expect(targetFileContent).to.equal(expectedTargetFileContent);
   });
 
   it("extract to existing file,and prompt for component name", async () => {
-    const sourceFileName = "ExtractToEXistingFile_Source.jsx";
-    const existingFileName = "ExtractToEXistingFile_Existing.jsx";
+    const sourceFileName = "ExtractToExistingFile_Source.jsx";
+    const targetFileName = "ExtractToExistingFile_Target.jsx";
 
-    const sourceFileContents = outdent`
-        const SomeParentComp = () => (
+    const originalSourceFileContent = outdent`
+        const ParentComp = () => (
             <div>
                 <span>some content</span>
             </div>
         )
     `;
-    const expectedTargetFileContents = outdent`
-        export function Existing({}) {
-          return (<div />)
-        }
-        export function Target({}) {
-          return <span>some content</span>;
-        }
-      `;
 
-    const existingFileContents = outdent`
+    const originalTargetFileContent = outdent`
       export function Existing({}) {
         return (<div />)
       }
 
     `;
 
-    fs.writeFileSync(env.getAbsolutePath(sourceFileName), sourceFileContents);
+    const expectedSourceFileContent = outdent`
+      import { NewTargetComp } from './ExtractToExistingFile_Target';
+
+      const ParentComp = () => (
+        <div>
+          <NewTargetComp />
+        </div>
+      )
+    `;
+
+    const expectedTargetFileContent = outdent`
+        export function Existing({}) {
+          return (<div />)
+        }
+        export function NewTargetComp({}) {
+          return <span>some content</span>;
+        }
+      `;
+
     fs.writeFileSync(
-      env.getAbsolutePath(existingFileName),
-      existingFileContents
+      env.getAbsolutePath(sourceFileName),
+      originalSourceFileContent
+    );
+    fs.writeFileSync(
+      env.getAbsolutePath(targetFileName),
+      originalTargetFileContent
     );
 
     const driver = extensionDriver(vscode, env);
     await driver
       .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
-      .toExistingFile(".", existingFileName, "Target");
+      .toExistingFile(".", targetFileName, "NewTargetComp");
 
-    const targetDocumentText = await driver.getDocumentText(existingFileName);
-    expect(targetDocumentText).to.equal(expectedTargetFileContents);
+    const sourceFileContent = await driver.getDocumentText(sourceFileName);
+    expect(stripSpaces(sourceFileContent)).to.equal(
+      stripSpaces(expectedSourceFileContent)
+    );
+
+    const targetFileContent = await driver.getDocumentText(targetFileName);
+    expect(targetFileContent).to.equal(expectedTargetFileContent);
   });
 });
