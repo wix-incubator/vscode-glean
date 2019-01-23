@@ -38,6 +38,9 @@ describe("esm support", function() {
       switchToTarget: true
     });
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
+    sandbox.stub(fileSystem, "createFileIfDoesntExist");
+
+    sandbox.stub(fileSystem, "doesFileExist").returns(Promise.resolve(false));
     sandbox.stub(editor, "selectedText").returns(`
             class Foo {
 

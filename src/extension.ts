@@ -20,6 +20,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
     };
 
     const text = selectedText();
+    if (!text) return [];
 
     if (isJSX(text)) {
       return [

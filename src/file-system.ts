@@ -6,15 +6,18 @@ import * as gitignoreToGlob from "gitignore-to-glob";
 import { workspaceRoot, activeURI } from "./editor";
 import * as vscode from "vscode";
 import { Position, Uri } from "vscode";
+import { promisify } from "util";
 
-export function createFileIfDoesntExist(absolutePath: string): string {
+export function createFileIfDoesntExist(absolutePath: string): void {
   let directoryToFile = path.dirname(absolutePath);
   if (!fs.existsSync(absolutePath)) {
     mkdirp.sync(directoryToFile);
     fs.appendFileSync(absolutePath, "");
   }
+}
 
-  return absolutePath;
+export function doesFileExist(absolutePath: string) {
+  return promisify(fs.exists)(absolutePath);
 }
 
 export function subfoldersListOf(root: string, ignoreList): string[] {
@@ -31,7 +34,7 @@ export function subfoldersListOf(root: string, ignoreList): string[] {
 
 export function filesInFolder(folder): string[] {
   const root = workspaceRoot();
-  const fullPathToFolder = root ? `${root}${folder}` : folder;
+  const fullPathToFolder = root ? path.join(root, folder) : folder;
   const results = globSync("**", { cwd: fullPathToFolder }).filter(
     f => !fs.statSync(path.join(fullPathToFolder, f)).isDirectory()
   );
@@ -50,6 +53,8 @@ export function replaceTextInFile(
   return vscode.workspace.applyEdit(edit);
 }
 export async function appendTextToFile(text, absolutePath) {
+  createFileIfDoesntExist(absolutePath);
+
   const edit = new vscode.WorkspaceEdit();
   const linesInFile = await countLineInFile(absolutePath);
 
@@ -66,6 +71,8 @@ export async function appendTextToFile(text, absolutePath) {
 }
 
 export function prependTextToFile(text, absolutePath) {
+  createFileIfDoesntExist(absolutePath);
+
   let edit = new vscode.WorkspaceEdit();
   edit.insert(Uri.file(absolutePath), new vscode.Position(0, 0), text);
   return vscode.workspace.applyEdit(edit);

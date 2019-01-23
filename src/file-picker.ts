@@ -6,15 +6,16 @@ import {
   showInputBox,
   workspaceRoot
 } from "./editor";
-import { filesInFolder, createFileIfDoesntExist } from "./file-system";
-import { cancelActionIfNeeded } from "./utils";
+import { filesInFolder } from "./file-system";
+import * as path from "path";
 
 function completeToFullFilePath(file, folder) {
   if (file === NEW_FILE_OPTION) {
-    return promptFileNameInput(folder).then(createFileIfDoesntExist);
+    return promptFileNameInput(folder);
   } else {
-    const root = workspaceRoot();
-    return `${root || ""}${folder}/${file}`;
+    const root = workspaceRoot() || "";
+    const absolutePath = path.join(root, folder, file);
+    return absolutePath;
   }
 }
 
@@ -22,6 +23,10 @@ export function promptFileNameInput(directory) {
   return showInputBox(directory, "Filename or relative path to a file").then(
     convertRelativeToFullPath
   );
+}
+
+export function promptComponentNameInput() {
+  return showInputBox("Component Name", "MyComponent");
 }
 
 const NEW_FILE_OPTION: string = "Create New File";
@@ -36,6 +41,5 @@ export function showFilePicker(directory) {
     "Select File to extract to"
   )
     .then(extractQuickPickValue)
-    .then(cancelActionIfNeeded)
     .then(file => completeToFullFilePath(file, directory));
 }
