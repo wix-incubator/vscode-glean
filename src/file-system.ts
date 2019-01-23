@@ -58,7 +58,7 @@ export async function appendTextToFile(text, absolutePath) {
   const edit = new vscode.WorkspaceEdit();
   const linesInFile = await countLineInFile(absolutePath);
 
-  edit.insert(Uri.file(absolutePath), new Position(linesInFile, 0), text);
+  edit.insert(Uri.file(absolutePath), new Position(linesInFile + 1, 0), text);
   return vscode.workspace.applyEdit(edit);
 
   // return new Promise((resolve, reject) => {

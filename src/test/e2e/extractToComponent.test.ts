@@ -127,4 +127,43 @@ describe("extract to component", function() {
     const targetFileContent = await driver.getDocumentText(targetFileName);
     expect(targetFileContent).to.equal(expectedTargetFileContent);
   });
+
+  it("extract to same file", async () => {
+    const sourceFileName = "ExtractToSameFile_Source.jsx";
+
+    const originalSourceFileContent = outdent`
+        const ParentComp = () => (
+            <div>
+                <span>some content</span>
+            </div>
+        )
+    `;
+
+    const expectedSourceFileContent = outdent`
+        const ParentComp = () => (
+            <div>
+                <Target />
+            </div>
+        )
+
+        function Target ({}) {
+            return (<span>some content</span>);
+        }
+    `;
+
+    fs.writeFileSync(
+      env.getAbsolutePath(sourceFileName),
+      originalSourceFileContent
+    );
+
+    const driver = extensionDriver(vscode, env);
+    await driver
+      .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
+      .toExistingFile(".", sourceFileName, "Target");
+
+    const sourceFileContent = await driver.getDocumentText(sourceFileName);
+    expect(stripSpaces(sourceFileContent)).to.equal(
+      stripSpaces(expectedSourceFileContent)
+    );
+  });
 });

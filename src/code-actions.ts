@@ -58,7 +58,9 @@ export async function extractJSXToComponent() {
       selectedText()
     );
     await appendSelectedTextToFile(selectionProccessingResult, filePath);
-    await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
+    if (!isOperatingInsideSameFile(filePath)) {
+      await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
+    }
     const componentInstance = createComponentInstance(
       selectionProccessingResult.metadata.name,
       selectionProccessingResult.metadata.componentProperties
@@ -178,7 +180,10 @@ export const appendSelectedTextToFile = (
 ) => {
   let text;
 
-  if (isOperationBetweenJSFiles(destinationPath)) {
+  if (
+    !isOperatingInsideSameFile(destinationPath) &&
+    isOperationBetweenJSFiles(destinationPath)
+  ) {
     text = transformJSIntoExportExpressions(selection);
   } else {
     text = selection;
@@ -221,6 +226,9 @@ export const removeSelectedTextFromOriginalFile = selection => {
 };
 export const isOperationBetweenJSFiles = destinationPath =>
   shouldBeConsideredJsFiles(activeFileName(), destinationPath);
+
+const isOperatingInsideSameFile = destinationPath =>
+  path.normalize(activeFileName()) === path.normalize(destinationPath);
 
 export const handleError = e => {
   if (e) {
