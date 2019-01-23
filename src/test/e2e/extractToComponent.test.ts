@@ -1,13 +1,10 @@
 import * as chai from "chai";
 import * as fs from "fs-extra";
 import outdent from "outdent";
-import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
 import * as vscode from "vscode";
 import * as environment from "./environment";
 import { extensionDriver } from "./extensionDriver";
 
-chai.use(sinonChai);
 const expect = chai.expect;
 
 describe("extract to component", function() {
