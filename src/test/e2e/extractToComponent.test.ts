@@ -1,47 +1,30 @@
-import * as vscode from "vscode";
 import * as chai from "chai";
-import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
-import * as path from "path";
 import * as fs from "fs-extra";
 import outdent from "outdent";
+import * as sinon from "sinon";
+import * as sinonChai from "sinon-chai";
+import * as vscode from "vscode";
+import * as environment from "./environment";
+import { extensionDriver } from "./extensionDriver";
 
 chai.use(sinonChai);
 const expect = chai.expect;
 
 describe("extract to component", function() {
-  let sandbox;
-  let relativeTestRoot;
-  let absoluteTestRoot;
-  let testIdx = 1;
+  let env: environment.Environment;
 
-  beforeEach(() => {
-    relativeTestRoot = `test_${testIdx++}`;
-    absoluteTestRoot = path.join(vscode.workspace.rootPath, relativeTestRoot);
-    fs.emptyDirSync(absoluteTestRoot);
+  beforeEach(async () => {
+    env = await environment.setup();
   });
 
   afterEach(async () => {
-    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
-    expect(vscode.window.visibleTextEditors.length).to.eq(0);
-    fs.removeSync(absoluteTestRoot);
+    await env.teardown();
   });
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  const openDocument = async (path: string) => {
-    const document = await vscode.workspace.openTextDocument(path);
-    const editor = await vscode.window.showTextDocument(document, 1);
-    return editor;
-  };
 
   it("extract to new file", async () => {
+    const sourceFileName = "ExtractToNewFile_Source.jsx";
+    const targetFileName = "ExtractToNewFile_Target.jsx";
+
     const sourceFileContents = outdent`
         const ParentComp = () => (
             <div>
@@ -50,43 +33,26 @@ describe("extract to component", function() {
         )
     `;
     const expectedTargetFileContents = outdent`
-        export function Target({}) {
+        export function ExtractToNewFile_Target({}) {
           return <div>let's extract this div</div>;
         }
       `;
 
-    const sourceFilePath = path.join(absoluteTestRoot, "source.jsx");
-    const targetFilePath = path.join(absoluteTestRoot, "target.jsx");
-    fs.writeFileSync(sourceFilePath, sourceFileContents);
+    fs.writeFileSync(env.getAbsolutePath(sourceFileName), sourceFileContents);
 
-    const editor = await openDocument(sourceFilePath);
+    const driver = extensionDriver(vscode, env);
+    await driver
+      .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
+      .toNewFile(".", targetFileName);
 
-    editor.selection = new vscode.Selection(2, 0, 3, 0);
-
-    sandbox
-      .stub(vscode.window, "showQuickPick")
-      .onFirstCall()
-      .returns(Promise.resolve({ label: `${relativeTestRoot}/` }))
-      .onSecondCall()
-      .returns(Promise.resolve({ label: "Create New File" }));
-
-    sandbox
-      .stub(vscode.window, "showInputBox")
-      .onFirstCall()
-      .returns(Promise.resolve(`${relativeTestRoot}/target.jsx`));
-
-    await vscode.commands.executeCommand(
-      "extension.glean.react.extract-component"
-    );
-
-    const targetDocument = await vscode.workspace.openTextDocument(
-      targetFilePath
-    );
-
-    expect(targetDocument.getText()).to.equal(expectedTargetFileContents);
+    const targetDocumentText = await driver.getDocumentText(targetFileName);
+    expect(targetDocumentText).to.equal(expectedTargetFileContents);
   });
 
   it("extract to existing file,and prompt for component name", async () => {
+    const sourceFileName = "ExtractToEXistingFile_Source.jsx";
+    const existingFileName = "ExtractToEXistingFile_Existing.jsx";
+
     const sourceFileContents = outdent`
         const SomeParentComp = () => (
             <div>
@@ -110,34 +76,18 @@ describe("extract to component", function() {
 
     `;
 
-    const sourceFilePath = path.join(absoluteTestRoot, "source.jsx");
-    fs.writeFileSync(sourceFilePath, sourceFileContents);
-    const targetFilePath = path.join(absoluteTestRoot, "existing.jsx");
-    fs.writeFileSync(targetFilePath, existingFileContents);
-
-    const editor = await openDocument(sourceFilePath);
-    editor.selection = new vscode.Selection(2, 0, 3, 0);
-
-    sandbox
-      .stub(vscode.window, "showQuickPick")
-      .onFirstCall()
-      .returns(Promise.resolve({ label: `${relativeTestRoot}/` }))
-      .onSecondCall()
-      .returns(Promise.resolve({ label: "existing.jsx" }));
-
-    sandbox
-      .stub(vscode.window, "showInputBox")
-      .returns(Promise.resolve("Target"));
-
-    await vscode.commands.executeCommand(
-      "extension.glean.react.extract-component"
+    fs.writeFileSync(env.getAbsolutePath(sourceFileName), sourceFileContents);
+    fs.writeFileSync(
+      env.getAbsolutePath(existingFileName),
+      existingFileContents
     );
 
-    const targetDocument = await vscode.workspace.openTextDocument(
-      targetFilePath
-    );
-    const actualTargetContent = targetDocument.getText();
+    const driver = extensionDriver(vscode, env);
+    await driver
+      .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
+      .toExistingFile(".", existingFileName, "Target");
 
-    expect(actualTargetContent).to.equal(expectedTargetFileContents);
+    const targetDocumentText = await driver.getDocumentText(existingFileName);
+    expect(targetDocumentText).to.equal(expectedTargetFileContents);
   });
 });
