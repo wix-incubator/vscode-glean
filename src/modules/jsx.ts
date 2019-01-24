@@ -150,12 +150,6 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
             componentProperties.state.add(path.parent.property.name);
           }
         } else {
-          if (t.isThisExpression(path.node.object)) {
-            componentProperties.componentMembers.add(path.node.property.name);
-            let identifier = t.identifier(path.node.property.name);
-            (<any>identifier).wasVisited = true;
-            path.replaceWith(identifier);
-          } else {
             componentProperties.componentMembers.add(path.node.property.name);
             const membershipExpr = t.memberExpression(
               t.memberExpression(path.node.object, t.identifier("props")),
@@ -164,7 +158,7 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
             (<any>membershipExpr).wasVisited = true;
             path.replaceWith(membershipExpr);
             path.skip();
-          }
+
         }
 
         path.node.wasVisited = true;

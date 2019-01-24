@@ -131,7 +131,7 @@ export function statefulToStateless(component) {
       const statelessComponent = arrowFunction({
         name: (statelessComponentName),
         params: ['props'],
-        propType: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? path.node.superTypeParameters.params[0] : null,
+        propType: path.node.superTypeParameters && path.node.superTypeParameters.params.length ? path.node.superTypeParameters.params : null,
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
         body: functionBody
       });
