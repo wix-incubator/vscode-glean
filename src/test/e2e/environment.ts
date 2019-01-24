@@ -43,6 +43,7 @@ export const prepare = () => {
   let numberOfRequiredEnvironments = 0;
 
   before(async () => {
+    await new Promise(resolve => setTimeout(resolve, 100)); // vscode needs time to warm up, welcome screens to load, etc...
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
     await preDefineWorkspaceFolders(numberOfRequiredEnvironments); // updating workspace folders before & after each tests currently causes different sorts of bugs. see vscode issues.
   });
