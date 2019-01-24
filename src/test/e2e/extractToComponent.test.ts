@@ -1,5 +1,6 @@
 import * as chai from "chai";
 import * as fs from "fs-extra";
+import * as path from "path";
 import outdent from "outdent";
 import * as vscode from "vscode";
 import * as environment from "./environment";
@@ -9,20 +10,22 @@ const expect = chai.expect;
 
 const stripSpaces = str => str.replace(/[\s\n]/g, ""); // TODO: stop using once formatting is defined and fixed
 
+const getDocumentText = async (
+  env: environment.TestEnvironment,
+  documentRelativePath: string
+): Promise<string> => {
+  const document = await vscode.workspace.openTextDocument(
+    path.join(env.workspaceRootPath, documentRelativePath)
+  );
+  return document.getText();
+};
+
 describe("extract to component", function() {
-  let env: environment.Environment;
+  const itWithEnv = environment.prepare();
 
-  beforeEach(async () => {
-    env = await environment.setup();
-  });
-
-  afterEach(async () => {
-    await env.teardown();
-  });
-
-  it("extract to new file", async () => {
-    const sourceFileName = "ExtractToNewFile_Source.jsx";
-    const targetFileName = "ExtractToNewFile_Target.jsx";
+  itWithEnv("extract to new file", async env => {
+    const sourceFileName = "source.jsx";
+    const targetFileName = "target.jsx";
 
     const originalSourceFileContent = outdent`
         const ParentComp = () => (
@@ -33,23 +36,23 @@ describe("extract to component", function() {
     `;
 
     const expectedSourceFileContent = outdent`
-        import { ExtractToNewFile_Target } from './ExtractToNewFile_Target';
+        import { Target } from './target';
 
         const ParentComp = () => (
             <div>
-               <ExtractToNewFile_Target />
+               <Target />
             </div>
         )
       `;
 
     const expectedTargetFileContent = outdent`
-        export function ExtractToNewFile_Target({}) {
+        export function Target({}) {
           return <div>let's extract this div</div>;
         }
       `;
 
     fs.writeFileSync(
-      env.getAbsolutePath(sourceFileName),
+      path.join(env.workspaceRootPath, sourceFileName),
       originalSourceFileContent
     );
 
@@ -58,20 +61,22 @@ describe("extract to component", function() {
       .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
       .toNewFile(".", targetFileName);
 
-    const sourceFileContent = await driver.getDocumentText(sourceFileName);
+    const sourceFileContent = await getDocumentText(env, sourceFileName);
     expect(stripSpaces(sourceFileContent)).to.equal(
       stripSpaces(expectedSourceFileContent)
     );
 
-    const targetFileContent = await driver.getDocumentText(targetFileName);
+    const targetFileContent = await getDocumentText(env, targetFileName);
     expect(targetFileContent).to.equal(expectedTargetFileContent);
   });
 
-  it("extract to existing file,and prompt for component name", async () => {
-    const sourceFileName = "ExtractToExistingFile_Source.jsx";
-    const targetFileName = "ExtractToExistingFile_Target.jsx";
+  itWithEnv(
+    "extract to existing file,and prompt for component name",
+    async env => {
+      const sourceFileName = "source.jsx";
+      const targetFileName = "target.jsx";
 
-    const originalSourceFileContent = outdent`
+      const originalSourceFileContent = outdent`
         const ParentComp = () => (
             <div>
                 <span>some content</span>
@@ -79,15 +84,15 @@ describe("extract to component", function() {
         )
     `;
 
-    const originalTargetFileContent = outdent`
+      const originalTargetFileContent = outdent`
       export function Existing({}) {
         return (<div />)
       }
 
     `;
 
-    const expectedSourceFileContent = outdent`
-      import { NewTargetComp } from './ExtractToExistingFile_Target';
+      const expectedSourceFileContent = outdent`
+      import { NewTargetComp } from './target';
 
       const ParentComp = () => (
         <div>
@@ -96,7 +101,7 @@ describe("extract to component", function() {
       )
     `;
 
-    const expectedTargetFileContent = outdent`
+      const expectedTargetFileContent = outdent`
         export function Existing({}) {
           return (<div />)
         }
@@ -105,31 +110,32 @@ describe("extract to component", function() {
         }
       `;
 
-    fs.writeFileSync(
-      env.getAbsolutePath(sourceFileName),
-      originalSourceFileContent
-    );
-    fs.writeFileSync(
-      env.getAbsolutePath(targetFileName),
-      originalTargetFileContent
-    );
+      fs.writeFileSync(
+        path.join(env.workspaceRootPath, sourceFileName),
+        originalSourceFileContent
+      );
+      fs.writeFileSync(
+        path.join(env.workspaceRootPath, targetFileName),
+        originalTargetFileContent
+      );
 
-    const driver = extensionDriver(vscode, env);
-    await driver
-      .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
-      .toExistingFile(".", targetFileName, "NewTargetComp");
+      const driver = extensionDriver(vscode, env);
+      await driver
+        .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
+        .toExistingFile(".", targetFileName, "NewTargetComp");
 
-    const sourceFileContent = await driver.getDocumentText(sourceFileName);
-    expect(stripSpaces(sourceFileContent)).to.equal(
-      stripSpaces(expectedSourceFileContent)
-    );
+      const sourceFileContent = await getDocumentText(env, sourceFileName);
+      expect(stripSpaces(sourceFileContent)).to.equal(
+        stripSpaces(expectedSourceFileContent)
+      );
 
-    const targetFileContent = await driver.getDocumentText(targetFileName);
-    expect(targetFileContent).to.equal(expectedTargetFileContent);
-  });
+      const targetFileContent = await getDocumentText(env, targetFileName);
+      expect(targetFileContent).to.equal(expectedTargetFileContent);
+    }
+  );
 
-  it("extract to same file", async () => {
-    const sourceFileName = "ExtractToSameFile_Source.jsx";
+  itWithEnv("extract to same file", async env => {
+    const sourceFileName = "source.jsx";
 
     const originalSourceFileContent = outdent`
         const ParentComp = () => (
@@ -152,7 +158,7 @@ describe("extract to component", function() {
     `;
 
     fs.writeFileSync(
-      env.getAbsolutePath(sourceFileName),
+      path.join(env.workspaceRootPath, sourceFileName),
       originalSourceFileContent
     );
 
@@ -161,7 +167,7 @@ describe("extract to component", function() {
       .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
       .toExistingFile(".", sourceFileName, "Target");
 
-    const sourceFileContent = await driver.getDocumentText(sourceFileName);
+    const sourceFileContent = await getDocumentText(env, sourceFileName);
     expect(stripSpaces(sourceFileContent)).to.equal(
       stripSpaces(expectedSourceFileContent)
     );

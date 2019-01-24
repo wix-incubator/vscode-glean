@@ -2,7 +2,12 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { QuickPickItem } from "vscode";
 
-export const workspaceRoot = () => vscode.workspace.rootPath;
+export const workspaceRoot = () => {
+  const activeWorkspace = vscode.workspace.getWorkspaceFolder(
+    vscode.window.activeTextEditor.document.uri
+  );
+  return activeWorkspace.uri.fsPath;
+};
 
 export const activeURI = () => vscode.window.activeTextEditor.document.uri;
 export const activeFileName = () =>

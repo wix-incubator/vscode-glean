@@ -1,6 +1,7 @@
-import { Environment } from "./environment";
+import { TestEnvironment } from "./environment";
 import { Selection } from "vscode";
 import * as sinon from "sinon";
+import * as path from "path";
 
 const runInSandbox = async <T>(
   cb: (sandbox: sinon.SinonSandbox) => Promise<T>
@@ -13,20 +14,11 @@ const runInSandbox = async <T>(
   }
 };
 
-export const extensionDriver = (vscode, env: Environment) => {
+export const extensionDriver = (vscode, env: TestEnvironment) => {
   const openDocument = async (path: string) => {
     const document = await vscode.workspace.openTextDocument(path);
     const editor = await vscode.window.showTextDocument(document, 1);
     return editor;
-  };
-
-  const getDocumentText = async (
-    documentRelativePath: string
-  ): Promise<string> => {
-    const document = await vscode.workspace.openTextDocument(
-      env.getAbsolutePath(documentRelativePath)
-    );
-    return document.getText();
   };
 
   const extractComponent = (
@@ -35,7 +27,7 @@ export const extensionDriver = (vscode, env: Environment) => {
   ) => {
     const runCommand = async () => {
       const editor = await openDocument(
-        env.getAbsolutePath(sourceFileRelativePath)
+        path.join(env.workspaceRootPath, sourceFileRelativePath)
       );
       editor.selection = selection;
       await vscode.commands.executeCommand(
@@ -87,7 +79,6 @@ export const extensionDriver = (vscode, env: Environment) => {
   };
 
   return {
-    getDocumentText,
     extractComponent
   };
 };
