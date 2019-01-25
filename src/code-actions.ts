@@ -1,15 +1,18 @@
-import { SnippetString } from 'vscode';
+import { SnippetString, Position } from 'vscode';
 import { showDirectoryPicker } from "./directories-picker";
 import { showFilePicker } from "./file-picker";
-import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage, allText } from "./editor";
+import { activeEditor, selectedText, activeFileName, openFile, selectedTextStart, selectedTextEnd, showErrorMessage, showInformationMessage, allText, currentEditorPath, activeURI } from "./editor";
 import { statelessToStateful } from "./modules/statless-to-stateful";
 import { statefulToStateless } from './modules/stateful-to-stateless'
 import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from "./settings";
-import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn, readFileContent } from "./file-system";
+import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn, readFileContent, persistFileSystemChanges } from "./file-system";
 import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions, codeToAst } from "./parsing";
 import { createComponentInstance, wrapWithComponent, isRangeContainedInJSXExpression, isJSXExpression, importReactIfNeeded } from "./modules/jsx";
 import * as relative from 'relative';
 import * as path from 'path'
+import { getReactImportReference } from './ast-helpers';
+import * as t from "@babel/types";
+import { transformFromAst } from "@babel/core";
 
 export async function extractJSXToComponent() {
   var editor = activeEditor();
@@ -26,7 +29,7 @@ export async function extractJSXToComponent() {
     await importReactIfNeeded(filePath);
     await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
     const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
-    await replaceSelectionWith(componentInstance);
+    await persistFileSystemChanges(replaceSelectionWith(componentInstance));
     await switchToDestinationFileIfRequired(filePath);
   } catch (e) {
     handleError(e);
@@ -79,7 +82,7 @@ export async function extractToFile() {
 export async function statelessToStatefulComponent() {
   try {
     const selectionProccessingResult = statelessToStateful(selectedText())
-    await replaceSelectionWith(selectionProccessingResult.text);
+    await persistFileSystemChanges(replaceSelectionWith(selectionProccessingResult.text));
 
   } catch (e) {
     handleError(e);
@@ -87,15 +90,31 @@ export async function statelessToStatefulComponent() {
 }
 
 export async function statefulToStatelessComponent() {
+  const persistantChanges = []
   try {
     await showInformationMessage('WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?', ['Yes', 'No']).then(async res => {
       if (res === 'Yes') {
-        const selectionProccessingResult = statefulToStateless(selectedText())
-        await replaceSelectionWith(selectionProccessingResult.text);
+        const selectionProccessingResult = statefulToStateless(selectedText());
+        if(selectionProccessingResult.metadata.stateHooksPresent) {
+          persistantChanges.push(importStateHook());
+        }
+        persistantChanges.push(replaceSelectionWith(selectionProccessingResult.text));
+
+        await persistFileSystemChanges(...persistantChanges);
       }
     });
   } catch (e) {
     handleError(e);
+  }
+
+function importStateHook() {
+    const currentFile = activeURI().path;
+    const file = readFileContent(currentFile);
+    const ast = codeToAst(file);
+    const reactImport = getReactImportReference(ast);
+    reactImport.specifiers.push(t.importSpecifier(t.identifier('useState'), t.identifier('useState')));
+    const updatedReactImport = transformFromAst(t.program([reactImport])).code;
+    return replaceTextInFile(updatedReactImport, new Position(reactImport.loc.start.line, reactImport.loc.start.column), new Position(reactImport.loc.end.line, reactImport.loc.end.column), activeFileName());
   }
 }
 
@@ -105,8 +124,8 @@ export async function switchToDestinationFileIfRequired(destinationFilePath: any
   }
 }
 
-export async function replaceSelectionWith(text: string, path = activeFileName()) {
-  await replaceTextInFile(text, selectedTextStart(), selectedTextEnd(), activeFileName());
+export function replaceSelectionWith(text: string, path = activeFileName()) {
+  return replaceTextInFile(text, selectedTextStart(), selectedTextEnd(), activeFileName());
 }
 
 export type ProcessedSelection = {

@@ -42,12 +42,8 @@ export function filesInFolder(folder): string[] {
   return results;
 }
 
-export function replaceTextInFile(text, start: vscode.Position, end: vscode.Position, path) {
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(Uri.file(path), new vscode.Range(start, end), text);
-  return vscode.workspace.applyEdit(edit);
+export const replaceTextInFile = (text, start: vscode.Position, end: vscode.Position, path) => edit => edit.replace(Uri.file(path), new vscode.Range(start, end), text); 
 
-}
 export async function appendTextToFile(text, absolutePath) {
   const edit = new vscode.WorkspaceEdit();
   const linesInFile = await countLineInFile(absolutePath);
@@ -62,6 +58,12 @@ export async function appendTextToFile(text, absolutePath) {
   //     resolve(absolutePath);
   //   });
   // });
+}
+
+export function persistFileSystemChanges(...changes) {
+  const accumulatedEdit = new vscode.WorkspaceEdit();
+  changes.forEach(addChangeTo => addChangeTo(accumulatedEdit))
+  return vscode.workspace.applyEdit(accumulatedEdit);
 }
 
 export function prependTextToFile(text, absolutePath) {

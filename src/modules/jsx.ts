@@ -9,6 +9,7 @@ import * as t from "@babel/types";
 import { readFileContent, prependTextToFile } from "../file-system";
 import { addDefault, addNamed } from "@babel/helper-module-imports";
 import { program } from "babel-types";
+import { getReactImportReference } from "../ast-helpers";
 
 export type ComponentProperties = {
   argumentProps: Set<string>;
@@ -53,11 +54,7 @@ export async function importReactIfNeeded(filePath) {
   const file = readFileContent(filePath);
   const ast = codeToAst(file);
 
-  const reactImport = ast.program.body.find(statement => {
-    return (
-      t.isImportDeclaration(statement) && statement.source.value === "react"
-    );
-  });
+  const reactImport = getReactImportReference(ast);
 
   if (!reactImport) {
     ast.program.body.unshift(

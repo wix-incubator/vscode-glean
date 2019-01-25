@@ -5,10 +5,13 @@ import * as t from '@babel/types';
 import { transformFromAst } from '@babel/core';
 import { capitalizeFirstLetter } from "../utils";
 import { isHooksForFunctionalComponentsExperimentOn } from "../settings";
+import { getReactImportReference } from "../ast-helpers";
 
 
 export function statefulToStateless(component) {
   const functionBody = []
+
+  let stateHooksPresent = false;
 
   const lifecycleMethods = [
     'constructor',
@@ -25,7 +28,7 @@ export function statefulToStateless(component) {
 
   const arrowFunction = ({ name, params = [], propType = null, paramDefaults = [], body = [] }) => {
     const identifier = t.identifier(name);
-    identifier.typeAnnotation = propType ? t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'), t.tsTypeParameterInstantiation([propType]))) : null;
+    addPropTSAnnotationIfNeeded(propType, identifier);
     return t.variableDeclaration('const', [
       t.variableDeclarator(
         identifier,
@@ -121,6 +124,10 @@ export function statefulToStateless(component) {
 
   };
 
+  const buildStateHook = template(`
+  const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
+`);
+
   const visitor = {
     ClassDeclaration(path) {
       const statelessComponentName = path.node.id.name;
@@ -161,13 +168,10 @@ export function statefulToStateless(component) {
             return t.isAssignmentExpression(bodyStatement.expression)
           }));
 
-          const buildRequire = template(`
-          const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
-        `);
-
           if (expression.left.property.name === "state") {
+            stateHooksPresent = true;
             const stateHooksExpressions = expression.right.properties.map(({key, value}) => {
-              return buildRequire({
+              return buildStateHook({
                 STATE_PROP: t.identifier(key.name),
                 STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
                 STATE_VALUE: value
@@ -198,12 +202,27 @@ export function statefulToStateless(component) {
   const ast = codeToAst(component);
 
   traverse(ast, visitor);
+
+  // if(stateHooksPresent) {
+  //   const reactImport = getReactImportReference(ast);
+  //   reactImport.specifiers.push(t.importSpecifier(t.identifier('useState'),t.identifier('useState')));
+  // }
   ast.program.body.splice(-1);
 
   const processedJSX = transformFromAst(ast).code;
 
   return {
     text: processedJSX,
-    metadata: {}
+    metadata: {
+      stateHooksPresent
+    }
   }
 }
+function addPropTSAnnotationIfNeeded(propType: any, identifier: t.Identifier) {
+  if (propType) {
+    const members = propType.reduce((acc, typeLiteral) => ([...acc, ...typeLiteral.members]), []);
+    const typeAnnotation = t.tsTypeLiteral(members);
+    identifier.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'), t.tsTypeParameterInstantiation([typeAnnotation])));
+  }
+}
+
