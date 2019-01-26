@@ -1,11 +1,15 @@
-import { codeToAst } from "../parsing";
+import { codeToAst, templateToAst } from "../parsing";
 import traverse from "@babel/traverse";
 import template from "@babel/template";
 import * as t from '@babel/types';
 import { transformFromAst } from '@babel/core';
 import { capitalizeFirstLetter } from "../utils";
 import { isHooksForFunctionalComponentsExperimentOn } from "../settings";
-import { getReactImportReference } from "../ast-helpers";
+import { getReactImportReference, isExportedDeclaration } from "../ast-helpers";
+import { showInformationMessage, selectedText, activeURI, activeFileName } from "../editor";
+import { replaceSelectionWith, handleError } from "../code-actions";
+import { persistFileSystemChanges, readFileContent, replaceTextInFile } from "../file-system";
+import { Position } from "vscode";
 
 
 export function statefulToStateless(component) {
@@ -226,3 +230,49 @@ function addPropTSAnnotationIfNeeded(propType: any, identifier: t.Identifier) {
   }
 }
 
+export async function statefulToStatelessComponent() {
+  try {
+    const answer = await showInformationMessage('WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?', ['Yes', 'No']);
+      if (answer === 'Yes') {
+        const selectionProccessingResult = statefulToStateless(selectedText());
+        const persistantChanges = [replaceSelectionWith(selectionProccessingResult.text)]
+        if(selectionProccessingResult.metadata.stateHooksPresent) {
+          persistantChanges.push(importStateHook());
+        }
+        await persistFileSystemChanges(...persistantChanges);
+      }
+
+  } catch (e) {
+    handleError(e);
+  }
+
+function importStateHook() {
+    const currentFile = activeURI().path;
+    const file = readFileContent(currentFile);
+    const ast = codeToAst(file);
+    const reactImport = getReactImportReference(ast);
+    reactImport.specifiers.push(t.importSpecifier(t.identifier('useState'), t.identifier('useState')));
+    const updatedReactImport = transformFromAst(t.program([reactImport])).code;
+    return replaceTextInFile(updatedReactImport, new Position(reactImport.loc.start.line, reactImport.loc.start.column), new Position(reactImport.loc.end.line, reactImport.loc.end.column), activeFileName());
+  }
+}
+
+export function isStatefulComp(code) {
+  const ast = templateToAst(code);
+
+  const isSupportedComponent = classPath => {
+    const supportedComponents = ["Component", "PureComponent"];
+    return (
+      (classPath.superClass.object &&
+        classPath.superClass.object.name === "React" &&
+        supportedComponents.indexOf(classPath.superClass.property.name) !==
+          -1) ||
+      supportedComponents.indexOf(classPath.superClass.name) !== -1
+    );
+  };
+
+  return (
+    (isExportedDeclaration(ast) && isSupportedComponent(ast.declaration)) ||
+    isSupportedComponent(ast)
+  );
+}

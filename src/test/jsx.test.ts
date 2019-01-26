@@ -5,11 +5,10 @@ import * as editor from "../editor";
 import * as fileSystem from "../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
-import {
-  extractJSXToComponent,
-  statelessToStatefulComponent,
-  statefulToStatelessComponent
-} from "../code-actions";
+import { extractJSXToComponent } from "../modules/extract-to-component";
+import { statelessToStatefulComponent } from "../modules/statless-to-stateful";
+import { statefulToStatelessComponent } from "../modules/stateful-to-stateless";
+
 const expect = chai.expect;
 
 chai.use(sinonChai);
@@ -147,7 +146,7 @@ describe("jsx module", function() {
       );
     });
 
-    it("replaces references to class methods with props", async () => {
+    it.only("replaces references to class methods with props", async () => {
       sandbox.stub(editor, "selectedText").returns(`
         <Wrapper handleClick={this.handleClick}/>
     `);
