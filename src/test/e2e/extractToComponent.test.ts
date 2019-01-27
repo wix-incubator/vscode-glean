@@ -7,7 +7,7 @@ import * as environment from "./environment";
 import { extensionDriver } from "./extensionDriver";
 import * as chaiString from "chai-string";
 
-chai.use(chaiString);
+chai.use(chaiString); // TODO: stop using once formatting is defined and fixed
 
 const expect = chai.expect;
 
