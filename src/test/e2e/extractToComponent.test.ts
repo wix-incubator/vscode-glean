@@ -5,10 +5,11 @@ import outdent from "outdent";
 import * as vscode from "vscode";
 import * as environment from "./environment";
 import { extensionDriver } from "./extensionDriver";
+import * as chaiString from "chai-string";
+
+chai.use(chaiString);
 
 const expect = chai.expect;
-
-const stripSpaces = str => str.replace(/[\s\n]/g, ""); // TODO: stop using once formatting is defined and fixed
 
 const getDocumentText = async (
   env: environment.TestEnvironment,
@@ -40,7 +41,7 @@ describe("extract to component", function() {
 
         const ParentComp = () => (
             <div>
-               <Target />
+                <Target />
             </div>
         )
       `;
@@ -62,9 +63,7 @@ describe("extract to component", function() {
       .toNewFile(".", targetFileName);
 
     const sourceFileContent = await getDocumentText(env, sourceFileName);
-    expect(stripSpaces(sourceFileContent)).to.equal(
-      stripSpaces(expectedSourceFileContent)
-    );
+    expect(sourceFileContent).to.equalIgnoreSpaces(expectedSourceFileContent);
 
     const targetFileContent = await getDocumentText(env, targetFileName);
     expect(targetFileContent).to.equal(expectedTargetFileContent);
@@ -125,9 +124,7 @@ describe("extract to component", function() {
         .toExistingFile(".", targetFileName, "NewTargetComp");
 
       const sourceFileContent = await getDocumentText(env, sourceFileName);
-      expect(stripSpaces(sourceFileContent)).to.equal(
-        stripSpaces(expectedSourceFileContent)
-      );
+      expect(sourceFileContent).to.equalIgnoreSpaces(expectedSourceFileContent);
 
       const targetFileContent = await getDocumentText(env, targetFileName);
       expect(targetFileContent).to.equal(expectedTargetFileContent);
@@ -168,8 +165,6 @@ describe("extract to component", function() {
       .toExistingFile(".", sourceFileName, "Target");
 
     const sourceFileContent = await getDocumentText(env, sourceFileName);
-    expect(stripSpaces(sourceFileContent)).to.equal(
-      stripSpaces(expectedSourceFileContent)
-    );
+    expect(sourceFileContent).to.equalIgnoreSpaces(expectedSourceFileContent);
   });
 });
