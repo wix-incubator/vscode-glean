@@ -62,7 +62,7 @@ export async function extractJSXToComponent() {
       await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
     }
     const componentInstance = createComponentInstance(
-      selectionProccessingResult.metadata.name,
+      componentName,
       selectionProccessingResult.metadata.componentProperties
     );
     await replaceSelectionWith(componentInstance);

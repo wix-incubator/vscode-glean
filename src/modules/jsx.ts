@@ -82,51 +82,59 @@ export function produceComponentNameFrom(fullPath: any) {
     .join("");
 }
 
+function isPropsExpression(path) {
+  return (
+    t.isMemberExpression(path.node.object) &&
+    t.isThisExpression(path.node.object.object) &&
+    path.node.object.property.name === "props"
+  );
+}
+
+function isStateExpression(path) {
+  return (
+    t.isMemberExpression(path.node.object) &&
+    t.isThisExpression(path.node.object.object) &&
+    path.node.object.property.name === "state"
+  );
+}
+
+function isMemberExpression(path) {
+  return !t.isMemberExpression(path.parent) && t.isMemberExpression(path.node);
+}
+
 export function wrapWithComponent(componentName, jsx): ProcessedSelection {
-  const componentProperties = {
-    argumentProps: new Set(),
-    memberProps: new Set(),
-    state: new Set(),
-    componentMembers: new Set()
+  const targetProps = {
+    fromVariable: new Set(),
+    fromProps: new Set(),
+    fromState: new Set(),
+    fromMember: new Set()
   };
+
+  const visit = path =>
+    path.node.wasVisited ? false : (path.node.wasVisited = true);
 
   const visitor = {
     Identifier(path) {
-      let isMember = !!path.findParent(
-        path =>
-          path.node.type === "MemberExpression" ||
-          path.isArrowFunctionExpression(path.node)
-      );
-      if (!isMember) {
-        componentProperties.argumentProps.add(path.node.name);
+      if (visit(path)) {
+        targetProps.fromVariable.add(path.node.name);
       }
     },
     MemberExpression(path) {
-      if (!path.node.wasVisited && t.isThisExpression(path.node.object)) {
-        if (
-          path.parent.property &&
-          (path.node.property.name === "props" ||
-            path.node.property.name === "state")
-        ) {
-          //props or state = path.node.property.name;
-          if (path.node.property.name === "props") {
-            componentProperties.memberProps.add(path.parent.property.name);
+      if (visit(path)) {
+        if (isMemberExpression(path)) {
+          const propName = path.node.property.name;
+          if (isPropsExpression(path)) {
+            targetProps.fromProps.add(propName);
+          } else if (isStateExpression(path)) {
+            targetProps.fromState.add(propName);
           } else {
-            path.node.property.name = "props";
-            componentProperties.state.add(path.parent.property.name);
+            targetProps.fromMember.add(propName);
           }
-        } else {
-          componentProperties.componentMembers.add(path.node.property.name);
-          const membershipExpr = t.memberExpression(
-            t.memberExpression(path.node.object, t.identifier("props")),
-            t.identifier(path.node.property.name)
-          );
-          (<any>membershipExpr).wasVisited = true;
-          path.replaceWith(membershipExpr);
+          const expr = t.identifier(propName);
+          (<any>expr).wasVisited = true;
+          path.replaceWith(expr);
           path.skip();
         }
-
-        path.node.wasVisited = true;
       }
     }
   };
@@ -136,36 +144,46 @@ export function wrapWithComponent(componentName, jsx): ProcessedSelection {
   traverse(ast, visitor);
 
   const processedJSX = transformFromAst(ast).code;
+
   const indexOfLastSemicolon = processedJSX.lastIndexOf(";");
   const code =
     processedJSX.slice(0, indexOfLastSemicolon) +
     processedJSX.slice(indexOfLastSemicolon + 1);
 
+  const allProps = [
+    ...targetProps.fromVariable,
+    ...targetProps.fromProps,
+    ...targetProps.fromState,
+    ...targetProps.fromMember
+  ];
+
+  const componentText = buildComponent(componentName, code, allProps);
+
   return {
-    text: buildComponent(componentName, code, componentProperties),
+    text: componentText,
     metadata: {
       isJSX: true,
-      componentProperties,
+      componentProperties: targetProps,
       name: componentName
     }
   };
 }
 
 export function createComponentInstance(name, props) {
-  const stateToInputProps = Array.from(props.state)
+  const stateToInputProps = Array.from(props.fromState)
     .map(prop => `${prop}={this.state.${prop}}`)
     .join(" ");
-  const argPropsToInputProps = Array.from(props.argumentProps)
+  const variablePropsToInputProps = Array.from(props.fromVariable)
     .map(prop => `${prop}={${prop}}`)
     .join(" ");
-  const memberPropsToInputProps = Array.from(props.memberProps)
+  const memberPropsToInputProps = Array.from(props.fromProps)
     .map(prop => `${prop}={this.props.${prop}}`)
     .join(" ");
-  const componentMembersToInputProps = Array.from(props.componentMembers)
+  const componentMembersToInputProps = Array.from(props.fromMember)
     .map(prop => `${prop}={this.${prop}}`)
     .join(" ");
 
-  return `<${name}  ${stateToInputProps} ${argPropsToInputProps} ${memberPropsToInputProps} ${componentMembersToInputProps}/>`;
+  return `<${name}  ${stateToInputProps} ${variablePropsToInputProps} ${memberPropsToInputProps} ${componentMembersToInputProps}/>`;
 }
 
 function isExportedDeclaration(ast) {

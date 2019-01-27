@@ -53,49 +53,6 @@ describe("jsx module", function() {
     sandbox.restore();
   });
 
-  it('creates stateful component if the JSX string contains "this" references', async () => {
-    sandbox.stub(editor, "selectedText").returns(`
-        <div>{this.props.foo}</div>
-    `);
-
-    await extractJSXToComponent();
-
-    expect(
-      (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
-    ).to.deep.equal([
-      outdent`
-        export class Target extends React.Component {
-          render() {
-            return <div>{this.props.foo}</div>;
-          }
-        
-        }
-      `,
-      "/target.js"
-    ]);
-  });
-
-  it('creates functional component if there are no "this" references', async () => {
-    sandbox.stub(editor, "selectedText").returns(`
-        <div>{foo}</div>
-    `);
-
-    await extractJSXToComponent();
-
-    expect(
-      (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
-    ).to.deep.equal([
-      outdent`
-        export function Target({
-          foo
-        }) {
-          return <div>{foo}</div>;
-        }
-      `,
-      "/target.js"
-    ]);
-  });
-
   describe("When extracting JSX to component", () => {
     it("doesnt wrap the extracted jsx with a Fragment if its a single line", async () => {
       sandbox.stub(editor, "selectedText").returns(`
@@ -144,10 +101,10 @@ describe("jsx module", function() {
       ]);
     });
 
-    it('creates functional component if there are no "this" references', async () => {
+    it('creates functional component if the JSX string contains "this" references', async () => {
       sandbox.stub(editor, "selectedText").returns(`
-        <div>{foo}</div>
-    `);
+          <div>{this.props.foo}</div>
+      `);
 
       await extractJSXToComponent();
 
@@ -165,25 +122,10 @@ describe("jsx module", function() {
       ]);
     });
 
-    it("replaces all state references to props", async () => {
+    it('creates functional component if there are no "this" references', async () => {
       sandbox.stub(editor, "selectedText").returns(`
-                <div>{this.state.foo}</div>
-        `);
-
-      await extractJSXToComponent();
-
-      expect((<any>fileSystem.appendTextToFile).args[0][0]).to.contain(
-        "this.props.foo"
-      );
-      expect((<any>fileSystem.appendTextToFile).args[0][0]).not.to.contain(
-        "this.state.foo"
-      );
-    });
-
-    it("instantiates referenced variables by destructring them from props object", async () => {
-      sandbox.stub(editor, "selectedText").returns(`
-                <Wrapper bar={bar}>{this.props.foo}</Wrapper>
-            `);
+        <div>{foo}</div>
+    `);
 
       await extractJSXToComponent();
 
@@ -191,39 +133,10 @@ describe("jsx module", function() {
         (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
       ).to.deep.equal([
         outdent`
-          export class Target extends React.Component {
-            render() {
-              const {
-                bar
-              } = this.props;
-              return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;
-            }
-
-          }
-        `,
-        "/target.js"
-      ]);
-    });
-
-    it("instantiates referenced variables by destructring them from props object", async () => {
-      sandbox.stub(editor, "selectedText").returns(`
-              <Wrapper bar={bar}>{this.props.foo}</Wrapper>
-          `);
-
-      await extractJSXToComponent();
-
-      expect(
-        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args
-      ).to.deep.equal([
-        outdent`
-          export class Target extends React.Component {
-            render() {
-              const {
-                bar
-              } = this.props;
-              return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;
-            }
-
+          export function Target({
+            foo
+          }) {
+            return <div>{foo}</div>;
           }
         `,
         "/target.js"
@@ -257,8 +170,30 @@ describe("jsx module", function() {
 
       await extractJSXToComponent();
 
-      expect((<any>fileSystem.replaceTextInFile).args[0][0]).to.be.equal(
+      expect(
+        (fileSystem.replaceTextInFile as sinon.SinonSpy).getCall(0).args[0]
+      ).to.be.equal(
         "<Target  foo={this.state.foo} x={x} bar={this.props.bar} getZoo={this.getZoo}/>"
+      );
+
+      expect(
+        (fileSystem.appendTextToFile as sinon.SinonSpy).getCall(0).args[0]
+      ).to.eql(
+        outdent`
+            export function Target({
+              x,
+              bar,
+              foo,
+              getZoo
+            }) {
+              return <>
+                            <div>{x}</div>
+                            <div>{foo}</div>
+                            <div>{bar}</div>
+                            <div>{getZoo()}</div>
+                        </>;
+            }
+          `
       );
     });
   });
