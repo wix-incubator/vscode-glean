@@ -21,6 +21,14 @@ const getDocumentText = async (
   return document.getText();
 };
 
+const createFile = (
+  env: environment.TestEnvironment,
+  name: string,
+  content = ""
+) => {
+  fs.writeFileSync(path.join(env.workspaceRootPath, name), content);
+};
+
 describe("extract to component", function() {
   const itWithEnv = environment.prepare();
 
@@ -28,13 +36,17 @@ describe("extract to component", function() {
     const sourceFileName = "source.jsx";
     const targetFileName = "target.jsx";
 
-    const originalSourceFileContent = outdent`
+    createFile(
+      env,
+      sourceFileName,
+      outdent`
         const ParentComp = () => (
-            <div>
-                <div>let's extract this div</div>
-            </div>
+          <div>
+              <div>let's extract this div</div>
+          </div>
         )
-    `;
+      `
+    );
 
     const expectedSourceFileContent = outdent`
         import { Target } from './target';
@@ -52,13 +64,7 @@ describe("extract to component", function() {
         }
       `;
 
-    fs.writeFileSync(
-      path.join(env.workspaceRootPath, sourceFileName),
-      originalSourceFileContent
-    );
-
-    const driver = extensionDriver(vscode, env);
-    await driver
+    await extensionDriver(vscode, env)
       .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
       .toNewFile(".", targetFileName);
 
@@ -75,20 +81,27 @@ describe("extract to component", function() {
       const sourceFileName = "source.jsx";
       const targetFileName = "target.jsx";
 
-      const originalSourceFileContent = outdent`
-        const ParentComp = () => (
+      createFile(
+        env,
+        sourceFileName,
+        outdent`
+          const ParentComp = () => (
             <div>
                 <span>some content</span>
             </div>
-        )
-    `;
+          )
+        `
+      );
 
-      const originalTargetFileContent = outdent`
-      export function Existing({}) {
-        return (<div />)
-      }
-
-    `;
+      createFile(
+        env,
+        targetFileName,
+        outdent`
+          export function Existing({}) {
+            return (<div />)
+          }
+        `
+      );
 
       const expectedSourceFileContent = outdent`
       import { NewTargetComp } from './target';
@@ -109,17 +122,7 @@ describe("extract to component", function() {
         }
       `;
 
-      fs.writeFileSync(
-        path.join(env.workspaceRootPath, sourceFileName),
-        originalSourceFileContent
-      );
-      fs.writeFileSync(
-        path.join(env.workspaceRootPath, targetFileName),
-        originalTargetFileContent
-      );
-
-      const driver = extensionDriver(vscode, env);
-      await driver
+      await extensionDriver(vscode, env)
         .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
         .toExistingFile(".", targetFileName, "NewTargetComp");
 
@@ -127,20 +130,24 @@ describe("extract to component", function() {
       expect(sourceFileContent).to.equalIgnoreSpaces(expectedSourceFileContent);
 
       const targetFileContent = await getDocumentText(env, targetFileName);
-      expect(targetFileContent).to.equal(expectedTargetFileContent);
+      expect(targetFileContent).to.equalIgnoreSpaces(expectedTargetFileContent);
     }
   );
 
   itWithEnv("extract to same file", async env => {
     const sourceFileName = "source.jsx";
 
-    const originalSourceFileContent = outdent`
+    createFile(
+      env,
+      sourceFileName,
+      outdent`
         const ParentComp = () => (
             <div>
                 <span>some content</span>
             </div>
         )
-    `;
+      `
+    );
 
     const expectedSourceFileContent = outdent`
         const ParentComp = () => (
@@ -154,13 +161,7 @@ describe("extract to component", function() {
         }
     `;
 
-    fs.writeFileSync(
-      path.join(env.workspaceRootPath, sourceFileName),
-      originalSourceFileContent
-    );
-
-    const driver = extensionDriver(vscode, env);
-    await driver
+    await extensionDriver(vscode, env)
       .extractComponent(sourceFileName, new vscode.Selection(2, 0, 3, 0))
       .toExistingFile(".", sourceFileName, "Target");
 
