@@ -14,6 +14,7 @@ import { Position } from "vscode";
 
 export function statefulToStateless(component) {
   const functionBody = []
+  const stateProperties = new Map();
 
   let stateHooksPresent = false;
 
@@ -103,6 +104,8 @@ export function statefulToStateless(component) {
                   STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
                   STATE_VALUE: value
                 }));
+
+                stateProperties.set(key.name, value);
               });
 
               path.remove();
@@ -174,14 +177,19 @@ export function statefulToStateless(component) {
 
           if (expression.left.property.name === "state") {
             stateHooksPresent = true;
-            const stateHooksExpressions = expression.right.properties.map(({key, value}) => {
-              return buildStateHook({
-                STATE_PROP: t.identifier(key.name),
-                STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
-                STATE_VALUE: value
-              });
-            });
-            functionBody.push(...stateHooksExpressions);
+            // const stateHooksExpressions = expression.right.properties.map(({key, value}) => {
+            //   return buildStateHook({
+            //     STATE_PROP: t.identifier(key.name),
+            //     STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
+            //     STATE_VALUE: value
+            //   });
+            // });
+            // functionBody.push(...stateHooksExpressions);
+
+            expression.right.properties.map(({key, value}) => {
+              stateProperties.set(key.name,value);
+            })
+            
           }
         }
 
@@ -206,6 +214,14 @@ export function statefulToStateless(component) {
   const ast = codeToAst(component);
 
   traverse(ast, visitor);
+
+  const hookExpressions = Array.from(stateProperties).map(([key, defaultValue]) => {
+    return buildStateHook({
+    STATE_PROP: t.identifier(key),
+    STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key)}`),
+    STATE_VALUE: defaultValue
+  })});
+  functionBody.unshift(...hookExpressions);
 
   // if(stateHooksPresent) {
   //   const reactImport = getReactImportReference(ast);
