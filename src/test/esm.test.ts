@@ -6,7 +6,7 @@ import * as editor from '../editor';
 import * as fileSystem from '../file-system';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { extractToFile } from '../code-actions';
+import { extractToFile } from '../modules/extract-to-file';
 const expect = chai.expect;
 
 chai.use(sinonChai);

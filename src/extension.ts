@@ -1,10 +1,14 @@
-import { extractToFile, statelessToStatefulComponent, statefulToStatelessComponent, extractJSXToComponent, wrapJSXWithCondition } from './code-actions';
 'use strict';
 
 import * as vscode from 'vscode';
 import { selectedText } from './editor';
-import { isStatelessComp, isStatefulComp, isJSX } from './modules/jsx';
+import { isJSX } from './modules/jsx';
 import { ProviderResult } from 'vscode';
+import { isStatelessComp, statelessToStatefulComponent } from './modules/statless-to-stateful';
+import { isStatefulComp, statefulToStatelessComponent } from './modules/stateful-to-stateless';
+import { extractToFile } from './modules/extract-to-file';
+import { extractJSXToComponent } from './modules/extract-to-component';
+import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {

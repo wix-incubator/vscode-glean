@@ -1,8 +1,21 @@
-import { codeToAst } from "../parsing";
+import { codeToAst, templateToAst } from "../parsing";
 import traverse from "@babel/traverse";
 import * as t from '@babel/types';
 import { transformFromAst } from '@babel/core';
+import { isExportedDeclaration } from "../ast-helpers";
+import { persistFileSystemChanges } from "../file-system";
+import { selectedText } from "../editor";
+import { replaceSelectionWith, handleError } from "../code-actions";
 
+export function isStatelessComp(code) {
+  const ast = templateToAst(code);
+
+  return (
+    (t.isVariableDeclaration(ast) && t.isFunction(ast.declarations[0].init)) ||
+    (isExportedDeclaration(ast) && t.isFunction(ast.declaration)) ||
+    t.isFunction(ast)
+  );
+}
 
 function isReferenced(node, parent) {
   for (const param of parent.params) {
@@ -100,5 +113,15 @@ export function statelessToStateful(component) {
   return {
     text: processedJSX,
     metadata: {}
+  }
+}
+
+export async function statelessToStatefulComponent() {
+  try {
+    const selectionProccessingResult = statelessToStateful(selectedText())
+    await persistFileSystemChanges(replaceSelectionWith(selectionProccessingResult.text));
+
+  } catch (e) {
+    handleError(e);
   }
 }

@@ -35,7 +35,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Glean Configuration",
+      "title": "Glean",
       "properties": {
         "glean.jsFilesExtensions": {
           "type": [
@@ -58,12 +58,19 @@
           "type": "boolean",
           "default": false,
           "description": "Specifies whether to switch to the target file after extracting the content or not"
+        },
+        "glean.experiments": {
+          "type": [
+            "string"
+          ],
+          "default": [],
+          "description": "Active experimental features. Please see https://github.com/wix/vscode-glean/ for list of experimental features"
         }
       }
     }
-  },
+    },
   "scripts": {
-    "vscode:prepublish": "npm test",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
@@ -71,6 +78,7 @@
     "semantic-release": "semantic-release"
   },
   "devDependencies": {
+    "@babel/helper-module-imports": "^7.0.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@semantic-release/changelog": "^2.1.2",
     "@semantic-release/git": "^5.0.0",
@@ -83,10 +91,12 @@
     "@types/sinon": "^4.3.0",
     "@types/sinon-chai": "^2.7.29",
     "chai": "^4.2.0",
+    "prettier": "1.15.3",
     "semantic-release": "^15.10.0",
     "semantic-release-vsce": "^2.1.2",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",
+    "tslint-config-prettier": "^1.17.0",
     "typescript": "^2.6.1",
     "vscode": "^1.1.21"
   },
