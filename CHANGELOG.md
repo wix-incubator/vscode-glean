@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/wix/vscode-glean/compare/v4.2.5...v4.3.0) (2019-02-05)
+
+
+### Features
+
+* **general:** Glean V5 ([#61](https://github.com/wix/vscode-glean/issues/61)) ([5ad9a80](https://github.com/wix/vscode-glean/commit/5ad9a80))
+
 ## [4.2.5](https://github.com/wix/vscode-glean/compare/v4.2.4...v4.2.5) (2019-01-13)
 
 
