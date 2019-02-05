@@ -127,7 +127,7 @@ describe("jsx module", function() {
       await extractJSXToComponent();
 
       expect((<any>fileSystem.appendTextToFile).args[0][0]).to.contain(
-        "this.props.foo"
+        "{foo}"
       );
       expect((<any>fileSystem.appendTextToFile).args[0][0]).not.to.contain(
         "this.state.foo"
@@ -155,20 +155,7 @@ describe("jsx module", function() {
       await extractJSXToComponent();
 
       expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ",
-        "/target.js"
-      );
-    });
-
-    it("instantiates referenced variables by destructring them from props object", async () => {
-      sandbox.stub(editor, "selectedText").returns(`
-              <Wrapper bar={bar}>{this.props.foo}</Wrapper>
-          `);
-
-      await extractJSXToComponent();
-
-      expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-        "\nexport class Target extends React.Component {\n  render() {\n    const {\n      bar\n    } = this.props;\n    return <Wrapper bar={bar}>{this.props.foo}</Wrapper>;\n  }\n\n}\n  ",
+        "\nexport function Target({\n  bar,\n  foo\n}) {\n  return <Wrapper bar={bar}>{foo}</Wrapper>;\n}\n  ",
         "/target.js"
       );
     });
@@ -493,7 +480,7 @@ describe("jsx module", function() {
       );
     });
 
-    it.only("creates stateless component with props type interface and default props", async () => {
+    it("creates stateless component with props type interface and default props", async () => {
       givenApprovedWarning();
       sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component<MyProps> {
