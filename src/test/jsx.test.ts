@@ -50,18 +50,6 @@ describe("jsx module", function() {
     sandbox.restore();
   });
 
-  it('creates stateful component if the JSX string contains "this" references', async () => {
-    sandbox.stub(editor, "selectedText").returns(`
-        <div>{this.props.foo}</div>
-    `);
-
-    await extractJSXToComponent();
-
-    expect(fileSystem.appendTextToFile).to.have.been.calledWith(
-      "\nexport class Target extends React.Component {\n  render() {\n    return <div>{this.props.foo}</div>;\n  }\n\n}\n  ",
-      "/target.js"
-    );
-  });
 
   it('creates functional component if there are no "this" references', async () => {
     sandbox.stub(editor, "selectedText").returns(`
@@ -146,7 +134,7 @@ describe("jsx module", function() {
       );
     });
 
-    it.only("replaces references to class methods with props", async () => {
+    it("replaces references to class methods with props", async () => {
       sandbox.stub(editor, "selectedText").returns(`
         <Wrapper handleClick={this.handleClick}/>
     `);
@@ -505,7 +493,7 @@ describe("jsx module", function() {
       );
     });
 
-    it("creates stateless component with props type interface and default props", async () => {
+    it.only("creates stateless component with props type interface and default props", async () => {
       givenApprovedWarning();
       sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component<MyProps> {

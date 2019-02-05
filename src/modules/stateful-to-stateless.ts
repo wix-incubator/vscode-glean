@@ -6,7 +6,7 @@ import { transformFromAst } from '@babel/core';
 import { capitalizeFirstLetter } from "../utils";
 import { isHooksForFunctionalComponentsExperimentOn } from "../settings";
 import { getReactImportReference, isExportedDeclaration } from "../ast-helpers";
-import { showInformationMessage, selectedText, activeURI, activeFileName } from "../editor";
+import { showInformationMessage, selectedText, activeURI, activeFileName, openFile } from "../editor";
 import { replaceSelectionWith, handleError } from "../code-actions";
 import { persistFileSystemChanges, readFileContent, replaceTextInFile } from "../file-system";
 import { Position } from "vscode";
@@ -238,12 +238,30 @@ export function statefulToStateless(component) {
     }
   }
 }
-function addPropTSAnnotationIfNeeded(propType: any, identifier: t.Identifier) {
-  if (propType) {
-    const members = propType.reduce((acc, typeLiteral) => ([...acc, ...typeLiteral.members]), []);
-    const typeAnnotation = t.tsTypeLiteral(members);
-    identifier.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'), t.tsTypeParameterInstantiation([typeAnnotation])));
+function addPropTSAnnotationIfNeeded(typeAnnotation: any, identifier: t.Identifier) {
+  if (typeAnnotation) {
+    identifier.typeAnnotation = resolveTypeAnnotation(typeAnnotation);
   }
+}
+
+function resolveTypeAnnotation(propType: any,) {
+  let typeAnnotation;
+  const hasTypeReferences = propType.some(annotation => t.isTSTypeReference(annotation));
+  if (hasTypeReferences) {
+    if (propType.length > 1) {
+      typeAnnotation = t.tsIntersectionType(propType);
+    }
+    else {
+      typeAnnotation = propType[0];
+    }
+  }
+  else {
+    const members = propType.reduce((acc, typeLiteral) => {
+      return [...acc, ...typeLiteral.members];
+    }, []);
+    typeAnnotation = t.tsTypeLiteral(members);
+  }
+  return t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'), t.tsTypeParameterInstantiation([typeAnnotation])));;
 }
 
 export async function statefulToStatelessComponent() {

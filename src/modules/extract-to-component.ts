@@ -36,11 +36,11 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
     Identifier(path) {
       let isMember =
         !!path.findParent(
-          parentPath =>
-            t.isMemberExpression(parentPath.node) ||
+          parentPath => {
+           return t.isMemberExpression(parentPath.node) ||
             path.isArrowFunctionExpression(parentPath.node)
-        ) || t.isObjectProperty(path.parent);
-      if (!isMember && !path.node.wasVisited) {
+          }) || t.isObjectProperty(path.parent);
+      if (!isMember && !path.node.wasVisited && !path.shouldSkip)  {
         componentProperties.argumentProps.add(path.node.name);
       }
     },
