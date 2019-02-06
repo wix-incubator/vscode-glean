@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/wix/vscode-glean/compare/v4.4.1...v4.5.0) (2019-02-06)
+
+
+### Features
+
+* **class-to-functional:** use FC instead of SFC type in hooks are enabled ([a97b963](https://github.com/wix/vscode-glean/commit/a97b963))
+
 ## [4.4.1](https://github.com/wix/vscode-glean/compare/v4.4.0...v4.4.1) (2019-02-06)
 
 
