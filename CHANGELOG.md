@@ -1,3 +1,10 @@
+## [4.4.1](https://github.com/wix/vscode-glean/compare/v4.4.0...v4.4.1) (2019-02-06)
+
+
+### Bug Fixes
+
+* **stateful-to-stateless:** fix crash in case constructor doesnt have state init ([493ecd9](https://github.com/wix/vscode-glean/commit/493ecd9))
+
 # [4.4.0](https://github.com/wix/vscode-glean/compare/v4.3.0...v4.4.0) (2019-02-06)
 
 
