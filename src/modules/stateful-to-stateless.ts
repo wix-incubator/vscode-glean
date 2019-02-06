@@ -171,7 +171,7 @@ export function statefulToStateless(component) {
    
       if (isHooksForFunctionalComponentsExperimentOn()) {
         if (path.node.kind === "constructor") {
-          const { expression } = path.node.body.body.find((bodyStatement => {
+          const { expression = null } = path.node.body.body.find((bodyStatement => {
             return t.isAssignmentExpression(bodyStatement.expression)
           })) || {};
 
