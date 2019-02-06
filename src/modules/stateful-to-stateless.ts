@@ -261,7 +261,8 @@ function resolveTypeAnnotation(propType: any,) {
     }, []);
     typeAnnotation = t.tsTypeLiteral(members);
   }
-  return t.tsTypeAnnotation(t.tsTypeReference(t.identifier('SFC'), t.tsTypeParameterInstantiation([typeAnnotation])));;
+  const componentTypeAnnotation = isHooksForFunctionalComponentsExperimentOn()? 'FC' : 'SFC';
+  return t.tsTypeAnnotation(t.tsTypeReference(t.identifier(componentTypeAnnotation), t.tsTypeParameterInstantiation([typeAnnotation])));;
 }
 
 export async function statefulToStatelessComponent() {
