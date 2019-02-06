@@ -2,7 +2,7 @@
   "name": "glean",
   "displayName": "glean",
   "description": "The extension provides refactoring tools for your React codebase",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "publisher": "wix",
   "engines": {
     "vscode": "^1.23.0"
