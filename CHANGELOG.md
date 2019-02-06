@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/wix/vscode-glean/compare/v4.3.0...v4.4.0) (2019-02-06)
+
+
+### Features
+
+* **general:** Glean V5 with Hooks support BREAKING CHANGES ([f94f81f](https://github.com/wix/vscode-glean/commit/f94f81f))
+
 # [4.3.0](https://github.com/wix/vscode-glean/compare/v4.2.5...v4.3.0) (2019-02-05)
 
 
