@@ -173,9 +173,9 @@ export function statefulToStateless(component) {
         if (path.node.kind === "constructor") {
           const { expression } = path.node.body.body.find((bodyStatement => {
             return t.isAssignmentExpression(bodyStatement.expression)
-          }));
+          })) || {};
 
-          if (expression.left.property.name === "state") {
+          if (expression && expression.left.property.name === "state") {
             stateHooksPresent = true;
             // const stateHooksExpressions = expression.right.properties.map(({key, value}) => {
             //   return buildStateHook({
