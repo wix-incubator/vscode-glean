@@ -5,7 +5,7 @@ import * as editor from "../editor";
 import * as fileSystem from "../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
-import { extractJSXToComponent } from "../modules/extract-to-component";
+import { extractJSXToComponentToextractJSXToComponentToFile, extractJSXToComponentToFile } from "../modules/extract-to-component";
 import { statelessToStatefulComponent } from "../modules/statless-to-stateful";
 import { statefulToStatelessComponent } from "../modules/stateful-to-stateless";
 
@@ -56,7 +56,7 @@ describe("jsx module", function() {
         <div>{foo}</div>
     `);
 
-    await extractJSXToComponent();
+    await extractJSXToComponentToFile();
 
     expect(fileSystem.appendTextToFile).to.have.been.calledWith(
       "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
@@ -70,7 +70,7 @@ describe("jsx module", function() {
         <div>{foo}</div>
     `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.appendTextToFile).to.have.been.calledWith(
         "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
@@ -84,7 +84,7 @@ describe("jsx module", function() {
       <div>{bar}</div>
   `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.appendTextToFile).to.have.been.calledWith(
         "\nexport function Target({\n  foo,\n  bar\n}) {\n  return <>\n      <div>{foo}</div>\n      <div>{bar}</div>\n  </>;\n}\n  ",
@@ -98,7 +98,7 @@ describe("jsx module", function() {
     <div>{bar}</div>
 `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.prependTextToFile).to.have.been.calledWith(
         'import React from "react";',
@@ -111,7 +111,7 @@ describe("jsx module", function() {
         <div>{foo}</div>
     `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.appendTextToFile).to.have.been.calledWith(
         "\nexport function Target({\n  foo\n}) {\n  return <div>{foo}</div>;\n}\n  ",
@@ -124,7 +124,7 @@ describe("jsx module", function() {
                 <div>{this.state.foo}</div>
         `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect((<any>fileSystem.appendTextToFile).args[0][0]).to.contain(
         "{foo}"
@@ -139,7 +139,7 @@ describe("jsx module", function() {
         <Wrapper handleClick={this.handleClick}/>
     `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.appendTextToFile).to.have.been.calledWith(
         "\nexport function Target({\n  handleClick\n}) {\n  return <Wrapper handleClick={handleClick} />;\n}\n  ",
@@ -152,7 +152,7 @@ describe("jsx module", function() {
                 <Wrapper bar={bar}>{this.props.foo}</Wrapper>
             `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.appendTextToFile).to.have.been.calledWith(
         "\nexport function Target({\n  bar,\n  foo\n}) {\n  return <Wrapper bar={bar}>{foo}</Wrapper>;\n}\n  ",
@@ -165,7 +165,7 @@ describe("jsx module", function() {
                 <Wrapper></Wrapper>
             `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "<Target     />",
@@ -183,7 +183,7 @@ describe("jsx module", function() {
                 <div>{this.getZoo()}</div>
             `);
 
-      await extractJSXToComponent();
+      await extractJSXToComponentToFile();
 
       expect((<any>fileSystem.replaceTextInFile).args[0][0]).to.be.equal(
         "<Target  foo={this.state.foo} x={x} bar={this.props.bar} getZoo={this.getZoo}/>"
