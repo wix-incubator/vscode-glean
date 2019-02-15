@@ -1,3 +1,10 @@
+# [4.6.0](https://github.com/wix/vscode-glean/compare/v4.5.0...v4.6.0) (2019-02-15)
+
+
+### Features
+
+* **extract-component:** Allow extracting component to same file ([f012bda](https://github.com/wix/vscode-glean/commit/f012bda))
+
 # [4.5.0](https://github.com/wix/vscode-glean/compare/v4.4.1...v4.5.0) (2019-02-06)
 
 
