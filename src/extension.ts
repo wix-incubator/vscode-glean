@@ -7,7 +7,7 @@ import { ProviderResult } from 'vscode';
 import { isStatelessComp, statelessToStatefulComponent } from './modules/statless-to-stateful';
 import { isStatefulComp, statefulToStatelessComponent } from './modules/stateful-to-stateless';
 import { extractToFile } from './modules/extract-to-file';
-import { extractJSXToComponent as extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
+import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {

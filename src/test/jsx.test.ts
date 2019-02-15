@@ -5,9 +5,9 @@ import * as editor from "../editor";
 import * as fileSystem from "../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
-import { extractJSXToComponentToextractJSXToComponentToFile, extractJSXToComponentToFile } from "../modules/extract-to-component";
 import { statelessToStatefulComponent } from "../modules/statless-to-stateful";
 import { statefulToStatelessComponent } from "../modules/stateful-to-stateless";
+import { extractJSXToComponentToFile } from "../modules/extract-to-component";
 
 const expect = chai.expect;
 
