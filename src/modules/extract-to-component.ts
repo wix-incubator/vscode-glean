@@ -1,4 +1,4 @@
-import { activeEditor, selectedText } from "../editor";
+import { activeEditor, selectedText, showInputBox, activeFileName } from "../editor";
 
 import { showDirectoryPicker } from "../directories-picker";
 
@@ -15,7 +15,7 @@ import { transformFromAst } from "@babel/core";
 import traverse from "@babel/traverse";
 import { buildComponent } from "./component-builder";
 
-function produceComponentNameFrom(fullPath: any) {
+export function produceComponentNameFrom(fullPath: any) {
   const baseName = path.basename(fullPath, path.extname(fullPath));
   return baseName
     .split("-")
@@ -24,7 +24,7 @@ function produceComponentNameFrom(fullPath: any) {
 }
 
 
-export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
+export function wrapWithComponent(componentName, jsx): ProcessedSelection {
   const componentProperties = {
     argumentProps: new Set(),
     memberProps: new Set(),
@@ -77,7 +77,6 @@ export function wrapWithComponent(fullPath, jsx): ProcessedSelection {
   const code =
     processedJSX.slice(0, indexOfLastSemicolon) +
     processedJSX.slice(indexOfLastSemicolon + 1);
-  const componentName = produceComponentNameFrom(fullPath);
 
   return {
     text: buildComponent(componentName, code, componentProperties),
@@ -107,7 +106,7 @@ export function createComponentInstance(name, props) {
 }
 
 
-export async function extractJSXToComponent() {
+export async function extractJSXToComponentToFile() {
   var editor = activeEditor();
   if (!editor) {
     return; // No open text editor
@@ -117,13 +116,33 @@ export async function extractJSXToComponent() {
     const folderPath = await showDirectoryPicker()
     const filePath = await showFilePicker(folderPath);
 
-    const selectionProccessingResult = await wrapWithComponent(filePath, selectedText());
+    const componentName = produceComponentNameFrom(filePath);
+    const selectionProccessingResult = await wrapWithComponent(componentName, selectedText());
     await appendSelectedTextToFile(selectionProccessingResult, filePath);
     await importReactIfNeeded(filePath);
     await prependImportsToFileIfNeeded(selectionProccessingResult, filePath);
     const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
     await persistFileSystemChanges(replaceSelectionWith(componentInstance));
     await switchToDestinationFileIfRequired(filePath);
+  } catch (e) {
+    handleError(e);
+  }
+}
+
+
+export async function extractJSXToComponent() {
+  var editor = activeEditor();
+  if (!editor) {
+    return; // No open text editor
+  }
+
+  try {
+    const componentName = await showInputBox(null, 'Select Component Name');
+
+    const selectionProccessingResult = await wrapWithComponent(componentName, selectedText());
+    await appendSelectedTextToFile(selectionProccessingResult, activeFileName());
+    const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
+    await persistFileSystemChanges(replaceSelectionWith(componentInstance));
   } catch (e) {
     handleError(e);
   }

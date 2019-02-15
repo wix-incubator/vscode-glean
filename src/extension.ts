@@ -7,7 +7,7 @@ import { ProviderResult } from 'vscode';
 import { isStatelessComp, statelessToStatefulComponent } from './modules/statless-to-stateful';
 import { isStatefulComp, statefulToStatelessComponent } from './modules/stateful-to-stateless';
 import { extractToFile } from './modules/extract-to-file';
-import { extractJSXToComponent } from './modules/extract-to-component';
+import { extractJSXToComponent as extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
@@ -21,6 +21,9 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
 
     if (isJSX(text)) {
       return [{
+        command: 'extension.glean.react.extract-component-to-file',
+        title: 'Extract Component to File'
+      }, {
         command: 'extension.glean.react.extract-component',
         title: 'Extract Component'
       }, {
@@ -55,6 +58,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ pattern: '**/*.*' }, new CompleteActionProvider()));
 
   vscode.commands.registerCommand('extension.glean', extractToFile);
+
+  vscode.commands.registerCommand('extension.glean.react.extract-component-to-file', extractJSXToComponentToFile);
 
   vscode.commands.registerCommand('extension.glean.react.extract-component', extractJSXToComponent);
 

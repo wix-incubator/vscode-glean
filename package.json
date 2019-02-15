@@ -23,16 +23,6 @@
   ],
   "main": "./out/extension",
   "contributes": {
-    "commands": [
-      {
-        "command": "extension.glean",
-        "title": "Extract to File"
-      },
-      {
-        "command": "extension.glean.react.stateless-to-stateful",
-        "title": "Convert to Stateful Component"
-      }
-    ],
     "configuration": {
       "type": "object",
       "title": "Glean",
