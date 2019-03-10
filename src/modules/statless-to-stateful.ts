@@ -51,13 +51,18 @@ const getDeclarationTypeAnnotation = (declaration) => {
 }
 
 export function statelessToStateful(component) {
+  const defaultProps = new Map();
+  let name;
   const visitor = {
     Function(path) {
       if (path.node.params.length) {
         if (path.node.params[0].type === 'ObjectPattern') {
           path.node.params[0].properties.map(prop => {
             if (isReferenced(prop.value, path.node)) {
-              const name = prop.value? prop.value.name : prop.argument.name;
+              if(t.isAssignmentPattern(prop.value)){
+                defaultProps.set(prop.value.left.name, prop.value.right);
+              }
+              const name = prop.value? (prop.value.left? prop.value.left.name : prop.value.name) : prop.argument.name;
               const membershipExpr = t.memberExpression(t.memberExpression(t.thisExpression(), t.identifier('props')), t.identifier(name));
               path.scope.bindings[name].referencePaths.forEach(refPath => refPath.replaceWith(membershipExpr));
             }
@@ -75,7 +80,6 @@ export function statelessToStateful(component) {
 
       }
 
-      let name;
       let replacementPath;
 
       if (t.isArrowFunctionExpression(path)) {
@@ -107,6 +111,13 @@ export function statelessToStateful(component) {
   const ast = codeToAst(component);
 
   traverse(ast, visitor);
+
+  if(defaultProps.size) {
+    const properties = Array.from(defaultProps).map(([key, value]) => { 
+      return t.objectProperty(t.identifier(key), value) 
+    });
+    ast.program.body.push(t.expressionStatement(t.assignmentExpression('=',t.memberExpression(name,t.identifier('defaultProps')),t.objectExpression(properties))))
+  }
 
   const processedJSX = transformFromAst(ast).code;
 

@@ -209,6 +209,18 @@ describe("jsx module", function() {
       );
     });
 
+    it('adds default props if the props have default value', async () => {
+      sandbox.stub(editor, "selectedText").returns(`
+                function Foo({x = 'boo'}) {
+                    return (<div>{x}</div>);
+                }
+            `);
+
+      await statelessToStatefulComponent();
+
+      expect(fileSystem.replaceTextInFile.lastCall.args[0]).to.contain(`Foo.defaultProps = {\n  x: 'boo'\n};`);
+    });
+
     it("turn all references to props parameter", async () => {
       sandbox.stub(editor, "selectedText").returns(`
                 function Foo(props) {
