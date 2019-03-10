@@ -1,3 +1,10 @@
+# [4.7.0](https://github.com/wix/vscode-glean/compare/v4.6.0...v4.7.0) (2019-03-10)
+
+
+### Features
+
+* **functional-to-class:** default props support ([3cf1c65](https://github.com/wix/vscode-glean/commit/3cf1c65))
+
 # [4.6.0](https://github.com/wix/vscode-glean/compare/v4.5.0...v4.6.0) (2019-02-15)
 
 
