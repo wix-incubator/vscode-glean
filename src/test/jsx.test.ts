@@ -218,7 +218,7 @@ describe("jsx module", function() {
 
       await statelessToStatefulComponent();
 
-      expect(fileSystem.replaceTextInFile.lastCall.args[0]).to.contain(`Foo.defaultProps = {\n  x: 'boo'\n};`);
+      expect((fileSystem.replaceTextInFile as any).lastCall.args[0]).to.contain(`Foo.defaultProps = {\n  x: 'boo'\n};`);
     });
 
     it("turn all references to props parameter", async () => {
