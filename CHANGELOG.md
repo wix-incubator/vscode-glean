@@ -1,3 +1,11 @@
+# [4.9.0](https://github.com/wix/vscode-glean/compare/v4.8.0...v4.9.0) (2019-03-11)
+
+
+### Features
+
+* **function-to-class:** defaultProps support ([c650f96](https://github.com/wix/vscode-glean/commit/c650f96))
+* **function-to-class:** defaultProps support ([2bc5858](https://github.com/wix/vscode-glean/commit/2bc5858))
+
 # [4.8.0](https://github.com/wix/vscode-glean/compare/v4.7.0...v4.8.0) (2019-03-11)
 
 
