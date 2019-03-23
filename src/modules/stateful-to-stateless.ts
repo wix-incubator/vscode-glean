@@ -259,6 +259,8 @@ export function statefulToStateless(component) {
       //   lifecycleEffectHook.expression.arguments.push(t.arrayExpression([]));
       // }
 
+      lifecycleEffectHook.expression.arguments.push(t.arrayExpression([]));
+
       functionBody.unshift(lifecycleEffectHook);
     }
 

@@ -8,7 +8,7 @@ import { importReactIfNeeded } from "./jsx";
 
 import { appendSelectedTextToFile, prependImportsToFileIfNeeded, replaceSelectionWith, switchToDestinationFileIfRequired, handleError, ProcessedSelection } from "../code-actions";
 import * as t from "@babel/types";
-import { persistFileSystemChanges } from "../file-system";
+import { persistFileSystemChanges, appendTextToFile } from "../file-system";
 import { jsxToAst } from "../parsing";
 import { capitalizeFirstLetter } from "../utils";
 import { transformFromAst } from "@babel/core";
@@ -45,9 +45,8 @@ export function wrapWithComponent(componentName, jsx): ProcessedSelection {
       }
     },
     MemberExpression(path) {
-      if (!path.node.wasVisited) {
+      if (!path.node.wasVisited && t.isThisExpression(path.node.object.object)) {
         if (
-          t.isThisExpression(path.node.object.object) &&
           (path.node.object.property.name === "props" ||
           path.node.object.property.name === "state")
         ) {
@@ -58,11 +57,13 @@ export function wrapWithComponent(componentName, jsx): ProcessedSelection {
             path.node.object.property.name = "props";
             componentProperties.state.add(path.node.property.name);
           }
+
+          path.replaceWith(t.identifier(path.node.property.name));
+
         } else {
             componentProperties.componentMembers.add(path.node.property.name);
         }
         path.node.wasVisited = true;
-        path.replaceWith(t.identifier(path.node.property.name));
         path.skip();
       }
     }
@@ -140,7 +141,7 @@ export async function extractJSXToComponent() {
     const componentName = await showInputBox(null, 'Select Component Name');
 
     const selectionProccessingResult = await wrapWithComponent(componentName, selectedText());
-    await appendSelectedTextToFile(selectionProccessingResult, activeFileName());
+    await appendTextToFile(selectionProccessingResult.text, activeFileName());
     const componentInstance = createComponentInstance(selectionProccessingResult.metadata.name, selectionProccessingResult.metadata.componentProperties);
     await persistFileSystemChanges(replaceSelectionWith(componentInstance));
   } catch (e) {
