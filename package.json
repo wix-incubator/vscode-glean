@@ -2,7 +2,7 @@
   "name": "glean",
   "displayName": "glean",
   "description": "The extension provides refactoring tools for your React codebase",
-  "version": "3.0.0",
+  "version": "4.8.0",
   "publisher": "wix",
   "engines": {
     "vscode": "^1.23.0"
@@ -27,6 +27,11 @@
       "type": "object",
       "title": "Glean",
       "properties": {
+        "glean.jsModuleSystem": {
+          "type": "string",
+          "default": "esm",
+          "description": "Module system to be used whem extracting Javascript"
+        },
         "glean.jsFilesExtensions": {
           "type": [
             "string"
@@ -38,11 +43,6 @@
             "tsx"
           ],
           "description": "File extensions to be treated as Javascript files"
-        },
-        "glean.jsModuleSystem": {
-          "type": "string",
-          "default": "esm",
-          "description": "Module system to be used whem extracting Javascript"
         },
         "glean.switchToTarget": {
           "type": "boolean",

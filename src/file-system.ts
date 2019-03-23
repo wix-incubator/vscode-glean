@@ -67,7 +67,7 @@ export function persistFileSystemChanges(...changes) {
 }
 
 export function prependTextToFile(text, absolutePath) {
-  let edit = new vscode.WorkspaceEdit();
+  const edit = new vscode.WorkspaceEdit();
   edit.insert(Uri.file(absolutePath), new vscode.Position(0, 0), text);
   return vscode.workspace.applyEdit(edit);
 }

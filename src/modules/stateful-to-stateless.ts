@@ -10,60 +10,21 @@ import { showInformationMessage, selectedText, activeURI, activeFileName, openFi
 import { replaceSelectionWith, handleError } from "../code-actions";
 import { persistFileSystemChanges, readFileContent, replaceTextInFile } from "../file-system";
 import { Position } from "vscode";
+import { Identifier } from "babel-types";
+
+const buildStateHook = template(`
+const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
+`);
+
+const buildEffectHook = template(`
+useEffect(() =>  { EFFECT });
+`);
+
 
 
 export function statefulToStateless(component) {
   const functionBody = []
   const stateProperties = new Map();
-
-  let stateHooksPresent = false;
-
-  const lifecycleMethods = [
-    'constructor',
-    'componentWillMount',
-    'componentDidMount',
-    'componentWillReceiveProps',
-    'shouldComponentUpdate',
-    'componentWillUpdate',
-    'componentDidUpdate',
-    'componentWillUnmount',
-    'componentDidCatch',
-    'getDerivedStateFromProps'
-  ];
-
-  const arrowFunction = ({ name, params = [], propType = null, paramDefaults = [], body = [] }) => {
-    const identifier = t.identifier(name);
-    addPropTSAnnotationIfNeeded(propType, identifier);
-    return t.variableDeclaration('const', [
-      t.variableDeclarator(
-        identifier,
-        t.arrowFunctionExpression(
-          params.map((param, idx) => {
-            const paramIdentifier = t.identifier(param);
-
-            let paramObj: any = paramIdentifier;
-
-            if (paramDefaults[idx]) {
-              paramObj = t.assignmentPattern(paramIdentifier, paramDefaults[idx]);
-            }
-
-            return paramObj;
-          }),
-          t.blockStatement(body))
-      )
-    ])
-  };
-
-  const copyNonLifeCycleMethods = (path) => {
-    const className = path.node.key.name;
-    const classBody = t.isClassMethod(path) ? path['node'].body.body : path.node.value.body.body;
-    if (lifecycleMethods.indexOf(className) === -1) {
-      path.traverse(RemoveSetStateAndForceUpdateVisitor);
-      path.traverse(ReplaceStateWithPropsVisitor);
-      path.traverse(RemoveThisVisitor);
-      appendFunctionBodyToStatelessComponent(className, classBody);
-    }
-  }
 
   const RemoveThisVisitor = {
     MemberExpression(path) {
@@ -78,7 +39,11 @@ export function statefulToStateless(component) {
 
       if (isHooksForFunctionalComponentsExperimentOn()) {
         if (t.isThisExpression(path.node.object.object) && path.node.object.property.name === 'state') {
-          path.replaceWith(t.identifier(path.node.property.name));
+          const stateVariable = path.node.property.name;
+          if(!stateProperties.has(stateVariable)) {
+            stateProperties.set(stateVariable, void 0);
+          }
+          path.replaceWith(t.identifier(stateVariable));
         }
       } else {
         if (t.isThisExpression(path.node.object) && path.node.property.name === 'state') {
@@ -121,6 +86,74 @@ export function statefulToStateless(component) {
     }
   }
 
+  let stateHooksPresent = false;
+
+  let effectBody, effectTeardown;
+
+  const lifecycleMethods = [
+    'constructor',
+    'componentWillMount',
+    'componentDidMount',
+    'componentWillReceiveProps',
+    'shouldComponentUpdate',
+    'componentWillUpdate',
+    'componentDidUpdate',
+    'componentWillUnmount',
+    'componentDidCatch',
+    'getDerivedStateFromProps'
+  ];
+
+  const arrowFunction = ({ name, params = [], propType = null, paramDefaults = [], body = [] }) => {
+    const identifier = t.identifier(name);
+    addPropTSAnnotationIfNeeded(propType, identifier);
+    return t.variableDeclaration('const', [
+      t.variableDeclarator(
+        identifier,
+        t.arrowFunctionExpression(
+          params.map((param, idx) => {
+            const paramIdentifier = t.identifier(param);
+
+            let paramObj: any = paramIdentifier;
+
+            if (paramDefaults[idx]) {
+              paramObj = t.assignmentPattern(paramIdentifier, paramDefaults[idx]);
+            }
+
+            return paramObj;
+          }),
+          t.blockStatement(body))
+      )
+    ])
+  };
+
+  const copyNonLifeCycleMethods = (path) => {
+    const methodName = path.node.key.name;
+    const classBody = t.isClassMethod(path) ? path['node'].body.body : path.node.value.body.body;
+    if (!lifecycleMethods.includes(methodName)) {
+      path.traverse(RemoveSetStateAndForceUpdateVisitor);
+      path.traverse(ReplaceStateWithPropsVisitor);
+      path.traverse(RemoveThisVisitor);
+      appendFunctionBodyToStatelessComponent(methodName, classBody);
+    } else if(isHooksForFunctionalComponentsExperimentOn()) {
+      if (methodName === 'componentDidMount'){
+        path.traverse(RemoveSetStateAndForceUpdateVisitor);
+        path.traverse(ReplaceStateWithPropsVisitor);
+        path.traverse(RemoveThisVisitor);
+
+        effectBody = path.node.body;
+      
+      } else if (methodName === 'componentWillUnmount'){
+        path.traverse(RemoveSetStateAndForceUpdateVisitor);
+        path.traverse(ReplaceStateWithPropsVisitor);
+        path.traverse(RemoveThisVisitor);
+
+        effectTeardown = path.node.body;
+      }
+    }
+  }
+
+
+
   const appendFunctionBodyToStatelessComponent = (name, body) => {
 
     if (name !== 'render') {
@@ -131,9 +164,7 @@ export function statefulToStateless(component) {
 
   };
 
-  const buildStateHook = template(`
-  const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
-`);
+
 
   const visitor = {
     ClassDeclaration(path) {
@@ -177,22 +208,12 @@ export function statefulToStateless(component) {
 
           if (expression && expression.left.property.name === "state") {
             stateHooksPresent = true;
-            // const stateHooksExpressions = expression.right.properties.map(({key, value}) => {
-            //   return buildStateHook({
-            //     STATE_PROP: t.identifier(key.name),
-            //     STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
-            //     STATE_VALUE: value
-            //   });
-            // });
-            // functionBody.push(...stateHooksExpressions);
-
             expression.right.properties.map(({key, value}) => {
               stateProperties.set(key.name,value);
             })
             
           }
         }
-
       }
 
       copyNonLifeCycleMethods(path);
@@ -211,22 +232,45 @@ export function statefulToStateless(component) {
     }
   };
 
+
   const ast = codeToAst(component);
+  const hasComponentDidUpdate = (node) => { 
+    const classDeclaration = isExportedDeclaration(node)? node.declaration : ast.program.body[0]; 
+    return Boolean((classDeclaration as any).body.body.find(node => t.isClassMethod(node) && (node.key as any).name === 'componentDidUpdate')) 
+  };
 
   traverse(ast, visitor);
 
-  const hookExpressions = Array.from(stateProperties).map(([key, defaultValue]) => {
-    return buildStateHook({
-    STATE_PROP: t.identifier(key),
-    STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key)}`),
-    STATE_VALUE: defaultValue
-  })});
-  functionBody.unshift(...hookExpressions);
 
-  // if(stateHooksPresent) {
-  //   const reactImport = getReactImportReference(ast);
-  //   reactImport.specifiers.push(t.importSpecifier(t.identifier('useState'),t.identifier('useState')));
-  // }
+  if(isHooksForFunctionalComponentsExperimentOn()) {
+
+    if((effectBody || effectTeardown)) {
+      const expressions = []
+      if(effectBody) {
+        expressions.push(...effectBody.body)
+      }
+
+      if(effectTeardown) {
+        expressions.push(t.returnStatement(t.arrowFunctionExpression([],effectTeardown)));
+      }
+
+      const lifecycleEffectHook = buildEffectHook({EFFECT: expressions});
+      // if(!(hasComponentDidUpdate(ast.program.body[0]))){
+      //   lifecycleEffectHook.expression.arguments.push(t.arrayExpression([]));
+      // }
+
+      functionBody.unshift(lifecycleEffectHook);
+    }
+
+    const hookExpressions = Array.from(stateProperties).map(([key, defaultValue]) => {
+      return buildStateHook({
+      STATE_PROP: t.identifier(key),
+      STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key)}`),
+      STATE_VALUE: defaultValue
+    })});
+    functionBody.unshift(...hookExpressions);
+  }
+
   ast.program.body.splice(-1);
 
   const processedJSX = transformFromAst(ast).code;
