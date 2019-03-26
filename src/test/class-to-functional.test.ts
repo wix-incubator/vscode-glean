@@ -297,7 +297,7 @@ describe("when refactoring stateful component into stateless component", () => {
       await statefulToStatelessComponent();
   
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  useEffect(() => {\n    console.log(2);\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    console.log(2);\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
@@ -324,7 +324,7 @@ describe("when refactoring stateful component into stateless component", () => {
       await statefulToStatelessComponent();
   
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  useEffect(() => {\n    return () => {\n      console.log(2);\n    };\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    return () => {\n      console.log(2);\n    };\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
         selectedTextStart,
         selectedTextEnd,
         "/source.js"
