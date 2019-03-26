@@ -1,3 +1,16 @@
+# [4.10.0](https://github.com/wix/vscode-glean/compare/v4.9.0...v4.10.0) (2019-03-26)
+
+
+### Bug Fixes
+
+* **class-to-functional:** useState hook not added for state variables not inited or set ([32c71f6](https://github.com/wix/vscode-glean/commit/32c71f6))
+* **extract-component:** incorrect handling of nested member expressions. Fixes [#62](https://github.com/wix/vscode-glean/issues/62) ([1840c64](https://github.com/wix/vscode-glean/commit/1840c64))
+
+
+### Features
+
+* **extract-component:** added extraction to the same file ([63911e7](https://github.com/wix/vscode-glean/commit/63911e7))
+
 # [4.9.0](https://github.com/wix/vscode-glean/compare/v4.8.0...v4.9.0) (2019-03-11)
 
 
