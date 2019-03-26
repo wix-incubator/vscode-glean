@@ -45,8 +45,9 @@ export function wrapWithComponent(componentName, jsx): ProcessedSelection {
       }
     },
     MemberExpression(path) {
-      if (!path.node.wasVisited && t.isThisExpression(path.node.object.object)) {
+      if (!path.node.wasVisited) {
         if (
+          t.isThisExpression(path.node.object.object) && 
           (path.node.object.property.name === "props" ||
           path.node.object.property.name === "state")
         ) {
@@ -61,7 +62,10 @@ export function wrapWithComponent(componentName, jsx): ProcessedSelection {
           path.replaceWith(t.identifier(path.node.property.name));
 
         } else {
+          if(t.isThisExpression(path.node.object)){
             componentProperties.componentMembers.add(path.node.property.name);
+            path.replaceWith(t.identifier(path.node.property.name));
+          }
         }
         path.node.wasVisited = true;
         path.skip();
