@@ -1,3 +1,10 @@
+## [4.10.1](https://github.com/wix/vscode-glean/compare/v4.10.0...v4.10.1) (2019-03-28)
+
+
+### Bug Fixes
+
+* **class-to-function:** changed the labels of refactorings ([d2848ee](https://github.com/wix/vscode-glean/commit/d2848ee))
+
 # [4.10.0](https://github.com/wix/vscode-glean/compare/v4.9.0...v4.10.0) (2019-03-26)
 
 
