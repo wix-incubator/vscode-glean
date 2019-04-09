@@ -343,13 +343,18 @@ export function isStatefulComp(code) {
 
   const isSupportedComponent = classPath => {
     const supportedComponents = ["Component", "PureComponent"];
-    return (
+
+    if(!classPath) {
+      return false
+    }
+
+    return (classPath.superClass && (
       (classPath.superClass.object &&
         classPath.superClass.object.name === "React" &&
         supportedComponents.indexOf(classPath.superClass.property.name) !==
           -1) ||
       supportedComponents.indexOf(classPath.superClass.name) !== -1
-    );
+    ));
   };
 
   return (
