@@ -1,3 +1,10 @@
+## [4.10.3](https://github.com/wix/vscode-glean/compare/v4.10.2...v4.10.3) (2019-04-23)
+
+
+### Bug Fixes
+
+* **general:** Fixes [#66](https://github.com/wix/vscode-glean/issues/66) ([8d104f4](https://github.com/wix/vscode-glean/commit/8d104f4))
+
 ## [4.10.2](https://github.com/wix/vscode-glean/compare/v4.10.1...v4.10.2) (2019-04-09)
 
 
