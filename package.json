@@ -19,7 +19,10 @@
     "cleancode"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/extension",
   "contributes": {
