@@ -1,3 +1,10 @@
+# [4.11.0](https://github.com/wix/vscode-glean/compare/v4.10.3...v4.11.0) (2019-05-10)
+
+
+### Features
+
+* **general:** Disabled the extension for plain text files ([#70](https://github.com/wix/vscode-glean/issues/70)) ([db119ef](https://github.com/wix/vscode-glean/commit/db119ef))
+
 ## [4.10.3](https://github.com/wix/vscode-glean/compare/v4.10.2...v4.10.3) (2019-04-23)
 
 
