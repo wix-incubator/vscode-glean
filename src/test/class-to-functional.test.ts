@@ -14,16 +14,15 @@ const expect = chai.expect;
 
 chai.use(sinonChai);
 
-
 describe("when refactoring stateful component into stateless component", () => {
   let sandbox;
   let selectedTextStart = {},
     selectedTextEnd = {};
-  
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
-  
+
   beforeEach(() => {
     sandbox
       .stub(directoryPicker, "showDirectoryPicker")
@@ -44,10 +43,10 @@ describe("when refactoring stateful component into stateless component", () => {
       switchToTarget: true
     });
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
-  
+
     sandbox.stub(editor, "openFile");
   });
-  
+
   afterEach(function() {
     sandbox.restore();
   });
@@ -248,12 +247,14 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  describe('when hooks support is on', () => {
+  describe("when hooks support is on", () => {
     beforeEach(() => {
-      sandbox.stub(settings,'isHooksForFunctionalComponentsExperimentOn').returns(true);
+      sandbox
+        .stub(settings, "isHooksForFunctionalComponentsExperimentOn")
+        .returns(true);
     });
 
-    it('add useState hook for any state variable referenced in the JSX', async () => {
+    it("add useState hook for any state variable referenced in the JSX", async () => {
       givenApprovedWarning();
       sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
@@ -266,9 +267,9 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           }
         `);
-  
+
       await statefulToStatelessComponent();
-  
+
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  return <div>\n                  {foo}\n                </div>;\n};",
         selectedTextStart,
@@ -277,7 +278,7 @@ describe("when refactoring stateful component into stateless component", () => {
       );
     });
 
-    it('replaces componentDidMount with useEffect', async () => {
+    it("replaces componentDidMount with useEffect", async () => {
       givenApprovedWarning();
       sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
@@ -293,9 +294,9 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           }
         `);
-  
+
       await statefulToStatelessComponent();
-  
+
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    console.log(2);\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
         selectedTextStart,
@@ -304,7 +305,34 @@ describe("when refactoring stateful component into stateless component", () => {
       );
     });
 
-    it('replaces componentWillUnmount with useEffect cleanup function', async () => {
+    it("wraps all non-lifecycle methods with useCallback", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
+          class SomeComponent extends React.Component {
+            doFoo() {
+              console.log(2);
+            }
+            render() {
+              return (
+                <div>
+                  {this.state.foo} + {this.state.bar}
+                </div>
+              );
+            }
+          }
+        `);
+
+      await statefulToStatelessComponent();
+
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const doFoo = useCallback(() => {\n    console.log(2);\n  });\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
+
+    it("replaces componentWillUnmount with useEffect cleanup function", async () => {
       givenApprovedWarning();
       sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
@@ -320,9 +348,9 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           }
         `);
-  
+
       await statefulToStatelessComponent();
-  
+
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    return () => {\n      console.log(2);\n    };\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
         selectedTextStart,
@@ -330,7 +358,7 @@ describe("when refactoring stateful component into stateless component", () => {
         "/source.js"
       );
     });
-  })
+  });
 
   const givenApprovedWarning = () => {
     sandbox
