@@ -1,3 +1,10 @@
+# [4.15.0](https://github.com/wix/vscode-glean/compare/v4.14.0...v4.15.0) (2019-07-16)
+
+
+### Features
+
+* **class-to-functional:** useCallback support for non-lifecycle methods ([be3301b](https://github.com/wix/vscode-glean/commit/be3301b))
+
 # [4.14.0](https://github.com/wix/vscode-glean/compare/v4.13.0...v4.14.0) (2019-07-16)
 
 
