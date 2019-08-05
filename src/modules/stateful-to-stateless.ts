@@ -250,7 +250,7 @@ export function statefulToStateless(component) {
     ClassMethod(path) {
       if (isHooksForFunctionalComponentsExperimentOn()) {
         const methodName = path.node.key.name;
-        if (!lifecycleMethods.includes(methodName)) {
+        if (!lifecycleMethods.includes(methodName) && methodName !== "render") {
           nonLifeycleMethodsPresent = true;
         }
         if (path.node.kind === "constructor") {
@@ -415,27 +415,37 @@ export async function statefulToStatelessComponent() {
       const persistantChanges = [
         replaceSelectionWith(selectionProccessingResult.text)
       ];
-      if (selectionProccessingResult.metadata.stateHooksPresent) {
-        persistantChanges.push(importHook("useState"));
+
+      const {
+        stateHooksPresent,
+        nonLifeycleMethodsPresent
+      } = selectionProccessingResult.metadata;
+      const usedHooks = [
+        ...(stateHooksPresent ? ["useState"] : []),
+        ...(nonLifeycleMethodsPresent ? ["useCallback"] : [])
+      ];
+
+      if (usedHooks.length) {
+        persistantChanges.push(importHooks(...usedHooks));
       }
 
-      if (selectionProccessingResult.metadata.nonLifeycleMethodsPresent) {
-        persistantChanges.push(importHook("useCallback"));
-      }
       await persistFileSystemChanges(...persistantChanges);
     }
   } catch (e) {
     handleError(e);
   }
 
-  function importHook(name) {
+  function importHooks(...hooks) {
     const currentFile = activeURI().path;
     const file = readFileContent(currentFile);
     const ast = codeToAst(file);
     const reactImport = getReactImportReference(ast);
-    reactImport.specifiers.push(
-      t.importSpecifier(t.identifier(name), t.identifier(name))
-    );
+    hooks.forEach(hook => {
+      reactImport.specifiers.push(
+        t.importSpecifier(t.identifier(hook), t.identifier(hook))
+      );
+    });
+
     const updatedReactImport = transformFromAst(t.program([reactImport])).code;
     return replaceTextInFile(
       updatedReactImport,
