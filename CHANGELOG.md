@@ -1,3 +1,10 @@
+## [4.15.1](https://github.com/wix/vscode-glean/compare/v4.15.0...v4.15.1) (2019-08-05)
+
+
+### Bug Fixes
+
+* **class-to-function:** Fixes [#75](https://github.com/wix/vscode-glean/issues/75) ([42b9493](https://github.com/wix/vscode-glean/commit/42b9493))
+
 # [4.15.0](https://github.com/wix/vscode-glean/compare/v4.14.0...v4.15.0) (2019-07-16)
 
 
