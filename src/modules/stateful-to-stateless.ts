@@ -436,7 +436,7 @@ export async function statefulToStatelessComponent() {
   }
 
   function importHooks(...hooks) {
-    const currentFile = activeURI().path;
+    const currentFile = activeURI().fsPath;
     const file = readFileContent(currentFile);
     const ast = codeToAst(file);
     const reactImport = getReactImportReference(ast);
