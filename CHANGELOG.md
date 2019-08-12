@@ -1,3 +1,10 @@
+## [4.15.2](https://github.com/wix/vscode-glean/compare/v4.15.1...v4.15.2) (2019-08-12)
+
+
+### Bug Fixes
+
+* **stateful-to-stateless:** fixed windows filepath ([a64aae1](https://github.com/wix/vscode-glean/commit/a64aae1))
+
 ## [4.15.1](https://github.com/wix/vscode-glean/compare/v4.15.0...v4.15.1) (2019-08-05)
 
 
