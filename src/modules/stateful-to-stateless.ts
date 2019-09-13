@@ -4,7 +4,7 @@ import template from "@babel/template";
 import * as t from "@babel/types";
 import { transformFromAst } from "@babel/core";
 import { capitalizeFirstLetter } from "../utils";
-import { isHooksForFunctionalComponentsExperimentOn } from "../settings";
+import { isHooksForFunctionalComponentsExperimentOn, shouldShowConversionWarning } from "../settings";
 import { getReactImportReference, isExportedDeclaration } from "../ast-helpers";
 import {
   showInformationMessage,
@@ -406,10 +406,11 @@ function resolveTypeAnnotation(propType: any) {
 
 export async function statefulToStatelessComponent() {
   try {
-    const answer = await showInformationMessage(
+    const answer = shouldShowConversionWarning() ? await showInformationMessage(
       "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?",
       ["Yes", "No"]
-    );
+    ) : "Yes";
+
     if (answer === "Yes") {
       const selectionProccessingResult = statefulToStateless(selectedText());
       const persistantChanges = [

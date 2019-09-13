@@ -16,3 +16,5 @@ export const isHooksForFunctionalComponentsExperimentOn = () => isExperimentOn('
 export const esmModuleSystemUsed = () => config().jsModuleSystem === 'esm';
 
 export const shouldSwitchToTarget = () => config().switchToTarget;
+
+export const shouldShowConversionWarning = () => config().showConversionWarning;

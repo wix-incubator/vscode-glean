@@ -40,7 +40,8 @@ describe("when refactoring stateful component into stateless component", () => {
     sandbox.stub(editor, "config").returns({
       jsModuleSystem: "esm",
       jsFilesExtensions: ["js"],
-      switchToTarget: true
+      switchToTarget: true,
+      showConversionWarning: true,
     });
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
 

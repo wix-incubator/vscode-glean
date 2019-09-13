@@ -58,6 +58,11 @@
           ],
           "default": [],
           "description": "Active experimental features. Please see https://github.com/wix/vscode-glean/ for list of experimental features"
+        },
+        "glean.showConversionWarning": {
+          "type": "boolean",
+          "default": true,
+          "description": "Specifies whether to show conversion warning or not"
         }
       }
     }
