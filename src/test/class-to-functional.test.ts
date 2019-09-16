@@ -65,7 +65,7 @@ describe("when refactoring stateful component into stateless component", () => {
     ]);
   });
   
-  it("does not shows the warning dialog when dialog is disabled", async () => {
+  it("does not show warning dialog when it is disabled", async () => {
     givenDeclinedWarning();
     
     configStub.restore();
