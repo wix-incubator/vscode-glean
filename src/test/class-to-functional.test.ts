@@ -15,7 +15,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 describe("when refactoring stateful component into stateless component", () => {
-  let sandbox;
+  let sandbox, configStub;
   let selectedTextStart = {},
     selectedTextEnd = {};
 
@@ -37,7 +37,7 @@ describe("when refactoring stateful component into stateless component", () => {
     sandbox.stub(fileSystem, "replaceTextInFile").returns(Promise.resolve());
     sandbox.stub(fileSystem, "prependTextToFile").returns(Promise.resolve());
     sandbox.stub(fileSystem, "readFileContent").returns("");
-    sandbox.stub(editor, "config").returns({
+    configStub = sandbox.stub(editor, "config").returns({
       jsModuleSystem: "esm",
       jsFilesExtensions: ["js"],
       switchToTarget: true,
@@ -63,6 +63,21 @@ describe("when refactoring stateful component into stateless component", () => {
       "Yes",
       "No"
     ]);
+  });
+  
+  it("does not shows the warning dialog when dialog is disabled", async () => {
+    givenDeclinedWarning();
+    
+    configStub.restore();
+    sandbox.stub(editor, "config").returns({
+      jsModuleSystem: "esm",
+      jsFilesExtensions: ["js"],
+      switchToTarget: true,
+      showConversionWarning: false,
+    });
+
+    await statefulToStatelessComponent();
+    expect((<any>editor.showInformationMessage).args).to.deep.equal([]);
   });
 
   it("does not refactor when the user does not accept the warning message", async () => {
