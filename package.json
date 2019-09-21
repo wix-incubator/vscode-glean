@@ -54,8 +54,11 @@
         },
         "glean.experiments": {
           "type": [
-            "string"
+            "array"
           ],
+          "items": {
+              "type": "string"
+          },
           "default": [],
           "description": "Active experimental features. Please see https://github.com/wix/vscode-glean/ for list of experimental features"
         }
