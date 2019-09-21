@@ -87,6 +87,10 @@ A list of enabled experimental features. Available experimental features:
 
 - "hooksForFunctionalComponents" - Hooks Support
 
+#### glean.showConversionWarning (Default: true)
+
+Determines whether VSCode should show conversion warning when converting Stateful Component to Functional Component.
+
 ## Contribute
 
 Feel free to open issues or PRs!
