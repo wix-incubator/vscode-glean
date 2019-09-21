@@ -1,3 +1,15 @@
+# [4.16.0](https://github.com/wix/vscode-glean/compare/v4.15.2...v4.16.0) (2019-09-21)
+
+
+### Bug Fixes
+
+* **experiments:** update experiments settings schema in package.json ([#82](https://github.com/wix/vscode-glean/issues/82)) ([92066b5](https://github.com/wix/vscode-glean/commit/92066b5))
+
+
+### Features
+
+* **class-to-functional:** added ability to disable conversion warning ([a6a0789](https://github.com/wix/vscode-glean/commit/a6a0789))
+
 ## [4.15.2](https://github.com/wix/vscode-glean/compare/v4.15.1...v4.15.2) (2019-08-12)
 
 
