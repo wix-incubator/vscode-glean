@@ -81,18 +81,52 @@ export function statefulToStateless(component) {
               const buildRequire = template(`
               STATE_SETTER(STATE_VALUE);
             `);
-              path.node.arguments[0].properties.forEach(({ key, value }) => {
-                path.insertBefore(
-                  buildRequire({
-                    STATE_SETTER: t.identifier(
-                      `set${capitalizeFirstLetter(key.name)}`
-                    ),
-                    STATE_VALUE: value
-                  })
-                );
 
-                stateProperties.set(key.name, value);
-              });
+              if (
+                t.isFunctionExpression(path.node.arguments[0]) ||
+                t.isArrowFunctionExpression(path.node.arguments[0])
+              ) {
+                let stateUpdates;
+                if (t.isObjectExpression(path.node.arguments[0].body)) {
+                  stateUpdates = path.node.arguments[0].body.properties;
+                } else {
+                  stateUpdates = path.node.arguments[0].body.body.find(exp =>
+                    t.isReturnStatement(exp)
+                  ).argument.properties;
+                }
+
+                stateUpdates.forEach(prop => {
+                  path.insertBefore(
+                    buildRequire({
+                      STATE_SETTER: t.identifier(
+                        `set${capitalizeFirstLetter(prop.key.name)}`
+                      ),
+                      STATE_VALUE: arrowFunction(
+                        [
+                          t.isObjectPattern(path.node.arguments[0].params[0])
+                            ? prop.key.name
+                            : "prev"
+                        ],
+                        [],
+                        [t.returnStatement(t.objectExpression([prop]))]
+                      )
+                    })
+                  );
+
+                });
+              } else {
+                path.node.arguments[0].properties.forEach(({ key, value }) => {
+                  path.insertBefore(
+                    buildRequire({
+                      STATE_SETTER: t.identifier(
+                        `set${capitalizeFirstLetter(key.name)}`
+                      ),
+                      STATE_VALUE: value
+                    })
+                  );
+
+                });
+              }
 
               path.remove();
             }
