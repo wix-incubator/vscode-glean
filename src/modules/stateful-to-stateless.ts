@@ -278,6 +278,12 @@ export function statefulToStateless(component) {
       ) {
         copyNonLifeCycleMethods(path);
       }
+      if (t.isObjectExpression(propValue) && path.node.key.name === "state") {
+        stateHooksPresent = true;
+        (propValue.properties as t.ObjectProperty[]).map(({ key, value }) => {
+          stateProperties.set(key.name, value);
+        });
+      }
     },
 
     ImportDeclaration(path) {
