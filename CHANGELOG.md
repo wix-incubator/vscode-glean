@@ -1,3 +1,10 @@
+# [4.17.0](https://github.com/wix/vscode-glean/compare/v4.16.0...v4.17.0) (2019-10-29)
+
+
+### Features
+
+* **class-to-functional:** support for default state initialization through class property ([5019116](https://github.com/wix/vscode-glean/commit/5019116))
+
 # [4.16.0](https://github.com/wix/vscode-glean/compare/v4.15.2...v4.16.0) (2019-09-21)
 
 
