@@ -9,9 +9,8 @@ before_install:
     sh -e /etc/init.d/xvfb start; sleep 3; fi
 install:
   - npm install
-  - travis_wait 30 mvn install
 script:
-  - npm test
+  - travis_wait 30 npm test
 after_success:
   - npm run semantic-release
 env:
