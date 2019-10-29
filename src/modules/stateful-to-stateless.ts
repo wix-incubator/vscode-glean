@@ -280,7 +280,7 @@ export function statefulToStateless(component) {
       }
       if (t.isObjectExpression(propValue) && path.node.key.name === "state") {
         stateHooksPresent = true;
-        propValue.properties.map(({ key, value }) => {
+        (propValue.properties as t.ObjectProperty[]).map(({ key, value }) => {
           stateProperties.set(key.name, value);
         });
       }
