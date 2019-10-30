@@ -254,6 +254,88 @@ describe("when refactoring stateful component into stateless component", () => {
         .returns(true);
     });
 
+    describe("when handling setState call that receives a function", () => {
+      it("it replaces it with a match state setter hook", async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, "selectedText").returns(`
+            class SomeComponent extends React.Component {
+  
+              someMethod() {
+                this.setState((prev) => ({
+                  foo:prev.foo
+                }));
+              }
+              render() {
+                return <div />;
+              }
+            }
+          `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return {\n        foo: prevFoo\n      };\n    });\n  });\n  return <div />;\n};",
+          selectedTextStart,
+          selectedTextEnd,
+          "/source.js"
+        );
+      });
+
+      it("it replaces multiple property updates with multiple state setters", async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, "selectedText").returns(`
+            class SomeComponent extends React.Component {
+  
+              someMethod() {
+                this.setState((prev) => ({
+                  foo:prev.foo,
+                  bar:prev.bar
+                }));
+              }
+              render() {
+                return <div />;
+              }
+            }
+          `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return {\n        foo: prevFoo\n      };\n    });\n    setBar(prevBar => {\n      return {\n        bar: prevBar\n      };\n    });\n  });\n  return <div />;\n};",
+          selectedTextStart,
+          selectedTextEnd,
+          "/source.js"
+        );
+      });
+
+      it("it handles destructring of previous state", async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, "selectedText").returns(`
+            class SomeComponent extends React.Component {
+  
+              someMethod() {
+                this.setState(({foo, bar}) => ({
+                  foo: foo,
+                  bar: bar
+                }));
+              }
+              render() {
+                return <div />;
+              }
+            }
+          `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return {\n        foo: prevFoo\n      };\n    });\n    setBar(prevBar => {\n      return {\n        bar: prevBar\n      };\n    });\n  });\n  return <div />;\n};",
+          selectedTextStart,
+          selectedTextEnd,
+          "/source.js"
+        );
+      });
+    });
+
     it("add useState hook for any state variable referenced in the JSX", async () => {
       givenApprovedWarning();
       sandbox.stub(editor, "selectedText").returns(`
