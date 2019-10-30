@@ -4,7 +4,10 @@ import template from "@babel/template";
 import * as t from "@babel/types";
 import { transformFromAst } from "@babel/core";
 import { capitalizeFirstLetter } from "../utils";
-import { isHooksForFunctionalComponentsExperimentOn, shouldShowConversionWarning } from "../settings";
+import {
+  isHooksForFunctionalComponentsExperimentOn,
+  shouldShowConversionWarning
+} from "../settings";
 import { getReactImportReference, isExportedDeclaration } from "../ast-helpers";
 import {
   showInformationMessage,
@@ -366,7 +369,9 @@ function handleFunctionalStateUpdate(path: any, buildRequire: any) {
     path.traverse({
       Identifier(nestedPath) {
         if (nestedPath.listKey === "params") {
-          nestedPath.scope.bindings.prev.referencePaths.forEach(ref => {
+          (Object.values(
+            nestedPath.scope.bindings
+          )[0] as any).referencePaths.forEach(ref => {
             ref.parentPath.replaceWith(ref.container.property);
           });
         }
@@ -385,14 +390,14 @@ function handleFunctionalStateUpdate(path: any, buildRequire: any) {
     const fn = arrowFunction(
       [prop.key.name],
       [],
-      [t.returnStatement(t.objectExpression([prop]))]
+      [t.returnStatement(prop.value)]
     );
 
     traverse(
       fn,
       {
         Identifier(ss) {
-          if (ss.node.name === prop.key.name && ss.key !== 'key') {
+          if (ss.node.name === prop.key.name && ss.key !== "key") {
             ss.node.name = `prev${capitalizeFirstLetter(prop.key.name)}`;
           }
         }
@@ -469,10 +474,12 @@ function resolveTypeAnnotation(propType: any) {
 
 export async function statefulToStatelessComponent() {
   try {
-    const answer = shouldShowConversionWarning() ? await showInformationMessage(
-      "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?",
-      ["Yes", "No"]
-    ) : "Yes";
+    const answer = shouldShowConversionWarning()
+      ? await showInformationMessage(
+          "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?",
+          ["Yes", "No"]
+        )
+      : "Yes";
 
     if (answer === "Yes") {
       const selectionProccessingResult = statefulToStateless(selectedText());

@@ -290,8 +290,7 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return {\n        foo: prevFoo\n      };\n    });\n  });\n  return <div />;\n};",
-          selectedTextStart,
+          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n  });\n  return <div />;\n};",          selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );
@@ -317,8 +316,7 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return {\n        foo: prevFoo\n      };\n    });\n    setBar(prevBar => {\n      return {\n        bar: prevBar\n      };\n    });\n  });\n  return <div />;\n};",
-          selectedTextStart,
+          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",          selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );
@@ -344,8 +342,7 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return {\n        foo: prevFoo\n      };\n    });\n    setBar(prevBar => {\n      return {\n        bar: prevBar\n      };\n    });\n  });\n  return <div />;\n};",
-          selectedTextStart,
+          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",          selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );
