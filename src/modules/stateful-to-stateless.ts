@@ -81,18 +81,24 @@ export function statefulToStateless(component) {
               const buildRequire = template(`
               STATE_SETTER(STATE_VALUE);
             `);
-              path.node.arguments[0].properties.forEach(({ key, value }) => {
-                path.insertBefore(
-                  buildRequire({
-                    STATE_SETTER: t.identifier(
-                      `set${capitalizeFirstLetter(key.name)}`
-                    ),
-                    STATE_VALUE: value
-                  })
-                );
 
-                stateProperties.set(key.name, value);
-              });
+              if (
+                t.isFunctionExpression(path.node.arguments[0]) ||
+                t.isArrowFunctionExpression(path.node.arguments[0])
+              ) {
+                handleFunctionalStateUpdate(path, buildRequire);
+              } else {
+                path.node.arguments[0].properties.forEach(({ key, value }) => {
+                  path.insertBefore(
+                    buildRequire({
+                      STATE_SETTER: t.identifier(
+                        `set${capitalizeFirstLetter(key.name)}`
+                      ),
+                      STATE_VALUE: value
+                    })
+                  );
+                });
+              }
 
               path.remove();
             }
@@ -322,9 +328,6 @@ export function statefulToStateless(component) {
       }
 
       const lifecycleEffectHook = buildEffectHook({ EFFECT: expressions });
-      // if(!(hasComponentDidUpdate(ast.program.body[0]))){
-      //   lifecycleEffectHook.expression.arguments.push(t.arrayExpression([]));
-      // }
 
       lifecycleEffectHook.expression.arguments.push(t.arrayExpression([]));
 
@@ -355,6 +358,60 @@ export function statefulToStateless(component) {
     }
   };
 }
+function handleFunctionalStateUpdate(path: any, buildRequire: any) {
+  const stateProducer = path.node.arguments[0];
+  const stateProducerArg = stateProducer.params[0];
+  const isPrevStateDestructured = t.isObjectPattern(stateProducerArg);
+  if (!isPrevStateDestructured) {
+    path.traverse({
+      Identifier(nestedPath) {
+        if (nestedPath.listKey === "params") {
+          nestedPath.scope.bindings.prev.referencePaths.forEach(ref => {
+            ref.parentPath.replaceWith(ref.container.property);
+          });
+        }
+      }
+    });
+  }
+
+  let stateUpdates;
+  if (t.isObjectExpression(stateProducer.body)) {
+    stateUpdates = stateProducer.body.properties;
+  } else {
+    stateUpdates = stateProducer.body.body.find(exp => t.isReturnStatement(exp))
+      .argument.properties;
+  }
+  stateUpdates.forEach(prop => {
+    const fn = arrowFunction(
+      [prop.key.name],
+      [],
+      [t.returnStatement(t.objectExpression([prop]))]
+    );
+
+    traverse(
+      fn,
+      {
+        Identifier(ss) {
+          if (ss.node.name === prop.key.name && ss.key !== 'key') {
+            ss.node.name = `prev${capitalizeFirstLetter(prop.key.name)}`;
+          }
+        }
+      },
+      path.scope,
+      path
+    );
+
+    path.insertBefore(
+      buildRequire({
+        STATE_SETTER: t.identifier(
+          `set${capitalizeFirstLetter(prop.key.name)}`
+        ),
+        STATE_VALUE: fn
+      })
+    );
+  });
+}
+
 function arrowFunction(
   params: any[],
   paramDefaults: any[],
