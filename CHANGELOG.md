@@ -1,3 +1,11 @@
+## [4.18.4](https://github.com/wix/vscode-glean/compare/v4.18.3...v4.18.4) (2019-10-30)
+
+
+### Bug Fixes
+
+* **deployment:** fix ([061e324](https://github.com/wix/vscode-glean/commit/061e324))
+* **deployment:** travis-ci config ([fa27c74](https://github.com/wix/vscode-glean/commit/fa27c74))
+
 ## [4.18.3](https://github.com/wix/vscode-glean/compare/v4.18.2...v4.18.3) (2019-10-30)
 
 
