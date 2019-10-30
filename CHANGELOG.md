@@ -1,3 +1,10 @@
+## [4.18.1](https://github.com/wix/vscode-glean/compare/v4.18.0...v4.18.1) (2019-10-30)
+
+
+### Bug Fixes
+
+* **class-to-functional:** fixed return value of a generated state producer ([f0be91d](https://github.com/wix/vscode-glean/commit/f0be91d))
+
 # [4.18.0](https://github.com/wix/vscode-glean/compare/v4.17.0...v4.18.0) (2019-10-30)
 
 
