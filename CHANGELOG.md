@@ -1,3 +1,11 @@
+## [4.18.2](https://github.com/wix/vscode-glean/compare/v4.18.1...v4.18.2) (2019-10-30)
+
+
+### Bug Fixes
+
+* **config:** travisci ([52d3423](https://github.com/wix/vscode-glean/commit/52d3423))
+* **config:** travisci ([900a215](https://github.com/wix/vscode-glean/commit/900a215))
+
 ## [4.18.1](https://github.com/wix/vscode-glean/compare/v4.18.0...v4.18.1) (2019-10-30)
 
 
