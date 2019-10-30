@@ -1,3 +1,15 @@
+# [4.18.0](https://github.com/wix/vscode-glean/compare/v4.17.0...v4.18.0) (2019-10-30)
+
+
+### Bug Fixes
+
+* **class-to-functional:** fixed returned value from functional state producers ([74f4a15](https://github.com/wix/vscode-glean/commit/74f4a15))
+
+
+### Features
+
+* **class-to-functional:** support for functional state updates ([#86](https://github.com/wix/vscode-glean/issues/86)) ([6c6fa06](https://github.com/wix/vscode-glean/commit/6c6fa06))
+
 # [4.17.0](https://github.com/wix/vscode-glean/compare/v4.16.0...v4.17.0) (2019-10-29)
 
 
