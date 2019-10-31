@@ -89,7 +89,7 @@ export function statefulToStateless(component) {
                 t.isFunctionExpression(path.node.arguments[0]) ||
                 t.isArrowFunctionExpression(path.node.arguments[0])
               ) {
-                handleFunctionalStateUpdate(path, buildRequire);
+                handleFunctionalStateUpdate(path, buildRequire, stateProperties);
               } else {
                 path.node.arguments[0].properties.forEach(({ key, value }) => {
                   path.insertBefore(
@@ -100,6 +100,10 @@ export function statefulToStateless(component) {
                       STATE_VALUE: value
                     })
                   );
+
+                  if (!stateProperties.has(key.name)) {
+                    stateProperties.set(key.name, void 0);
+                  }
                 });
               }
 
@@ -119,8 +123,7 @@ export function statefulToStateless(component) {
     }
   };
 
-  let stateHooksPresent,
-    nonLifeycleMethodsPresent = false;
+  let nonLifeycleMethodsPresent = false;
 
   let effectBody, effectTeardown;
 
@@ -269,7 +272,6 @@ export function statefulToStateless(component) {
             }) || {};
 
           if (expression && expression.left.property.name === "state") {
-            stateHooksPresent = true;
             expression.right.properties.map(({ key, value }) => {
               stateProperties.set(key.name, value);
             });
@@ -288,7 +290,6 @@ export function statefulToStateless(component) {
         copyNonLifeCycleMethods(path);
       }
       if (t.isObjectExpression(propValue) && path.node.key.name === "state") {
-        stateHooksPresent = true;
         (propValue.properties as t.ObjectProperty[]).map(({ key, value }) => {
           stateProperties.set(key.name, value);
         });
@@ -356,12 +357,12 @@ export function statefulToStateless(component) {
   return {
     text: processedJSX,
     metadata: {
-      stateHooksPresent,
+      stateHooksPresent: stateProperties.size > 0,
       nonLifeycleMethodsPresent
     }
   };
 }
-function handleFunctionalStateUpdate(path: any, buildRequire: any) {
+function handleFunctionalStateUpdate(path: any, buildRequire: any, stateProperties) {
   const stateProducer = path.node.arguments[0];
   const stateProducerArg = stateProducer.params[0];
   const isPrevStateDestructured = t.isObjectPattern(stateProducerArg);
@@ -414,6 +415,10 @@ function handleFunctionalStateUpdate(path: any, buildRequire: any) {
         STATE_VALUE: fn
       })
     );
+
+    if (!stateProperties.has(prop.key.name)) {
+      stateProperties.set(prop.key.name, void 0);
+    }
   });
 }
 

@@ -41,7 +41,7 @@ describe("when refactoring stateful component into stateless component", () => {
       jsModuleSystem: "esm",
       jsFilesExtensions: ["js"],
       switchToTarget: true,
-      showConversionWarning: true,
+      showConversionWarning: true
     });
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
 
@@ -64,16 +64,16 @@ describe("when refactoring stateful component into stateless component", () => {
       "No"
     ]);
   });
-  
+
   it("does not show warning dialog when it is disabled", async () => {
     givenDeclinedWarning();
-    
+
     configStub.restore();
     sandbox.stub(editor, "config").returns({
       jsModuleSystem: "esm",
       jsFilesExtensions: ["js"],
       switchToTarget: true,
-      showConversionWarning: false,
+      showConversionWarning: false
     });
 
     await statefulToStatelessComponent();
@@ -290,7 +290,8 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n  });\n  return <div />;\n};",          selectedTextStart,
+          "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n  });\n  return <div />;\n};",
+          selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );
@@ -316,7 +317,8 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",          selectedTextStart,
+          "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
+          selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );
@@ -342,7 +344,8 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",          selectedTextStart,
+          "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
+          selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );
