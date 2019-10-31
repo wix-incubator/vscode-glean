@@ -1,3 +1,10 @@
+## [4.18.5](https://github.com/wix/vscode-glean/compare/v4.18.4...v4.18.5) (2019-10-31)
+
+
+### Bug Fixes
+
+* **class-to-functional:** useState calls not generated if no default is set ([d2de1cd](https://github.com/wix/vscode-glean/commit/d2de1cd))
+
 ## [4.18.4](https://github.com/wix/vscode-glean/compare/v4.18.3...v4.18.4) (2019-10-30)
 
 
