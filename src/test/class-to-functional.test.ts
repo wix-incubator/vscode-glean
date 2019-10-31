@@ -270,6 +270,31 @@ describe("when refactoring stateful component into stateless component", () => {
         .returns(true);
     });
 
+    describe('when handling class properties', () => {
+      it("it replaces it with a match state setter hook", async () => {
+        givenApprovedWarning();
+        sandbox.stub(editor, "selectedText").returns(`
+            class SomeComponent extends React.Component {
+              foo = 3;
+              someMethod() {
+                this.foo = 4
+              }
+              render() {
+                return <div />;
+              }
+            }
+          `);
+
+        await statefulToStatelessComponent();
+
+        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+          "const SomeComponent = props => {\n  const foo = useRef(3);\n  const someMethod = useCallback(() => {\n    foo.current = 4;\n  });\n  return <div />;\n};",          selectedTextStart,
+          selectedTextEnd,
+          "/source.js"
+        );
+      });
+    });
+
     describe("when handling setState call that receives a function", () => {
       it("it replaces it with a match state setter hook", async () => {
         givenApprovedWarning();

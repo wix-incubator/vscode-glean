@@ -29,6 +29,10 @@ const buildStateHook = template(`
 const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
 `);
 
+const buildRefHook = template(`
+const VAR_NAME = useRef(INITIAL_VALUE);
+`);
+
 const buildEffectHook = template(`
 useEffect(() =>  { EFFECT });
 `);
@@ -40,11 +44,37 @@ useCallback(CALLBACK);
 export function statefulToStateless(component) {
   const functionBody = [];
   const stateProperties = new Map();
-
+  const refProperties = new Map();
   const RemoveThisVisitor = {
     MemberExpression(path) {
-      if (t.isThisExpression(path.node.object)) {
-        path.replaceWith(path.node.property);
+      if (path.node.wasVisited || path.shouldSkip) return;
+      if (
+        isHooksForFunctionalComponentsExperimentOn() &&
+        path.key !== "callee"
+      ) {
+        if (
+          t.isIdentifier(path.node.property) &&
+          !["state", "props"].includes(path.node.property.name)
+        ) {
+          if (!refProperties.has(path.node.property.name)) {
+            refProperties.set(path.node.property.name, undefined);
+          }
+        }
+
+        const replacement = t.memberExpression(
+          t.identifier(path.node.property.name),
+          t.identifier("current")
+        );
+
+        (replacement as any).wasVisited = true;
+
+        path.replaceWith(replacement);
+
+        path.skip();
+      } else {
+        if (t.isThisExpression(path.node.object)) {
+          path.replaceWith(path.node.property);
+        }
       }
     }
   };
@@ -75,48 +105,41 @@ export function statefulToStateless(component) {
 
   const RemoveSetStateAndForceUpdateVisitor = {
     CallExpression(path) {
-      if (t.isMemberExpression(path.node.callee)) {
-        if (t.isThisExpression(path.node.callee.object)) {
-          if (isHooksForFunctionalComponentsExperimentOn()) {
-            if (path.node.callee.property.name === "forceUpdate") {
-              path.remove();
-            } else if (path.node.callee.property.name === "setState") {
-              const buildRequire = template(`
+      if (
+        t.isMemberExpression(path.node.callee) &&
+        t.isThisExpression(path.node.callee.object)
+      ) {
+        if (isHooksForFunctionalComponentsExperimentOn()) {
+          if (path.node.callee.property.name === "forceUpdate") {
+            path.remove();
+          } else if (path.node.callee.property.name === "setState") {
+            const buildRequire = template(`
               STATE_SETTER(STATE_VALUE);
             `);
 
-              if (
-                t.isFunctionExpression(path.node.arguments[0]) ||
-                t.isArrowFunctionExpression(path.node.arguments[0])
-              ) {
-                handleFunctionalStateUpdate(path, buildRequire, stateProperties);
-              } else {
-                path.node.arguments[0].properties.forEach(({ key, value }) => {
-                  path.insertBefore(
-                    buildRequire({
-                      STATE_SETTER: t.identifier(
-                        `set${capitalizeFirstLetter(key.name)}`
-                      ),
-                      STATE_VALUE: value
-                    })
-                  );
-
-                  if (!stateProperties.has(key.name)) {
-                    stateProperties.set(key.name, void 0);
-                  }
-                });
-              }
-
-              path.remove();
+            if (isStateChangedThroughFunction(path.node.arguments[0])) {
+              covertStateChangeThroughFunction(
+                path,
+                buildRequire,
+                stateProperties
+              );
+            } else {
+              convertStateChangeThroughObject(
+                path,
+                buildRequire,
+                stateProperties
+              );
             }
-          } else {
-            if (
-              ["setState", "forceUpdate"].indexOf(
-                path.node.callee.property.name
-              ) !== -1
-            ) {
-              path.remove();
-            }
+
+            path.remove();
+          }
+        } else {
+          if (
+            ["setState", "forceUpdate"].indexOf(
+              path.node.callee.property.name
+            ) !== -1
+          ) {
+            path.remove();
           }
         }
       }
@@ -288,6 +311,8 @@ export function statefulToStateless(component) {
         t.isArrowFunctionExpression(propValue)
       ) {
         copyNonLifeCycleMethods(path);
+      } else {
+        refProperties.set(path.node.key.name, path.node.value);
       }
       if (t.isObjectExpression(propValue) && path.node.key.name === "state") {
         (propValue.properties as t.ObjectProperty[]).map(({ key, value }) => {
@@ -319,6 +344,17 @@ export function statefulToStateless(component) {
   traverse(ast, visitor);
 
   if (isHooksForFunctionalComponentsExperimentOn()) {
+    const refHookExpression = Array.from(refProperties).map(
+      ([key, defaultValue]) => {
+        return buildRefHook({
+          VAR_NAME: t.identifier(key),
+          INITIAL_VALUE: defaultValue
+        });
+      }
+    );
+
+    functionBody.unshift(...refHookExpression);
+
     if (effectBody || effectTeardown) {
       const expressions = [];
       if (effectBody) {
@@ -358,11 +394,41 @@ export function statefulToStateless(component) {
     text: processedJSX,
     metadata: {
       stateHooksPresent: stateProperties.size > 0,
+      refHooksPresent: refProperties.size > 0,
       nonLifeycleMethodsPresent
     }
   };
 }
-function handleFunctionalStateUpdate(path: any, buildRequire: any, stateProperties) {
+function isStateChangedThroughFunction(setStateArg: any) {
+  return (
+    t.isFunctionExpression(setStateArg) ||
+    t.isArrowFunctionExpression(setStateArg)
+  );
+}
+
+function convertStateChangeThroughObject(
+  path: any,
+  buildRequire: any,
+  stateProperties: Map<any, any>
+) {
+  path.node.arguments[0].properties.forEach(({ key, value }) => {
+    path.insertBefore(
+      buildRequire({
+        STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
+        STATE_VALUE: value
+      })
+    );
+    if (!stateProperties.has(key.name)) {
+      stateProperties.set(key.name, void 0);
+    }
+  });
+}
+
+function covertStateChangeThroughFunction(
+  path: any,
+  buildRequire: any,
+  stateProperties
+) {
   const stateProducer = path.node.arguments[0];
   const stateProducerArg = stateProducer.params[0];
   const isPrevStateDestructured = t.isObjectPattern(stateProducerArg);
@@ -494,10 +560,12 @@ export async function statefulToStatelessComponent() {
 
       const {
         stateHooksPresent,
+        refHooksPresent,
         nonLifeycleMethodsPresent
       } = selectionProccessingResult.metadata;
       const usedHooks = [
         ...(stateHooksPresent ? ["useState"] : []),
+        ...(refHooksPresent ? ["useRef"] : []),
         ...(nonLifeycleMethodsPresent ? ["useCallback"] : [])
       ];
 
