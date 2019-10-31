@@ -1,3 +1,10 @@
+# [4.19.0](https://github.com/wix/vscode-glean/compare/v4.18.5...v4.19.0) (2019-10-31)
+
+
+### Features
+
+* **class-to-functional:** added support for converting class properties into useRef. Closes  [#77](https://github.com/wix/vscode-glean/issues/77) ([f399b84](https://github.com/wix/vscode-glean/commit/f399b84))
+
 ## [4.18.5](https://github.com/wix/vscode-glean/compare/v4.18.4...v4.18.5) (2019-10-31)
 
 
