@@ -393,6 +393,7 @@ export function statefulToStateless(component) {
   return {
     text: processedJSX,
     metadata: {
+      effectHooksPresent: !!(effectBody || effectTeardown),
       stateHooksPresent: stateProperties.size > 0,
       refHooksPresent: refProperties.size > 0,
       nonLifeycleMethodsPresent
@@ -561,12 +562,14 @@ export async function statefulToStatelessComponent() {
       const {
         stateHooksPresent,
         refHooksPresent,
-        nonLifeycleMethodsPresent
+        nonLifeycleMethodsPresent,
+        effectHooksPresent
       } = selectionProccessingResult.metadata;
       const usedHooks = [
         ...(stateHooksPresent ? ["useState"] : []),
         ...(refHooksPresent ? ["useRef"] : []),
-        ...(nonLifeycleMethodsPresent ? ["useCallback"] : [])
+        ...(nonLifeycleMethodsPresent ? ["useCallback"] : []),
+        ...(effectHooksPresent ? ["useEffect"] : [])
       ];
 
       if (usedHooks.length) {
