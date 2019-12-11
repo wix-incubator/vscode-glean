@@ -66,6 +66,11 @@
           "type": "boolean",
           "default": true,
           "description": "Specifies whether to show conversion warning or not"
+        },
+        "glean.useDefault": {
+          "type": "boolean",
+          "default":false,
+          "description": "Specifies export function as a default"
         }
       }
     }
@@ -93,13 +98,13 @@
     "@types/sinon-chai": "^2.7.29",
     "chai": "^4.2.0",
     "prettier": "1.15.3",
-    "semantic-release": "^15.10.0",
+    "semantic-release": "^15.13.31",
     "semantic-release-vsce": "^2.1.2",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",
     "tslint-config-prettier": "^1.17.0",
     "typescript": "^2.6.1",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.36"
   },
   "dependencies": {
     "@babel/core": "^7.1.2",

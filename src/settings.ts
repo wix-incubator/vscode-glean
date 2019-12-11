@@ -18,3 +18,5 @@ export const esmModuleSystemUsed = () => config().jsModuleSystem === 'esm';
 export const shouldSwitchToTarget = () => config().switchToTarget;
 
 export const shouldShowConversionWarning = () => config().showConversionWarning;
+
+export const shouldUseDefault = () => config().useDefault;

@@ -2,7 +2,7 @@ import { parse, ParserOptions } from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
 import { transformFromAst } from "@babel/core";
-import { esmModuleSystemUsed, commonJSModuleSystemUsed } from "./settings";
+import { esmModuleSystemUsed, commonJSModuleSystemUsed, shouldUseDefault } from "./settings";
 import template from "@babel/template";
 
 export const parsingOptions = {
@@ -77,7 +77,13 @@ export function exportAllDeclarationsESM(code) {
         path.parent.type === "Program" &&
         !path.node.type.includes("Export")
       ) {
-        path.replaceWith(t.exportNamedDeclaration(path.node, []));
+
+        // check use default declaration or not
+        if(shouldUseDefault()){
+          path.replaceWith(t.exportDefaultDeclaration(path.node));
+        } else {
+          path.replaceWith(t.exportNamedDeclaration(path.node, []));
+        }
       }
     }
   };
