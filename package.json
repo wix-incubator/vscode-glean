@@ -67,7 +67,7 @@
           "default": true,
           "description": "Specifies whether to show conversion warning or not"
         },
-        "glean.useDefault": {
+        "glean.useExportDefault": {
           "type": "boolean",
           "default":false,
           "description": "Specifies export function as a default"

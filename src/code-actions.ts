@@ -3,7 +3,7 @@ import { shouldSwitchToTarget, shouldBeConsideredJsFiles } from "./settings";
 import { replaceTextInFile, appendTextToFile, prependTextToFile, removeContentFromFileAtLineAndColumn } from "./file-system";
 import { getIdentifier, generateImportStatementFromFile, transformJSIntoExportExpressions } from "./parsing";
 import * as relative from 'relative';
-import * as path from 'path'
+import * as path from 'path';
 
 export async function switchToDestinationFileIfRequired(destinationFilePath: any) {
   if (shouldSwitchToTarget()) {

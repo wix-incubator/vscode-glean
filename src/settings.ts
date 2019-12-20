@@ -19,4 +19,4 @@ export const shouldSwitchToTarget = () => config().switchToTarget;
 
 export const shouldShowConversionWarning = () => config().showConversionWarning;
 
-export const shouldUseDefault = () => config().useDefault;
+export const shouldUseExportDefault = () => config().useExportDefault;

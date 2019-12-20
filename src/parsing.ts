@@ -2,7 +2,7 @@ import { parse, ParserOptions } from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
 import { transformFromAst } from "@babel/core";
-import { esmModuleSystemUsed, commonJSModuleSystemUsed, shouldUseDefault } from "./settings";
+import { esmModuleSystemUsed, commonJSModuleSystemUsed, shouldUseExportDefault } from "./settings";
 import template from "@babel/template";
 
 export const parsingOptions = {
@@ -59,10 +59,14 @@ function generateExportsExpr(value) {
   return t.expressionStatement(assignment(value));
 }
 
+function generateDefaultExports(identifiersString: string = ''): string {
+  return shouldUseExportDefault() ? `${identifiersString}` : `{ ${identifiersString} }`;
+}
+
 export function generateImportStatementFromFile(identifiers, modulePath) {
   const identifiersString = identifiers.join(", ");
   if (esmModuleSystemUsed()) {
-    const importType = shouldUseDefault() ? `${identifiersString}` : `{ ${identifiersString} }`;
+    const importType = generateDefaultExports(identifiersString);
     return `import ${importType} from './${modulePath}';\n`;
   } else if (commonJSModuleSystemUsed()) {
     return `const { ${identifiersString} } = require('./${modulePath}');\n`;
@@ -80,7 +84,7 @@ export function exportAllDeclarationsESM(code) {
       ) {
 
         // check use default declaration or not
-        if(shouldUseDefault()){
+        if(shouldUseExportDefault()){
           path.replaceWith(t.exportDefaultDeclaration(path.node));
         } else {
           path.replaceWith(t.exportNamedDeclaration(path.node, []));
