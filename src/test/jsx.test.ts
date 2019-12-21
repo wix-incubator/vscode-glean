@@ -14,9 +14,15 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 describe("jsx module", function() {
-  let sandbox;
+  let sandbox, stubConfig;
   let selectedTextStart = {},
     selectedTextEnd = {};
+  const defaultConfig = {
+    jsModuleSystem: "esm",
+    jsFilesExtensions: ["js"],
+    switchToTarget: true,
+    useExportDefault: false
+  };
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -36,11 +42,7 @@ describe("jsx module", function() {
     sandbox.stub(fileSystem, "replaceTextInFile").returns(Promise.resolve());
     sandbox.stub(fileSystem, "prependTextToFile").returns(Promise.resolve());
     sandbox.stub(fileSystem, "readFileContent").returns("");
-    sandbox.stub(editor, "config").returns({
-      jsModuleSystem: "esm",
-      jsFilesExtensions: ["js"],
-      switchToTarget: true
-    });
+    stubConfig = sandbox.stub(editor, "config").returns(defaultConfig);
     sandbox.stub(fileSystem, "appendTextToFile").returns(Promise.resolve());
 
     sandbox.stub(editor, "openFile");
@@ -65,6 +67,42 @@ describe("jsx module", function() {
   });
 
   describe("When extracting JSX to component", () => {
+
+    describe("useExportDefault config", ()=>{
+
+      const componentBodyText = `<div>Hello World</div>`;
+
+      beforeEach(()=>{
+        sandbox.stub(editor, "selectedText").returns(componentBodyText);
+      });
+
+      it("should extract export as regular when useExportDefault is false", async () => {
+        await extractJSXToComponentToFile();
+  
+        expect(fileSystem.appendTextToFile).to.have.been.calledWithMatch(
+          "export function Target({})",
+          "/target.js"
+        );
+      });
+
+      it("should extract export as default when useExportDefault is true", async () => {
+        stubConfig.restore();
+        
+        sandbox.stub(editor, "config").returns({
+          ...defaultConfig, 
+          useExportDefault: true
+        });
+  
+        await extractJSXToComponentToFile();
+  
+        expect(fileSystem.appendTextToFile).to.have.been.calledWithMatch(
+          "export default function Target({})",
+          "/target.js"
+        );
+      });
+
+    });
+
     it("doesnt wrap the extracted jsx with a Fragment if its a single line", async () => {
       sandbox.stub(editor, "selectedText").returns(`
         <div>{foo}</div>
