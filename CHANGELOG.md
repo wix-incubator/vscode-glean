@@ -1,3 +1,10 @@
+# [4.20.0](https://github.com/wix/vscode-glean/compare/v4.19.1...v4.20.0) (2020-01-05)
+
+
+### Features
+
+* **config:** support default exports ([6e95589](https://github.com/wix/vscode-glean/commit/6e955899128ca23017f619fa9de2ddf6373d0a58))
+
 ## [4.19.1](https://github.com/wix/vscode-glean/compare/v4.19.0...v4.19.1) (2020-01-05)
 
 
