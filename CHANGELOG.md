@@ -1,3 +1,10 @@
+## [4.19.1](https://github.com/wix/vscode-glean/compare/v4.19.0...v4.19.1) (2020-01-05)
+
+
+### Bug Fixes
+
+* **class-to-functional:** fixed prop coversion ([e133f0e](https://github.com/wix/vscode-glean/commit/e133f0e6eb3e21b322d767fdf73c83a243b6cb80))
+
 # [4.19.0](https://github.com/wix/vscode-glean/compare/v4.18.5...v4.19.0) (2019-10-31)
 
 

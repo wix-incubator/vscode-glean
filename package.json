@@ -69,7 +69,7 @@
         },
         "glean.useExportDefault": {
           "type": "boolean",
-          "default":false,
+          "default": false,
           "description": "Specifies export function as a default"
         }
       }
