@@ -59,14 +59,14 @@ function generateExportsExpr(value) {
   return t.expressionStatement(assignment(value));
 }
 
-function generateDefaultExports(identifiersString: string = ''): string {
+function getImportedIdentifier(identifiersString: string = ''): string {
   return shouldUseExportDefault() ? `${identifiersString}` : `{ ${identifiersString} }`;
 }
 
 export function generateImportStatementFromFile(identifiers, modulePath) {
   const identifiersString = identifiers.join(", ");
   if (esmModuleSystemUsed()) {
-    const importType = generateDefaultExports(identifiersString);
+    const importType = getImportedIdentifier(identifiersString);
     return `import ${importType} from './${modulePath}';\n`;
   } else if (commonJSModuleSystemUsed()) {
     return `const { ${identifiersString} } = require('./${modulePath}');\n`;
