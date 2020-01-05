@@ -45,6 +45,7 @@ export function statefulToStateless(component) {
   const functionBody = [];
   const stateProperties = new Map();
   const refProperties = new Map();
+  const classMethods = new Set();
   const RemoveThisVisitor = {
     MemberExpression(path) {
       if (path.node.wasVisited || path.shouldSkip) return;
@@ -54,23 +55,35 @@ export function statefulToStateless(component) {
       ) {
         if (
           t.isIdentifier(path.node.property) &&
-          !["state", "props"].includes(path.node.property.name)
+          t.isThisExpression(path.node.object) &&
+          !classMethods.has(path.node.property.name)
         ) {
           if (!refProperties.has(path.node.property.name)) {
             refProperties.set(path.node.property.name, undefined);
           }
+          const replacement = t.memberExpression(
+            t.identifier(path.node.property.name),
+            t.identifier("current")
+          );
+  
+          (replacement as any).wasVisited = true;
+  
+          path.replaceWith(replacement);
+  
+          path.skip();
+        } else {
+          if (t.isThisExpression(path.node.object.object) && !classMethods.has(path.node.property.name)) {
+            path.replaceWith(t.memberExpression(t.identifier('props'),path.node.property));
+           
+          } else {
+            if (t.isThisExpression(path.node.object)) {
+              path.replaceWith(path.node.property);
+            }
+          }
         }
 
-        const replacement = t.memberExpression(
-          t.identifier(path.node.property.name),
-          t.identifier("current")
-        );
-
-        (replacement as any).wasVisited = true;
-
-        path.replaceWith(replacement);
-
         path.skip();
+
       } else {
         if (t.isThisExpression(path.node.object)) {
           path.replaceWith(path.node.property);
@@ -285,6 +298,7 @@ export function statefulToStateless(component) {
     ClassMethod(path) {
       if (isHooksForFunctionalComponentsExperimentOn()) {
         const methodName = path.node.key.name;
+        classMethods.add(methodName);
         if (!lifecycleMethods.includes(methodName) && methodName !== "render") {
           nonLifeycleMethodsPresent = true;
         }
@@ -487,6 +501,7 @@ function covertStateChangeThroughFunction(
     }
   });
 }
+
 
 function arrowFunction(
   params: any[],
