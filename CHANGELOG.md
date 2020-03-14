@@ -1,3 +1,10 @@
+## [4.20.1](https://github.com/wix/vscode-glean/compare/v4.20.0...v4.20.1) (2020-03-14)
+
+
+### Bug Fixes
+
+* **conditional:** fixed wrapping with JSX expression when selection nested within JSX element. Fixes [#105](https://github.com/wix/vscode-glean/issues/105) ([65393db](https://github.com/wix/vscode-glean/commit/65393db2d273c1b50fc1149f62efaf3c18f5226e))
+
 # [4.20.0](https://github.com/wix/vscode-glean/compare/v4.19.1...v4.20.0) (2020-01-05)
 
 
