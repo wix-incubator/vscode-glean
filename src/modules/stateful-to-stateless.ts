@@ -6,7 +6,7 @@ import { transformFromAst } from "@babel/core";
 import { capitalizeFirstLetter } from "../utils";
 import {
   isHooksForFunctionalComponentsExperimentOn,
-  shouldShowConversionWarning
+  shouldShowConversionWarning,
 } from "../settings";
 import { getReactImportReference, isExportedDeclaration } from "../ast-helpers";
 import {
@@ -14,16 +14,18 @@ import {
   selectedText,
   activeURI,
   activeFileName,
-  openFile
+  openFile,
+  importMissingDependencies,
 } from "../editor";
 import { replaceSelectionWith, handleError } from "../code-actions";
 import {
   persistFileSystemChanges,
   readFileContent,
-  replaceTextInFile
+  replaceTextInFile,
 } from "../file-system";
 import { Position } from "vscode";
 import { Identifier } from "babel-types";
+import * as vscode from "vscode";
 
 const buildStateHook = template(`
 const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
@@ -65,16 +67,20 @@ export function statefulToStateless(component) {
             t.identifier(path.node.property.name),
             t.identifier("current")
           );
-  
+
           (replacement as any).wasVisited = true;
-  
+
           path.replaceWith(replacement);
-  
+
           path.skip();
         } else {
-          if (t.isThisExpression(path.node.object.object) && !classMethods.has(path.node.property.name)) {
-            path.replaceWith(t.memberExpression(t.identifier('props'),path.node.property));
-           
+          if (
+            t.isThisExpression(path.node.object.object) &&
+            !classMethods.has(path.node.property.name)
+          ) {
+            path.replaceWith(
+              t.memberExpression(t.identifier("props"), path.node.property)
+            );
           } else {
             if (t.isThisExpression(path.node.object)) {
               path.replaceWith(path.node.property);
@@ -83,13 +89,12 @@ export function statefulToStateless(component) {
         }
 
         path.skip();
-
       } else {
         if (t.isThisExpression(path.node.object)) {
           path.replaceWith(path.node.property);
         }
       }
-    }
+    },
   };
 
   const ReplaceStateWithPropsVisitor = {
@@ -113,7 +118,7 @@ export function statefulToStateless(component) {
           path.node.property.name = "props";
         }
       }
-    }
+    },
   };
 
   const RemoveSetStateAndForceUpdateVisitor = {
@@ -156,7 +161,7 @@ export function statefulToStateless(component) {
           }
         }
       }
-    }
+    },
   };
 
   let nonLifeycleMethodsPresent = false;
@@ -173,7 +178,7 @@ export function statefulToStateless(component) {
     "componentDidUpdate",
     "componentWillUnmount",
     "componentDidCatch",
-    "getDerivedStateFromProps"
+    "getDerivedStateFromProps",
   ];
 
   const namedArrowFunction = ({
@@ -182,19 +187,20 @@ export function statefulToStateless(component) {
     propType = null,
     paramDefaults = [],
     body = [],
-    arrowFunctionCreator = arrowFunction
+    arrowFunctionCreator = arrowFunction,
+    isAsync = false,
   }) => {
     const identifier = t.identifier(name);
     addPropTSAnnotationIfNeeded(propType, identifier);
     return t.variableDeclaration("const", [
       t.variableDeclarator(
         identifier,
-        arrowFunctionCreator(params, paramDefaults, body)
-      )
+        arrowFunctionCreator(params, paramDefaults, body, isAsync)
+      ),
     ]);
   };
 
-  const copyNonLifeCycleMethods = path => {
+  const copyNonLifeCycleMethods = (path) => {
     const methodName = path.node.key.name;
     const classBody = t.isClassMethod(path)
       ? path["node"].body.body
@@ -203,7 +209,11 @@ export function statefulToStateless(component) {
       path.traverse(RemoveSetStateAndForceUpdateVisitor);
       path.traverse(ReplaceStateWithPropsVisitor);
       path.traverse(RemoveThisVisitor);
-      appendFunctionBodyToStatelessComponent(methodName, classBody);
+      appendFunctionBodyToStatelessComponent(
+        methodName,
+        classBody,
+        path.node.async
+      );
     } else if (isHooksForFunctionalComponentsExperimentOn()) {
       if (methodName === "componentDidMount") {
         path.traverse(RemoveSetStateAndForceUpdateVisitor);
@@ -221,7 +231,7 @@ export function statefulToStateless(component) {
     }
   };
 
-  const appendFunctionBodyToStatelessComponent = (name, body) => {
+  const appendFunctionBodyToStatelessComponent = (name, body, isAsync) => {
     if (name !== "render") {
       if (isHooksForFunctionalComponentsExperimentOn()) {
         functionBody.push(
@@ -230,12 +240,17 @@ export function statefulToStateless(component) {
             body,
             arrowFunctionCreator: (params, paramDefaults, arrowBody) =>
               buildUseCallbackHook({
-                CALLBACK: arrowFunction(params, paramDefaults, arrowBody)
-              }).expression
+                CALLBACK: arrowFunction(
+                  params,
+                  paramDefaults,
+                  arrowBody,
+                  isAsync
+                ),
+              }).expression,
           })
         );
       } else {
-        functionBody.push(namedArrowFunction({ name, body }));
+        functionBody.push(namedArrowFunction({ name, body, isAsync }));
       }
     } else {
       functionBody.push(...body);
@@ -248,7 +263,7 @@ export function statefulToStateless(component) {
       const defaultPropsPath = path
         .get("body")
         .get("body")
-        .find(property => {
+        .find((property) => {
           return (
             t.isClassProperty(property) &&
             property["node"].key.name === "defaultProps"
@@ -264,7 +279,7 @@ export function statefulToStateless(component) {
             ? path.node.superTypeParameters.params
             : null,
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
-        body: functionBody
+        body: functionBody,
       });
 
       const isExportDefaultDeclaration = t.isExportDefaultDeclaration(
@@ -283,7 +298,7 @@ export function statefulToStateless(component) {
       );
 
       const mainPath = t.isExportDeclaration(path.container)
-        ? path.findParent(p => t.isExportDeclaration(p))
+        ? path.findParent((p) => t.isExportDeclaration(p))
         : path;
 
       if (isExportDefaultDeclaration) {
@@ -304,7 +319,7 @@ export function statefulToStateless(component) {
         }
         if (path.node.kind === "constructor") {
           const { expression = null } =
-            path.node.body.body.find(bodyStatement => {
+            path.node.body.body.find((bodyStatement) => {
               return t.isAssignmentExpression(bodyStatement.expression);
             }) || {};
 
@@ -338,17 +353,17 @@ export function statefulToStateless(component) {
     ImportDeclaration(path) {
       if (path.node.source.value === "react") {
       }
-    }
+    },
   };
 
   const ast = codeToAst(component);
-  const hasComponentDidUpdate = node => {
+  const hasComponentDidUpdate = (node) => {
     const classDeclaration = isExportedDeclaration(node)
       ? node.declaration
       : ast.program.body[0];
     return Boolean(
       (classDeclaration as any).body.body.find(
-        node =>
+        (node) =>
           t.isClassMethod(node) &&
           (node.key as any).name === "componentDidUpdate"
       )
@@ -362,7 +377,7 @@ export function statefulToStateless(component) {
       ([key, defaultValue]) => {
         return buildRefHook({
           VAR_NAME: t.identifier(key),
-          INITIAL_VALUE: defaultValue
+          INITIAL_VALUE: defaultValue,
         });
       }
     );
@@ -393,7 +408,7 @@ export function statefulToStateless(component) {
         return buildStateHook({
           STATE_PROP: t.identifier(key),
           STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key)}`),
-          STATE_VALUE: defaultValue
+          STATE_VALUE: defaultValue,
         });
       }
     );
@@ -409,8 +424,8 @@ export function statefulToStateless(component) {
     metadata: {
       stateHooksPresent: stateProperties.size > 0,
       refHooksPresent: refProperties.size > 0,
-      nonLifeycleMethodsPresent
-    }
+      nonLifeycleMethodsPresent,
+    },
   };
 }
 function isStateChangedThroughFunction(setStateArg: any) {
@@ -429,7 +444,7 @@ function convertStateChangeThroughObject(
     path.insertBefore(
       buildRequire({
         STATE_SETTER: t.identifier(`set${capitalizeFirstLetter(key.name)}`),
-        STATE_VALUE: value
+        STATE_VALUE: value,
       })
     );
     if (!stateProperties.has(key.name)) {
@@ -452,11 +467,11 @@ function covertStateChangeThroughFunction(
         if (nestedPath.listKey === "params") {
           (Object.values(
             nestedPath.scope.bindings
-          )[0] as any).referencePaths.forEach(ref => {
+          )[0] as any).referencePaths.forEach((ref) => {
             ref.parentPath.replaceWith(ref.container.property);
           });
         }
-      }
+      },
     });
   }
 
@@ -464,10 +479,11 @@ function covertStateChangeThroughFunction(
   if (t.isObjectExpression(stateProducer.body)) {
     stateUpdates = stateProducer.body.properties;
   } else {
-    stateUpdates = stateProducer.body.body.find(exp => t.isReturnStatement(exp))
-      .argument.properties;
+    stateUpdates = stateProducer.body.body.find((exp) =>
+      t.isReturnStatement(exp)
+    ).argument.properties;
   }
-  stateUpdates.forEach(prop => {
+  stateUpdates.forEach((prop) => {
     const fn = arrowFunction(
       [prop.key.name],
       [],
@@ -481,7 +497,7 @@ function covertStateChangeThroughFunction(
           if (ss.node.name === prop.key.name && ss.key !== "key") {
             ss.node.name = `prev${capitalizeFirstLetter(prop.key.name)}`;
           }
-        }
+        },
       },
       path.scope,
       path
@@ -492,7 +508,7 @@ function covertStateChangeThroughFunction(
         STATE_SETTER: t.identifier(
           `set${capitalizeFirstLetter(prop.key.name)}`
         ),
-        STATE_VALUE: fn
+        STATE_VALUE: fn,
       })
     );
 
@@ -502,11 +518,11 @@ function covertStateChangeThroughFunction(
   });
 }
 
-
 function arrowFunction(
   params: any[],
   paramDefaults: any[],
-  body: any[]
+  body: any[],
+  isAsync: boolean = false
 ): t.Expression {
   return t.arrowFunctionExpression(
     params.map((param, idx) => {
@@ -517,7 +533,8 @@ function arrowFunction(
       }
       return paramObj;
     }),
-    t.blockStatement(body)
+    t.blockStatement(body),
+    isAsync
   );
 }
 
@@ -532,7 +549,7 @@ function addPropTSAnnotationIfNeeded(
 
 function resolveTypeAnnotation(propType: any) {
   let typeAnnotation;
-  const hasTypeReferences = propType.some(annotation =>
+  const hasTypeReferences = propType.some((annotation) =>
     t.isTSTypeReference(annotation)
   );
   if (hasTypeReferences) {
@@ -570,18 +587,18 @@ export async function statefulToStatelessComponent() {
     if (answer === "Yes") {
       const selectionProccessingResult = statefulToStateless(selectedText());
       const persistantChanges = [
-        replaceSelectionWith(selectionProccessingResult.text)
+        replaceSelectionWith(selectionProccessingResult.text),
       ];
 
       const {
         stateHooksPresent,
         refHooksPresent,
-        nonLifeycleMethodsPresent
+        nonLifeycleMethodsPresent,
       } = selectionProccessingResult.metadata;
       const usedHooks = [
         ...(stateHooksPresent ? ["useState"] : []),
         ...(refHooksPresent ? ["useRef"] : []),
-        ...(nonLifeycleMethodsPresent ? ["useCallback"] : [])
+        ...(nonLifeycleMethodsPresent ? ["useCallback"] : []),
       ];
 
       if (usedHooks.length) {
@@ -589,6 +606,7 @@ export async function statefulToStatelessComponent() {
       }
 
       await persistFileSystemChanges(...persistantChanges);
+      await importMissingDependencies(activeFileName());
     }
   } catch (e) {
     handleError(e);
@@ -599,7 +617,7 @@ export async function statefulToStatelessComponent() {
     const file = readFileContent(currentFile);
     const ast = codeToAst(file);
     const reactImport = getReactImportReference(ast);
-    hooks.forEach(hook => {
+    hooks.forEach((hook) => {
       reactImport.specifiers.push(
         t.importSpecifier(t.identifier(hook), t.identifier(hook))
       );
@@ -618,7 +636,7 @@ export async function statefulToStatelessComponent() {
 export function isStatefulComp(code) {
   const ast = templateToAst(code);
 
-  const isSupportedComponent = classPath => {
+  const isSupportedComponent = (classPath) => {
     const supportedComponents = ["Component", "PureComponent"];
 
     if (!classPath) {
