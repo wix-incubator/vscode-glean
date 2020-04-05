@@ -1,3 +1,10 @@
+# [4.21.0](https://github.com/wix/vscode-glean/compare/v4.20.1...v4.21.0) (2020-04-05)
+
+
+### Features
+
+* **general:** auto import missing dependencies ([3d506cc](https://github.com/wix/vscode-glean/commit/3d506ccd02a621bb6b08637abd3928c3cad32e6a))
+
 ## [4.20.1](https://github.com/wix/vscode-glean/compare/v4.20.0...v4.20.1) (2020-03-14)
 
 
