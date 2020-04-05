@@ -1,3 +1,10 @@
+## [4.21.1](https://github.com/wix/vscode-glean/compare/v4.21.0...v4.21.1) (2020-04-05)
+
+
+### Bug Fixes
+
+* **build:** updated travis setup ([efe0d8b](https://github.com/wix/vscode-glean/commit/efe0d8b3bb342bb3a32963c54540a848c9378ae0))
+
 # [4.21.0](https://github.com/wix/vscode-glean/compare/v4.20.1...v4.21.0) (2020-04-05)
 
 
