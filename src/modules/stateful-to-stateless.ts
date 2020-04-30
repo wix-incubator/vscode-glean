@@ -5,7 +5,7 @@ import * as t from "@babel/types";
 import { transformFromAst } from "@babel/core";
 import { capitalizeFirstLetter } from "../utils";
 import {
-  isHooksForFunctionalComponentsExperimentOn,
+  hooksSupported,
   shouldShowConversionWarning,
 } from "../settings";
 import { getReactImportReference, isExportedDeclaration } from "../ast-helpers";
@@ -52,7 +52,7 @@ export function statefulToStateless(component) {
     MemberExpression(path) {
       if (path.node.wasVisited || path.shouldSkip) return;
       if (
-        isHooksForFunctionalComponentsExperimentOn() &&
+        hooksSupported() &&
         path.key !== "callee"
       ) {
         if (
@@ -99,7 +99,7 @@ export function statefulToStateless(component) {
 
   const ReplaceStateWithPropsVisitor = {
     MemberExpression(path) {
-      if (isHooksForFunctionalComponentsExperimentOn()) {
+      if (hooksSupported()) {
         if (
           t.isThisExpression(path.node.object.object) &&
           path.node.object.property.name === "state"
@@ -127,7 +127,7 @@ export function statefulToStateless(component) {
         t.isMemberExpression(path.node.callee) &&
         t.isThisExpression(path.node.callee.object)
       ) {
-        if (isHooksForFunctionalComponentsExperimentOn()) {
+        if (hooksSupported()) {
           if (path.node.callee.property.name === "forceUpdate") {
             path.remove();
           } else if (path.node.callee.property.name === "setState") {
@@ -214,7 +214,7 @@ export function statefulToStateless(component) {
         classBody,
         path.node.async
       );
-    } else if (isHooksForFunctionalComponentsExperimentOn()) {
+    } else if (hooksSupported()) {
       if (methodName === "componentDidMount") {
         path.traverse(RemoveSetStateAndForceUpdateVisitor);
         path.traverse(ReplaceStateWithPropsVisitor);
@@ -233,7 +233,7 @@ export function statefulToStateless(component) {
 
   const appendFunctionBodyToStatelessComponent = (name, body, isAsync) => {
     if (name !== "render") {
-      if (isHooksForFunctionalComponentsExperimentOn()) {
+      if (hooksSupported()) {
         functionBody.push(
           namedArrowFunction({
             name,
@@ -311,7 +311,7 @@ export function statefulToStateless(component) {
       }
     },
     ClassMethod(path) {
-      if (isHooksForFunctionalComponentsExperimentOn()) {
+      if (hooksSupported()) {
         const methodName = path.node.key.name;
         classMethods.add(methodName);
         if (!lifecycleMethods.includes(methodName) && methodName !== "render") {
@@ -372,7 +372,7 @@ export function statefulToStateless(component) {
 
   traverse(ast, visitor);
 
-  if (isHooksForFunctionalComponentsExperimentOn()) {
+  if (hooksSupported()) {
     const refHookExpression = Array.from(refProperties).map(
       ([key, defaultValue]) => {
         return buildRefHook({
@@ -564,7 +564,7 @@ function resolveTypeAnnotation(propType: any) {
     }, []);
     typeAnnotation = t.tsTypeLiteral(members);
   }
-  const componentTypeAnnotation = isHooksForFunctionalComponentsExperimentOn()
+  const componentTypeAnnotation = hooksSupported()
     ? "FC"
     : "SFC";
   return t.tsTypeAnnotation(
