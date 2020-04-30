@@ -9,6 +9,7 @@ import { isStatefulComp, statefulToStatelessComponent } from './modules/stateful
 import { extractToFile } from './modules/extract-to-file';
 import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
+import { renameState, isStateVariable } from './modules/rename-state';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {
@@ -18,6 +19,13 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
     };
 
     const text = selectedText()
+
+    if (isStateVariable(text)) {
+      return [{
+        command: 'extension.glean.react.rename-state-hook',
+        title: 'Rename State'
+      }];
+    }
 
     if (isJSX(text)) {
       return [{
@@ -48,6 +56,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       }]
     }
 
+
     return [exportToFileAction];
   }
 }
@@ -68,6 +77,8 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('extension.glean.react.stateless-to-stateful', statelessToStatefulComponent);
 
   vscode.commands.registerCommand('extension.glean.react.stateful-to-stateless', statefulToStatelessComponent);
+
+  vscode.commands.registerCommand('extension.glean.react.rename-state-hook', renameState);
 
 }
 
