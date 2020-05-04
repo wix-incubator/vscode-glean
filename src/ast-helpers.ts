@@ -1,4 +1,6 @@
 import * as t from "@babel/types";
+import traverse from "@babel/traverse";
+
 
 export function getReactImportReference(ast): t.ImportDeclaration {
   return ast.program.body.find(statement => {
@@ -10,4 +12,18 @@ export function getReactImportReference(ast): t.ImportDeclaration {
 
 export function isExportedDeclaration(ast) {
   return t.isExportNamedDeclaration(ast) || t.isExportDefaultDeclaration(ast);
+}
+
+export function findPathInContext(ast, identifierName) {
+  let foundPath = null;
+  const visitor = {
+    Identifier(path) {
+      if (!foundPath && path.node.name === identifierName) {
+        foundPath = path;
+      }
+    }
+  };
+
+  traverse(ast, visitor);
+  return foundPath;
 }

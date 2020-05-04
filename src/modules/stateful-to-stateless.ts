@@ -26,22 +26,7 @@ import {
 import { Position } from "vscode";
 import { Identifier } from "babel-types";
 import * as vscode from "vscode";
-
-const buildStateHook = template(`
-const [STATE_PROP, STATE_SETTER] = useState(STATE_VALUE);
-`);
-
-const buildRefHook = template(`
-const VAR_NAME = useRef(INITIAL_VALUE);
-`);
-
-const buildEffectHook = template(`
-useEffect(() =>  { EFFECT });
-`);
-
-const buildUseCallbackHook = template(`
-useCallback(CALLBACK);
-`);
+import { buildEffectHook, buildRefHook, buildStateHook, buildUseCallbackHook } from '../snippet-builder'
 
 export function statefulToStateless(component) {
   const functionBody = [];
@@ -275,7 +260,7 @@ export function statefulToStateless(component) {
         params: ["props"],
         propType:
           path.node.superTypeParameters &&
-          path.node.superTypeParameters.params.length
+            path.node.superTypeParameters.params.length
             ? path.node.superTypeParameters.params
             : null,
         paramDefaults: defaultPropsPath ? [defaultPropsPath.node.value] : [],
@@ -579,9 +564,9 @@ export async function statefulToStatelessComponent() {
   try {
     const answer = shouldShowConversionWarning()
       ? await showInformationMessage(
-          "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?",
-          ["Yes", "No"]
-        )
+        "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?",
+        ["Yes", "No"]
+      )
       : "Yes";
 
     if (answer === "Yes") {
@@ -648,7 +633,7 @@ export function isStatefulComp(code) {
       ((classPath.superClass.object &&
         classPath.superClass.object.name === "React" &&
         supportedComponents.indexOf(classPath.superClass.property.name) !==
-          -1) ||
+        -1) ||
         supportedComponents.indexOf(classPath.superClass.name) !== -1)
     );
   };

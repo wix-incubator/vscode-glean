@@ -6,6 +6,7 @@ import { window, Position, Range } from "vscode";
 import { persistFileSystemChanges, replaceTextInFile } from "../file-system";
 import { capitalizeFirstLetter } from "../utils";
 import * as t from "@babel/types";
+import { findPathInContext } from "../ast-helpers";
 
 function isPathOnLines(path, start, end) {
     if (!path.node) return false;
@@ -15,20 +16,6 @@ function isPathOnLines(path, start, end) {
         (pathStart.line === start.line && pathStart.column === start.character) &&
         (pathEnd.line === end.line && pathEnd.column === end.character))
 
-}
-
-function findPathInContext(ast, identifierName) {
-    let foundPath = null;
-    const visitor = {
-        Identifier(path) {
-            if (!foundPath && path.node.name === identifierName) {
-                foundPath = path;
-            }
-        }
-    };
-
-    traverse(ast, visitor);
-    return foundPath;
 }
 
 export function isStateVariable(text) {

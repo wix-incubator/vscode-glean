@@ -16,13 +16,13 @@ export const codeToAst = code =>
     ...parsingOptions
   });
 
-  export const jsxToAst = code => {
-    try {
-      return codeToAst(code);
-    } catch (e) {
-      return codeToAst(`<>${code}</>`);
-    }
-  };
+export const jsxToAst = code => {
+  try {
+    return codeToAst(code);
+  } catch (e) {
+    return codeToAst(`<>${code}</>`);
+  }
+};
 
 export const templateToAst = code => template.ast(code, parsingOptions);
 
@@ -84,7 +84,7 @@ export function exportAllDeclarationsESM(code) {
       ) {
 
         // check use default declaration or not
-        if(shouldUseExportDefault()){
+        if (shouldUseExportDefault()) {
           path.replaceWith(t.exportDefaultDeclaration(path.node));
         } else {
           path.replaceWith(t.exportNamedDeclaration(path.node, []));
@@ -118,3 +118,5 @@ export function transformJSIntoExportExpressions(code) {
     return exportAllDeclarationsCommonJS(code);
   }
 }
+
+export const astToCode = ast => transformFromAst(ast).code
