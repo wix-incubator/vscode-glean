@@ -11,6 +11,7 @@ import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/ex
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
 import { renameState, isStateVariable } from './modules/rename-state';
 import { wrapWithUseEffect, isInsideOfFunctionBody } from './modules/wrap-with-useeffect';
+import { isFunctionInsideAFunction, wrapWithUseCallback } from './modules/wrap-with-uscallback';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {
@@ -20,7 +21,12 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
     };
 
     const text = selectedText()
-
+    if (isFunctionInsideAFunction()) {
+      return [{
+        command: 'extension.glean.react.wrap-with-usecallback',
+        title: 'Wrap with useCallback'
+      }];
+    }
     if (isInsideOfFunctionBody(text) && !isJSX(text)) {
       return [{
         command: 'extension.glean.react.wrap-with-useeffect',
@@ -89,6 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('extension.glean.react.rename-state-hook', renameState);
 
   vscode.commands.registerCommand('extension.glean.react.wrap-with-useeffect', wrapWithUseEffect);
+  vscode.commands.registerCommand('extension.glean.react.wrap-with-usecallback', wrapWithUseCallback);
 
 
 }

@@ -27,3 +27,15 @@ export function findPathInContext(ast, identifierName) {
   traverse(ast, visitor);
   return foundPath;
 }
+
+export function pathContains(path, start, end) {
+  if (!path.node) return false;
+  const pathStart = path.node.loc.start;
+  const pathEnd = path.node.loc.end;
+  return (
+    (
+      (pathStart.line === start.line && pathStart.column >= start.character)) &&
+    (
+      (pathEnd.line >= end.line && pathEnd.column >= end.character))
+  );
+}
