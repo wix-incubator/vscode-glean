@@ -50,10 +50,10 @@ export async function wrapWithUseCallback() {
     const snippet = selectedText();
     const ast = codeToAst(snippet);
     const callackWrapper = buildUseCallbackHook({
-        CALLBACK: t.isFunctionDeclaration(ast.program.body[0]) ? functionDeclartionToExpression(ast.program.body[0]) : (ast.program.body[0] as t.VariableDeclaration).declarations[0].init
+        CALLBACK: t.isFunctionDeclaration(ast.program.body[0]) ? functionDeclartionToExpression(ast.program.body[0] as t.FunctionDeclaration) : (ast.program.body[0] as t.VariableDeclaration).declarations[0].init
     });
 
-    const callbackId = t.isFunctionDeclaration(ast.program.body[0]) ? ast.program.body[0].id : (ast.program.body[0] as t.VariableDeclaration).declarations[0].id;
+    const callbackId = t.isFunctionDeclaration(ast.program.body[0]) ? (ast.program.body[0] as t.FunctionDeclaration).id : (ast.program.body[0] as t.VariableDeclaration).declarations[0].id;
 
     await persistFileSystemChanges(replaceSelectionWith(astToCode(t.program([t.variableDeclaration('const', [t.variableDeclarator(callbackId, callackWrapper.expression)])]))));
 
