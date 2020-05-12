@@ -15,3 +15,6 @@ useEffect(() =>  { EFFECT });
 export const buildUseCallbackHook = template(`
 useCallback(CALLBACK);
 `);
+export const buildUseMemo= template(`
+const VAR = useMemo(() => EXPRESSION);
+`);

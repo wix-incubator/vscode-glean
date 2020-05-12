@@ -11,7 +11,8 @@ import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/ex
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
 import { renameState, isStateVariable } from './modules/rename-state';
 import { wrapWithUseEffect, isInsideOfFunctionBody } from './modules/wrap-with-useeffect';
-import { isFunctionInsideAFunction, wrapWithUseCallback } from './modules/wrap-with-uscallback';
+import { isFunctionInsideAFunction, wrapWithUseCallback } from './modules/wrap-with-usecallback';
+import { isVariableDeclarationWithNonFunctionInit, wrapWithUseMemo } from './modules/wrap-with-usememo';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {
@@ -21,6 +22,14 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
     };
 
     const text = selectedText()
+
+    if (isVariableDeclarationWithNonFunctionInit(text)) {
+      return [{
+        command: 'extension.glean.react.wrap-with-usememo',
+        title: 'Wrap with useMemo'
+      }];
+    }
+
     if (isFunctionInsideAFunction()) {
       return [{
         command: 'extension.glean.react.wrap-with-usecallback',
@@ -95,7 +104,10 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('extension.glean.react.rename-state-hook', renameState);
 
   vscode.commands.registerCommand('extension.glean.react.wrap-with-useeffect', wrapWithUseEffect);
+
   vscode.commands.registerCommand('extension.glean.react.wrap-with-usecallback', wrapWithUseCallback);
+
+  vscode.commands.registerCommand('extension.glean.react.wrap-with-usememo', wrapWithUseMemo);
 
 
 }
