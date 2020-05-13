@@ -16,7 +16,7 @@ The extension provides refactoring tools for your React codebase: extract JSX in
 - Allows converting Class Components to Functional Components and vice-verse
 - Allows wrapping JSX with conditional
 - Allows renaming state variables and their setters simultaneously.
-- Allows wrapping code with useMemo, useCallback or useEffect
+- Allows wrapping code with `useMemo`, `useCallback` or `useEffect`
 - Moving code between files
 - Typescript support
 - ES2015 modules support
