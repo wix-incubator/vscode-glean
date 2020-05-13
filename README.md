@@ -32,9 +32,9 @@ Go to the link below and click `Install`.
 
 ### Extracting JSX into a new Component
 
-Glean allows easy extraction of JSX into new React components. Just select the JSX to extract, and Glean will handle all the rest:
+Glean allows easy extraction of JSX into new React components (in the same or other file). Just select the JSX to extract, and Glean will handle all the rest:
 
-- Generate Stateful or Stateless Component, such that the extracted JSX will continue to function.
+- Generate Class or Functional Component, such that the extracted JSX will continue to function.
 - It will identify all inputs to the newly created component.
 - Replace extracted JSX with newly created component, while providing it with all the props.
 
@@ -54,7 +54,7 @@ Glean seamlesly automates convertion of class components to functional component
 
 
 
-### Converting Functional Component to Stateful Component
+### Converting Functional Component to Class Component
 
 ![Example of Stateless to Stateful Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateless-to-stateful.gif?raw=true)
 
@@ -98,7 +98,7 @@ A list of enabled experimental features. Available experimental features:
 
 #### glean.showConversionWarning (Default: true)
 
-Determines whether VSCode should show conversion warning when converting Stateful Component to Functional Component.
+Determines whether VSCode should show conversion warning when converting Class Component to Functional Component.
 
 ## Contribute
 
