@@ -58,6 +58,15 @@ Glean seamlesly automates convertion of class components to functional component
 
 ![Example of Stateless to Stateful Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateless-to-stateful.gif?raw=true)
 
+### Rename State Variable
+
+Rename any state variable and let Glean rename its setter accordingly for You!
+
+![Example of Rename State](https://github.com/wix/vscode-glean/blob/master/assets/rename-state.gif?raw=true)
+
+### Wrap with Hook (usMemo, useCallback or useEffect)
+
+![Example of Rename State](https://github.com/wix/vscode-glean/blob/master/assets/use-callback.gif?raw=true)
 
 ### Render Conditionally
 
