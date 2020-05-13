@@ -15,6 +15,7 @@ function isFunction(node) {
 export function isVariableDeclarationWithNonFunctionInit(text) {
     try {
         const ast = codeToAst(text);
+        if (ast.program.body.length > 1) return false;
         return t.isVariableDeclaration(ast.program.body[0]) && !isFunction((ast.program.body[0] as t.VariableDeclaration).declarations[0].init);
     } catch (e) {
         return false;

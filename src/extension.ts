@@ -23,6 +23,13 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
 
     const text = selectedText()
 
+    if (isStateVariable(text)) {
+      return [{
+        command: 'extension.glean.react.rename-state-hook',
+        title: 'Rename State'
+      }];
+    }
+
     if (isVariableDeclarationWithNonFunctionInit(text)) {
       return [{
         command: 'extension.glean.react.wrap-with-usememo',
@@ -36,17 +43,11 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
         title: 'Wrap with useCallback'
       }];
     }
+
     if (isInsideOfFunctionBody(text) && !isJSX(text)) {
       return [{
         command: 'extension.glean.react.wrap-with-useeffect',
         title: 'Wrap with useEffect'
-      }];
-    }
-
-    if (isStateVariable(text)) {
-      return [{
-        command: 'extension.glean.react.rename-state-hook',
-        title: 'Rename State'
       }];
     }
 

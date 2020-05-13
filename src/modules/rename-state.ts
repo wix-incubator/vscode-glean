@@ -22,7 +22,7 @@ export function isStateVariable(text) {
     try {
         const allAST = codeToAst(allText());
         const containerPath = findPathInContext(allAST, text);
-        const variableDeclarationParent = containerPath.findParent(parent => t.isVariableDeclaration(parent));
+        const variableDeclarationParent = containerPath.scope.bindings[containerPath.node.name].path.parentPath;
         return variableDeclarationParent && variableDeclarationParent.node.declarations[0].init.callee.name === 'useState'
     } catch (e) {
         return false;
@@ -41,7 +41,6 @@ export async function renameState() {
         containerPath.scope.bindings[varName].path.parentPath.get('declarations.0.id.elements.1').scope.rename(`set${capitalizeFirstLetter(selectedStateVariable)}`, `set${capitalizeFirstLetter(varName)}`);
 
         const processedJSX = transformFromAst(allAST).code;
-        console.log(processedJSX);
         const endLine = activeEditor().document.lineAt(activeEditor().document.lineCount - 1).range;
         const change = replaceTextInFile(
             processedJSX,
