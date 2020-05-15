@@ -4,18 +4,19 @@
 
 # VSCode Glean
 
-> The extension provides refactoring tools for your React/Javascript/Typescript codebase
+> The extension provides refactoring tools for your React codebase
 
 [![Build Status](https://travis-ci.org/wix/vscode-glean.svg?branch=master)](https://travis-ci.org/wix/vscode-glean)
 [![](https://vsmarketplacebadge.apphb.com/version/wix.glean.svg)](https://marketplace.visualstudio.com/items?itemName=wix.glean)
 
-The extension provides refactoring tools for your React codebase: extract JSX into a new component, convert Class Components to Functional Components and more! In addition, you can extract regular Javascript/Typescript code between files, while handling exporting the selected code from the old location and importing in the new one!
-
+The extension provides refactoring tools for your React codebase: extract JSX into a new component, convert Class Components to Functional Components, wrapping with Hooks and more!
 ## Highlights
 
 - Allows extracting JSX into new component
 - Allows converting Class Components to Functional Components and vice-verse
 - Allows wrapping JSX with conditional
+- Allows renaming state variables and their setters simultaneously.
+- Allows wrapping code with `useMemo`, `useCallback` or `useEffect`
 - Moving code between files
 - Typescript support
 - ES2015 modules support
@@ -31,23 +32,41 @@ Go to the link below and click `Install`.
 
 ### Extracting JSX into a new Component
 
-Glean allows easy extraction of JSX into new React components. Just select the JSX to extract, and Glean will handle all the rest:
+Glean allows easy extraction of JSX into new React components (in the same or other file). Just select the JSX to extract, and Glean will handle all the rest:
 
-- Generate Stateful or Stateless Component, such that the extracted JSX will continue to function.
+- Generate Class or Functional Component, such that the extracted JSX will continue to function.
 - It will identify all inputs to the newly created component.
 - Replace extracted JSX with newly created component, while providing it with all the props.
 
 ![Example of JSX extraction](https://github.com/wix/vscode-glean/blob/master/assets/extract-to-comp.gif?raw=true)
 
-### Converting Functional Component to Stateful Component
+### Converting Class Component to Functional Component
+Glean seamlesly automates convertion of class components to functional component, while take care of all the complexity:
+
+- Converts `setState` calls to `useState`
+- Converts `componentDidMount` and `componentWillUnmount` to `useEffect`
+- Converts class properties to `useRef`
+- Wraps call non-Lifecycle methods with `useCallback`
+
+**WARNING!!! If You are using React version older than 16.8.0, This refactoring will delete all Lifecycle methods and setState calls!**
+
+![Example of Hooks Support](https://github.com/wix/vscode-glean/blob/master/assets/hooks.gif?raw=true)
+
+
+
+### Converting Functional Component to Class Component
 
 ![Example of Stateless to Stateful Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateless-to-stateful.gif?raw=true)
 
-### Converting Stateful Component to Functional Component
+### Rename State Variable
 
-![Example of Stateful to Stateless Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateful-to-stateless.gif?raw=true)
+Rename any state variable and let Glean rename its setter accordingly for You!
 
-**WARNING!!! This refactoring will delete all Lifecycle methods and setState calls!**
+![Example of Rename State](https://github.com/wix/vscode-glean/blob/master/assets/rename-state.gif?raw=true)
+
+### Wrap with Hook (usMemo, useCallback or useEffect)
+
+![Example of Rename State](https://github.com/wix/vscode-glean/blob/master/assets/use-callback.gif?raw=true)
 
 ### Render Conditionally
 
@@ -58,14 +77,6 @@ Glean allows easy extraction of JSX into new React components. Just select the J
 Select text and either VSCode's code suggestion (aka "Lightbulb") or Command Pallet ('Extract to File' command) to extract the text.
 
 ![Example of Javascript Extraction](https://github.com/wix/vscode-glean/blob/master/assets/extract-to-file.gif?raw=true)
-
-## Experiments Features
-
-All the experimental features are opt-in and need to be enabled through the configuration.
-
-### Hooks Support for Class Component to Functional Component Refactoring
-
-![Example of Hooks Support](https://github.com/wix/vscode-glean/blob/master/assets/hooks.gif?raw=true)
 
 ## Configuration Options
 
@@ -85,11 +96,9 @@ Determines whether VSCode should switch to target file after extracting.
 
 A list of enabled experimental features. Available experimental features:
 
-- "hooksForFunctionalComponents" - Hooks Support
-
 #### glean.showConversionWarning (Default: true)
 
-Determines whether VSCode should show conversion warning when converting Stateful Component to Functional Component.
+Determines whether VSCode should show conversion warning when converting Class Component to Functional Component.
 
 ## Contribute
 

@@ -48,7 +48,7 @@ describe("when refactoring stateful component into stateless component", () => {
     sandbox.stub(editor, "openFile");
   });
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore();
   });
 
@@ -266,7 +266,7 @@ describe("when refactoring stateful component into stateless component", () => {
   describe("when hooks support is on", () => {
     beforeEach(() => {
       sandbox
-        .stub(settings, "isHooksForFunctionalComponentsExperimentOn")
+        .stub(settings, "hooksSupported")
         .returns(true);
     });
 
@@ -288,7 +288,7 @@ describe("when refactoring stateful component into stateless component", () => {
         await statefulToStatelessComponent();
 
         expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const foo = useRef(3);\n  const someMethod = useCallback(() => {\n    foo.current = 4;\n  });\n  return <div />;\n};",          selectedTextStart,
+          "const SomeComponent = props => {\n  const foo = useRef(3);\n  const someMethod = useCallback(() => {\n    foo.current = 4;\n  });\n  return <div />;\n};", selectedTextStart,
           selectedTextEnd,
           "/source.js"
         );

@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { config } from './editor';
 
+const ReactVersion = require('child_process').execSync('npm list react --version --depth=0').toString().trim().split('.').map(Number);
+
 export const shouldBeConsideredJsFiles = (...files) => {
     const extentionsToBeConsideredJS = config().jsFilesExtensions;
     return files.every(file => extentionsToBeConsideredJS.includes(path.extname(file).replace('.', '')));
@@ -11,7 +13,7 @@ export const commonJSModuleSystemUsed = () => config().jsModuleSystem === 'commo
 
 const isExperimentOn = (experiment) => (config().experiments || []).includes(experiment);
 
-export const isHooksForFunctionalComponentsExperimentOn = () => isExperimentOn('hooksForFunctionalComponents');
+export const hooksSupported = () => ReactVersion[0] >= 16 && ReactVersion[1] >= 8;
 
 export const esmModuleSystemUsed = () => config().jsModuleSystem === 'esm';
 

@@ -9,6 +9,10 @@ import { isStatefulComp, statefulToStatelessComponent } from './modules/stateful
 import { extractToFile } from './modules/extract-to-file';
 import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
+import { renameState, isStateVariable } from './modules/rename-state';
+import { wrapWithUseEffect, isInsideOfFunctionBody } from './modules/wrap-with-useeffect';
+import { isFunctionInsideAFunction, wrapWithUseCallback } from './modules/wrap-with-usecallback';
+import { isVariableDeclarationWithNonFunctionInit, wrapWithUseMemo } from './modules/wrap-with-usememo';
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(): ProviderResult<vscode.Command[]> {
@@ -18,6 +22,34 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
     };
 
     const text = selectedText()
+
+    if (isStateVariable(text)) {
+      return [{
+        command: 'extension.glean.react.rename-state-hook',
+        title: 'Rename State'
+      }];
+    }
+
+    if (isVariableDeclarationWithNonFunctionInit(text)) {
+      return [{
+        command: 'extension.glean.react.wrap-with-usememo',
+        title: 'Wrap with useMemo'
+      }];
+    }
+
+    if (isFunctionInsideAFunction()) {
+      return [{
+        command: 'extension.glean.react.wrap-with-usecallback',
+        title: 'Wrap with useCallback'
+      }];
+    }
+
+    if (isInsideOfFunctionBody(text) && !isJSX(text)) {
+      return [{
+        command: 'extension.glean.react.wrap-with-useeffect',
+        title: 'Wrap with useEffect'
+      }];
+    }
 
     if (isJSX(text)) {
       return [{
@@ -48,6 +80,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       }]
     }
 
+
     return [exportToFileAction];
   }
 }
@@ -68,6 +101,15 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('extension.glean.react.stateless-to-stateful', statelessToStatefulComponent);
 
   vscode.commands.registerCommand('extension.glean.react.stateful-to-stateless', statefulToStatelessComponent);
+
+  vscode.commands.registerCommand('extension.glean.react.rename-state-hook', renameState);
+
+  vscode.commands.registerCommand('extension.glean.react.wrap-with-useeffect', wrapWithUseEffect);
+
+  vscode.commands.registerCommand('extension.glean.react.wrap-with-usecallback', wrapWithUseCallback);
+
+  vscode.commands.registerCommand('extension.glean.react.wrap-with-usememo', wrapWithUseMemo);
+
 
 }
 

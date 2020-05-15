@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { QuickPickItem } from "vscode";
+import * as fs from 'fs';
 
 export const workspaceRoot = () => vscode.workspace.rootPath;
 
@@ -98,3 +99,4 @@ export const importMissingDependencies = (targetFile) =>
     targetFile,
     { fixId: "fixMissingImport" }
   );
+
