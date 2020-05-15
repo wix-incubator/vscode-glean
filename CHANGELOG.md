@@ -1,3 +1,39 @@
+# [5.0.0](https://github.com/wix/vscode-glean/compare/v4.21.1...v5.0.0) (2020-05-15)
+
+
+### Features
+
+* **v5:** New refactorings: wrap with useMemo, useCallback useEffect, rename state veriable ([#112](https://github.com/wix/vscode-glean/issues/112)) ([eba2954](https://github.com/wix/vscode-glean/commit/eba29546fc5430f7bbfc9e93a36baff79919366e))
+
+
+### BREAKING CHANGES
+
+* **v5:** Hooks support will now be activated automatically based on React version (16.8 and up) instead of a flag
+
+* feat(rename-state-variable): New Refactoring! Rename State Variable
+
+* feat(hooks-support): activate hooks support based on react version
+
+* removed excess deps
+
+* refactoring + wrap with effect refactoring
+
+* feat(wrap-with-useCallback): New refactoring - wrap function with useCallback
+
+* ts fix
+
+* feat(wrap-with-usememo): New! Wrap expressions with useMemo
+
+* docs: updated teh docs
+
+* fix(wrap-with-memo): improved case detection
+
+* docs: added new refactorings
+
+* docs
+
+* docs
+
 ## [4.21.1](https://github.com/wix/vscode-glean/compare/v4.21.0...v4.21.1) (2020-04-05)
 
 
