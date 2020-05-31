@@ -1,19 +1,17 @@
-import { selectedText, importMissingDependencies, activeFileName, allText } from "../editor";
+import { selectedText, importMissingDependencies, activeFileName, allText, selectedTextStart, selectedTextEnd } from "../editor";
 import { replaceSelectionWith } from "../code-actions";
 import { buildEffectHook } from "../snippet-builder";
 import { codeToAst, astToCode } from "../parsing";
 import { persistFileSystemChanges } from "../file-system";
 import * as t from '@babel/types';
-import { findPathInContext } from "../ast-helpers";
+import { findPathInContext, pathContains, findFirstPathInRange } from "../ast-helpers";
 
 
-export async function isInsideOfFunctionBody(text) {
+export function isWrappableByEffect(text) {
     try {
         const allAST = codeToAst(allText());
-        const containerPath = findPathInContext(allAST, text);
-        return !!containerPath.findParent(parent => {
-            return t.isFunctionExpression(parent)
-        });
+        const containerPath = findFirstPathInRange(allAST, selectedTextStart(), selectedTextEnd());
+        return !t.isProgram(containerPath.parent);
     } catch (e) {
         return false;
     }

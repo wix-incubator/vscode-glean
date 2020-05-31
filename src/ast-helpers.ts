@@ -28,6 +28,30 @@ export function findPathInContext(ast, identifierName) {
   return foundPath;
 }
 
+export function findFirstPathInRange(ast, start, end) {
+  let foundPath = null;
+  const visitor = {
+    enter(path) {
+      if (!foundPath && pathInRange(path, start, end)) {
+        foundPath = path;
+        path.stop();
+      }
+    }
+  };
+
+  traverse(ast, visitor);
+  return foundPath;
+}
+
+
+export function pathInRange(path, start, end) {
+  if (!path.node) return false;
+  const pathStart = path.node.loc.start;
+  const pathEnd = path.node.loc.end;
+  return (pathStart.line >= start.line && pathStart.column >= start.character)
+
+}
+
 export function pathContains(path, start, end) {
   if (!path.node) return false;
   const pathStart = path.node.loc.start;

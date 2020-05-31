@@ -10,7 +10,7 @@ import { extractToFile } from './modules/extract-to-file';
 import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
 import { renameState, isStateVariable } from './modules/rename-state';
-import { wrapWithUseEffect, isInsideOfFunctionBody } from './modules/wrap-with-useeffect';
+import { wrapWithUseEffect, isWrappableByEffect } from './modules/wrap-with-useeffect';
 import { isFunctionInsideAFunction, wrapWithUseCallback } from './modules/wrap-with-usecallback';
 import { isVariableDeclarationWithNonFunctionInit, wrapWithUseMemo } from './modules/wrap-with-usememo';
 
@@ -44,7 +44,7 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       }];
     }
 
-    if (isInsideOfFunctionBody(text) && !isJSX(text)) {
+    if (isWrappableByEffect(text) && !isJSX(text)) {
       return [{
         command: 'extension.glean.react.wrap-with-useeffect',
         title: 'Wrap with useEffect'
