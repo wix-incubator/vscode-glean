@@ -1,3 +1,10 @@
+## [5.0.1](https://github.com/wix/vscode-glean/compare/v5.0.0...v5.0.1) (2020-05-31)
+
+
+### Bug Fixes
+
+* **function-to-class:** Fix for wrap with useEffect refactoring relevancy detection. Closes [#113](https://github.com/wix/vscode-glean/issues/113) ([c273fdc](https://github.com/wix/vscode-glean/commit/c273fdc1befc08a2e880b3f6c793c12e1474a381))
+
 # [5.0.0](https://github.com/wix/vscode-glean/compare/v4.21.1...v5.0.0) (2020-05-15)
 
 
