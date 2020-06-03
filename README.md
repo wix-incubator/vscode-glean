@@ -64,7 +64,7 @@ Rename any state variable and let Glean rename its setter accordingly for You!
 
 ![Example of Rename State](https://github.com/wix/vscode-glean/blob/master/assets/rename-state.gif?raw=true)
 
-### Wrap with Hook (usMemo, useCallback or useEffect)
+### Wrap with Hook (useMemo, useCallback or useEffect)
 
 ![Example of Rename State](https://github.com/wix/vscode-glean/blob/master/assets/use-callback.gif?raw=true)
 
