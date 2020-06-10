@@ -36,9 +36,7 @@
           "description": "Module system to be used whem extracting Javascript"
         },
         "glean.jsFilesExtensions": {
-          "type": [
-            "string"
-          ],
+          "type": "array",
           "default": [
             "js",
             "jsx",
