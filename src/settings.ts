@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { config } from './editor';
 
-const ReactVersion = require('child_process').execSync('npm list react --version --depth=0').toString().trim().split('.').map(Number);
+const ReactVersion = require('child_process').execSync('npm view react version').toString().trim().split('.').map(Number);
 
 export const shouldBeConsideredJsFiles = (...files) => {
     const extentionsToBeConsideredJS = config().jsFilesExtensions;
