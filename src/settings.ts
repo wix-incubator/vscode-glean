@@ -1,15 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { config } from './editor';
-let ReactVersion = [];
-
-require('child_process').exec("node -p \"require('react').version\"", (error, stdout, stderr) => {
-    if (error) {
-        console.log(error)
-        return;
-    }
-    ReactVersion = stdout.split('.');
-});
 
 export const shouldBeConsideredJsFiles = (...files) => {
     const extentionsToBeConsideredJS = config().jsFilesExtensions;
@@ -20,7 +11,7 @@ export const commonJSModuleSystemUsed = () => config().jsModuleSystem === 'commo
 
 const isExperimentOn = (experiment) => (config().experiments || []).includes(experiment);
 
-export const hooksSupported = () => ReactVersion[0] >= 16 && ReactVersion[1] >= 8;
+export const hooksSupported = () => true;
 
 export const esmModuleSystemUsed = () => config().jsModuleSystem === 'esm';
 
