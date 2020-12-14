@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/wix/vscode-glean/compare/v5.0.4...v5.1.0) (2020-12-14)
+
+
+### Features
+
+* **hooks-support:** BREAKING CHANGE:  Drop support to pre-hooks React versions ([9421b2f](https://github.com/wix/vscode-glean/commit/9421b2f0f7ebfcc2b5ca21edf8ca534c82e6bfbf))
+
 ## [5.0.4](https://github.com/wix/vscode-glean/compare/v5.0.3...v5.0.4) (2020-12-14)
 
 
