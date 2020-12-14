@@ -1,3 +1,10 @@
+## [5.0.3](https://github.com/wix/vscode-glean/compare/v5.0.2...v5.0.3) (2020-12-14)
+
+
+### Bug Fixes
+
+* **build:** config ([3a6e65e](https://github.com/wix/vscode-glean/commit/3a6e65e4fd2569cfa63ebfa0acf31f3bfbdfcc21))
+
 ## [5.0.2](https://github.com/wix/vscode-glean/compare/v5.0.1...v5.0.2) (2020-12-14)
 
 
