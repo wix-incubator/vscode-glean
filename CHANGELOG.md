@@ -1,3 +1,10 @@
+## [5.0.2](https://github.com/wix/vscode-glean/compare/v5.0.1...v5.0.2) (2020-12-14)
+
+
+### Bug Fixes
+
+* **all:** improve react version detection ([a2db33f](https://github.com/wix/vscode-glean/commit/a2db33fc505d2287316c94016f4878dd268362f1))
+
 ## [5.0.1](https://github.com/wix/vscode-glean/compare/v5.0.0...v5.0.1) (2020-05-31)
 
 
