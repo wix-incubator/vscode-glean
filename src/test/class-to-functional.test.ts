@@ -127,7 +127,7 @@ describe("when refactoring stateful component into stateless component", () => {
     await statefulToStatelessComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-      "const SomeComponent = props => {\n  return <div>\n                {props.foo} + {props.bar}\n              </div>;\n};",
+      "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  return <div>\n                {foo} + {bar}\n              </div>;\n};",
       selectedTextStart,
       selectedTextEnd,
       "/source.js"
@@ -152,7 +152,7 @@ describe("when refactoring stateful component into stateless component", () => {
     await statefulToStatelessComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-      "const SomeComponent = props => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      "const SomeComponent = props => {\n  const [a, setA] = useState();\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
       selectedTextStart,
       selectedTextEnd,
       "/source.js"
@@ -178,7 +178,7 @@ describe("when refactoring stateful component into stateless component", () => {
     await statefulToStatelessComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-      "const SomeComponent: SFC<MyProps> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      "const SomeComponent: FC<MyProps> = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
       selectedTextStart,
       selectedTextEnd,
       "/source.js"
@@ -204,7 +204,7 @@ describe("when refactoring stateful component into stateless component", () => {
     await statefulToStatelessComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-      "const SomeComponent: SFC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      "const SomeComponent: FC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
       selectedTextStart,
       selectedTextEnd,
       "/source.js"
@@ -230,7 +230,7 @@ describe("when refactoring stateful component into stateless component", () => {
     await statefulToStatelessComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-      "const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};\n\nexport default SomeComponent;",
+      "const SomeComponent = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};\n\nexport default SomeComponent;",
       selectedTextStart,
       selectedTextEnd,
       "/source.js"
@@ -256,24 +256,17 @@ describe("when refactoring stateful component into stateless component", () => {
     await statefulToStatelessComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-      "export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const someMethod = () => {\n    console.log(2);\n  };\n\n  return <div />;\n};",
+      "export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
       selectedTextStart,
       selectedTextEnd,
       "/source.js"
     );
   });
 
-  describe("when hooks support is on", () => {
-    beforeEach(() => {
-      sandbox
-        .stub(settings, "hooksSupported")
-        .returns(true);
-    });
-
-    describe('when handling class properties', () => {
-      it("it replaces it with a match state setter hook", async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, "selectedText").returns(`
+  describe('when handling class properties', () => {
+    it("it replaces it with a match state setter hook", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
             class SomeComponent extends React.Component {
               foo = 3;
               someMethod() {
@@ -285,20 +278,20 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const foo = useRef(3);\n  const someMethod = useCallback(() => {\n    foo.current = 4;\n  });\n  return <div />;\n};", selectedTextStart,
-          selectedTextEnd,
-          "/source.js"
-        );
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  const foo = useRef(3);\n  const someMethod = useCallback(() => {\n    foo.current = 4;\n  });\n  return <div />;\n};", selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
     });
+  });
 
-    describe("when handling setState call that receives a function", () => {
-      it("it replaces it with a match state setter hook", async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, "selectedText").returns(`
+  describe("when handling setState call that receives a function", () => {
+    it("it replaces it with a match state setter hook", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
             class SomeComponent extends React.Component {
   
               someMethod() {
@@ -312,19 +305,19 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n  });\n  return <div />;\n};",
-          selectedTextStart,
-          selectedTextEnd,
-          "/source.js"
-        );
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n  });\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it("it replaces multiple property updates with multiple state setters", async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, "selectedText").returns(`
+    it("it replaces multiple property updates with multiple state setters", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
             class SomeComponent extends React.Component {
   
               someMethod() {
@@ -339,19 +332,19 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
-          selectedTextStart,
-          selectedTextEnd,
-          "/source.js"
-        );
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
+    });
 
-      it("it handles destructring of previous state", async () => {
-        givenApprovedWarning();
-        sandbox.stub(editor, "selectedText").returns(`
+    it("it handles destructring of previous state", async () => {
+      givenApprovedWarning();
+      sandbox.stub(editor, "selectedText").returns(`
             class SomeComponent extends React.Component {
   
               someMethod() {
@@ -366,20 +359,20 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-        await statefulToStatelessComponent();
+      await statefulToStatelessComponent();
 
-        expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-          "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
-          selectedTextStart,
-          selectedTextEnd,
-          "/source.js"
-        );
-      });
+      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
+        selectedTextStart,
+        selectedTextEnd,
+        "/source.js"
+      );
     });
+  });
 
-    it("add useState hook for any state variable referenced in the JSX", async () => {
-      givenApprovedWarning();
-      sandbox.stub(editor, "selectedText").returns(`
+  it("add useState hook for any state variable referenced in the JSX", async () => {
+    givenApprovedWarning();
+    sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             render() {
               return (
@@ -391,19 +384,19 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-      await statefulToStatelessComponent();
+    await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  return <div>\n                  {foo}\n                </div>;\n};",
-        selectedTextStart,
-        selectedTextEnd,
-        "/source.js"
-      );
-    });
+    expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+      "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  return <div>\n                  {foo}\n                </div>;\n};",
+      selectedTextStart,
+      selectedTextEnd,
+      "/source.js"
+    );
+  });
 
-    it("replaces componentDidMount with useEffect", async () => {
-      givenApprovedWarning();
-      sandbox.stub(editor, "selectedText").returns(`
+  it("replaces componentDidMount with useEffect", async () => {
+    givenApprovedWarning();
+    sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             componentDidMount() {
               console.log(2);
@@ -418,19 +411,19 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-      await statefulToStatelessComponent();
+    await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    console.log(2);\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
-        selectedTextStart,
-        selectedTextEnd,
-        "/source.js"
-      );
-    });
+    expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+      "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    console.log(2);\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+      selectedTextStart,
+      selectedTextEnd,
+      "/source.js"
+    );
+  });
 
-    it("wraps all non-lifecycle methods with useCallback", async () => {
-      givenApprovedWarning();
-      sandbox.stub(editor, "selectedText").returns(`
+  it("wraps all non-lifecycle methods with useCallback", async () => {
+    givenApprovedWarning();
+    sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             doFoo() {
               console.log(2);
@@ -445,19 +438,19 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-      await statefulToStatelessComponent();
+    await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const doFoo = useCallback(() => {\n    console.log(2);\n  });\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
-        selectedTextStart,
-        selectedTextEnd,
-        "/source.js"
-      );
-    });
+    expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+      "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const doFoo = useCallback(() => {\n    console.log(2);\n  });\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+      selectedTextStart,
+      selectedTextEnd,
+      "/source.js"
+    );
+  });
 
-    it("replaces componentWillUnmount with useEffect cleanup function", async () => {
-      givenApprovedWarning();
-      sandbox.stub(editor, "selectedText").returns(`
+  it("replaces componentWillUnmount with useEffect cleanup function", async () => {
+    givenApprovedWarning();
+    sandbox.stub(editor, "selectedText").returns(`
           class SomeComponent extends React.Component {
             componentWillUnmount() {
               console.log(2);
@@ -472,16 +465,16 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-      await statefulToStatelessComponent();
+    await statefulToStatelessComponent();
 
-      expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
-        "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    return () => {\n      console.log(2);\n    };\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
-        selectedTextStart,
-        selectedTextEnd,
-        "/source.js"
-      );
-    });
+    expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+      "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    return () => {\n      console.log(2);\n    };\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+      selectedTextStart,
+      selectedTextEnd,
+      "/source.js"
+    );
   });
+
 
   const givenApprovedWarning = () => {
     sandbox
