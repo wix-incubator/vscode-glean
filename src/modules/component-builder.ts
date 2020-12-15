@@ -16,7 +16,7 @@ function buildFunctionalComponent(name, code, attributes: ComponentProperties) {
   `;
 }
 
-function buildStatefulComponent(name, code, attributes: ComponentProperties) {
+function buildClassComponent(name, code, attributes: ComponentProperties) {
   return `class ${name} extends React.Component {
       render() {
 

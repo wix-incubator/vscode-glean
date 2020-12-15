@@ -5,8 +5,8 @@ import * as editor from "../editor";
 import * as fileSystem from "../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
-import { statelessToStatefulComponent } from "../modules/statless-to-stateful";
-import { statefulToStatelessComponent } from "../modules/stateful-to-stateless";
+import { functionToClassComponent } from "../modules/function-to-class";
+import { classToFunctionComponent } from "../modules/class-to-function";
 import { extractJSXToComponentToFile } from "../modules/extract-to-component";
 import * as settings from "../settings";
 
@@ -14,7 +14,7 @@ const expect = chai.expect;
 
 chai.use(sinonChai);
 
-describe("when refactoring stateful component into stateless component", () => {
+describe("when refactoring class component into function component", () => {
   let sandbox, configStub;
   let selectedTextStart = {},
     selectedTextEnd = {};
@@ -54,7 +54,7 @@ describe("when refactoring stateful component into stateless component", () => {
 
   it("shows the warning dialog before making a change", async () => {
     givenApprovedWarning();
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect((<any>editor.showInformationMessage).args[0][0]).to.equal(
       "WARNING! All lifecycle methods and react instance methods would be removed. Are you sure you want to continue?"
@@ -76,18 +76,18 @@ describe("when refactoring stateful component into stateless component", () => {
       showConversionWarning: false
     });
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
     expect((<any>editor.showInformationMessage).args).to.deep.equal([]);
   });
 
   it("does not refactor when the user does not accept the warning message", async () => {
     givenDeclinedWarning();
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).not.to.have.been.called;
   });
 
-  it("creates a stateless component from a class component ", async () => {
+  it("creates a function component from a class component ", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         class SomeComponent extends React.Component {
@@ -97,7 +97,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  return <div />;\n};",
@@ -107,7 +107,7 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  it("creates a stateless component without lifecycle methods and instance references", async () => {
+  it("creates a function component without lifecycle methods and instance references", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         class SomeComponent extends React.Component {
@@ -124,7 +124,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  return <div>\n                {foo} + {bar}\n              </div>;\n};",
@@ -134,7 +134,7 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  it("creates stateless component including instance methods without state functions", async () => {
+  it("creates function component including instance methods without state functions", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         class SomeComponent extends React.Component {
@@ -149,7 +149,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  const [a, setA] = useState();\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
@@ -159,7 +159,7 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  it("creates stateless component with props type interface and default props", async () => {
+  it("creates function component with props type interface and default props", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         class SomeComponent extends React.Component<MyProps> {
@@ -175,7 +175,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent: FC<MyProps> = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
@@ -185,7 +185,7 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  it("creates stateless component with props type literal and default props", async () => {
+  it("creates function component with props type literal and default props", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         class SomeComponent extends React.Component<{a: number}> {
@@ -201,7 +201,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent: FC<{\n  a: number;\n}> = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
@@ -211,7 +211,7 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  it("creates stateless component with default export", async () => {
+  it("creates function component with default export", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         export default class SomeComponent extends React.Component {
@@ -227,7 +227,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};\n\nexport default SomeComponent;",
@@ -237,7 +237,7 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
-  it("creates stateless component with named export", async () => {
+  it("creates function component with named export", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
         export class SomeComponent extends React.Component {
@@ -253,7 +253,7 @@ describe("when refactoring stateful component into stateless component", () => {
         }
       `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "export const SomeComponent = (props = {\n  a: 3\n}) => {\n  const [a, setA] = useState();\n  const defaultProps = useRef({\n    a: 3\n  });\n  const someMethod = useCallback(() => {\n    setA(3);\n    console.log(2);\n  });\n  return <div />;\n};",
@@ -278,7 +278,7 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-      await statefulToStatelessComponent();
+      await classToFunctionComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const foo = useRef(3);\n  const someMethod = useCallback(() => {\n    foo.current = 4;\n  });\n  return <div />;\n};", selectedTextStart,
@@ -305,7 +305,7 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-      await statefulToStatelessComponent();
+      await classToFunctionComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n  });\n  return <div />;\n};",
@@ -332,7 +332,7 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-      await statefulToStatelessComponent();
+      await classToFunctionComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
@@ -359,7 +359,7 @@ describe("when refactoring stateful component into stateless component", () => {
             }
           `);
 
-      await statefulToStatelessComponent();
+      await classToFunctionComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const someMethod = useCallback(() => {\n    setFoo(prevFoo => {\n      return prevFoo;\n    });\n    setBar(prevBar => {\n      return prevBar;\n    });\n  });\n  return <div />;\n};",
@@ -384,7 +384,7 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  return <div>\n                  {foo}\n                </div>;\n};",
@@ -411,7 +411,7 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    console.log(2);\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
@@ -438,7 +438,7 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const doFoo = useCallback(() => {\n    console.log(2);\n  });\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
@@ -465,7 +465,7 @@ describe("when refactoring stateful component into stateless component", () => {
           }
         `);
 
-    await statefulToStatelessComponent();
+    await classToFunctionComponent();
 
     expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
       "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  useEffect(() => {\n    return () => {\n      console.log(2);\n    };\n  }, []);\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",

@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import { selectedText } from './editor';
 import { isJSX } from './modules/jsx';
 import { ProviderResult } from 'vscode';
-import { isStatelessComp, statelessToStatefulComponent } from './modules/statless-to-stateful';
-import { isStatefulComp, statefulToStatelessComponent } from './modules/stateful-to-stateless';
+import { isFunctionComponent, functionToClassComponent } from './modules/function-to-class';
+import { isClassComponent, classToFunctionComponent } from './modules/class-to-function';
 import { extractToFile } from './modules/extract-to-file';
 import { extractJSXToComponentToFile, extractJSXToComponent } from './modules/extract-to-component';
 import { wrapJSXWithCondition } from './modules/wrap-with-conditional';
@@ -64,18 +64,18 @@ export class CompleteActionProvider implements vscode.CodeActionProvider {
       }];
     }
 
-    if (isStatelessComp(text)) {
+    if (isFunctionComponent(text)) {
       return [
         exportToFileAction,
         {
-          command: 'extension.glean.react.stateless-to-stateful',
+          command: 'extension.glean.react.function-to-class',
           title: 'Convert Function to Class Component'
         }]
     }
 
-    if (isStatefulComp(text)) {
+    if (isClassComponent(text)) {
       return [exportToFileAction, {
-        command: 'extension.glean.react.stateful-to-stateless',
+        command: 'extension.glean.react.class-to-function',
         title: 'Convert Class to Function Component'
       }]
     }
@@ -98,9 +98,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand('extension.glean.react.render-conditionally', wrapJSXWithCondition);
 
-  vscode.commands.registerCommand('extension.glean.react.stateless-to-stateful', statelessToStatefulComponent);
+  vscode.commands.registerCommand('extension.glean.react.function-to-class', functionToClassComponent);
 
-  vscode.commands.registerCommand('extension.glean.react.stateful-to-stateless', statefulToStatelessComponent);
+  vscode.commands.registerCommand('extension.glean.react.class-to-function', classToFunctionComponent);
 
   vscode.commands.registerCommand('extension.glean.react.rename-state-hook', renameState);
 

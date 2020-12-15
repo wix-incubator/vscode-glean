@@ -56,7 +56,7 @@ Glean seamlesly automates convertion of class components to functional component
 
 ### Converting Functional Component to Class Component
 
-![Example of Stateless to Stateful Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/stateless-to-stateful.gif?raw=true)
+![Example of Function to Class Component Conversion](https://github.com/wix/vscode-glean/blob/master/assets/function-to-class.gif?raw=true)
 
 ### Rename State Variable
 

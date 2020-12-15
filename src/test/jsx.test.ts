@@ -5,8 +5,8 @@ import * as editor from "../editor";
 import * as fileSystem from "../file-system";
 import * as chai from "chai";
 import * as sinonChai from "sinon-chai";
-import { statelessToStatefulComponent } from "../modules/statless-to-stateful";
-import { statefulToStatelessComponent } from "../modules/stateful-to-stateless";
+import { functionToClassComponent } from "../modules/function-to-class";
+import { classToFunctionComponent } from "../modules/class-to-function";
 import { extractJSXToComponentToFile } from "../modules/extract-to-component";
 
 const expect = chai.expect;
@@ -229,7 +229,7 @@ describe("jsx module", function() {
     });
   });
 
-  describe("when refactoring stateless component into stateful component", () => {
+  describe("when refactoring function component into class component", () => {
     it("turn all references to destructed props to references to props object", async () => {
       sandbox.stub(editor, "selectedText").returns(`
                 function Foo({x}) {
@@ -237,7 +237,7 @@ describe("jsx module", function() {
                 }
             `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}",
@@ -254,7 +254,7 @@ describe("jsx module", function() {
                 }
             `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect((fileSystem.replaceTextInFile as any).lastCall.args[0]).to.contain(`Foo.defaultProps = {\n  x: 'boo'\n};`);
     });
@@ -266,7 +266,7 @@ describe("jsx module", function() {
                 }
             `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div>{this.props.x}</div>);\n  }\n\n}",
@@ -276,14 +276,14 @@ describe("jsx module", function() {
       );
     });
 
-    it("creates stateful component from functional declaration", async () => {
+    it("creates class component from functional declaration", async () => {
       sandbox.stub(editor, "selectedText").returns(`
                 function Foo(props) {
                     return (<div></div>);
                 }
             `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
@@ -300,7 +300,7 @@ describe("jsx module", function() {
           }
           `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div {...this.props.rest}></div>);\n  }\n\n}",
@@ -310,12 +310,12 @@ describe("jsx module", function() {
       );
     });
 
-    it("creates stateful component from variable declaration", async () => {
+    it("creates class component from variable declaration", async () => {
       sandbox.stub(editor, "selectedText").returns(`
               const Foo = (props) => (<div></div>)
           `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
@@ -330,7 +330,7 @@ describe("jsx module", function() {
             const Foo = (props: Props) => (<div></div>)
         `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
@@ -345,7 +345,7 @@ describe("jsx module", function() {
           const Foo: SFC<Props> = (props) => (<div></div>)
       `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component<Props> {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
@@ -360,7 +360,7 @@ describe("jsx module", function() {
             const Foo = ({handleUpdate}) => (<input onChange={e => handleUpdate(e)} />)
         `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class Foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<input onChange={e => this.props.handleUpdate(e)} />);\n  }\n\n}",
@@ -370,14 +370,14 @@ describe("jsx module", function() {
       );
     });
 
-    it("creates stateful component from arrow function", async () => {
+    it("creates class component from arrow function", async () => {
       sandbox.stub(editor, "selectedText").returns(`
                 const foo = (props) => {
                     return (<div></div>);
                 }
             `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
@@ -387,14 +387,14 @@ describe("jsx module", function() {
       );
     });
 
-    it("creates stateful component from arrow function", async () => {
+    it("creates class component from arrow function", async () => {
       sandbox.stub(editor, "selectedText").returns(`
               const foo = (props) => {
                   return (<div></div>);
               }
           `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
@@ -404,12 +404,12 @@ describe("jsx module", function() {
       );
     });
 
-    it("creates stateful component from arrow function with JSX element being behind an AND operator", async () => {
+    it("creates class component from arrow function with JSX element being behind an AND operator", async () => {
       sandbox.stub(editor, "selectedText").returns(`
             const foo = (props) => true && <div></div>;
         `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return true && <div></div>;\n  }\n\n}",
@@ -426,7 +426,7 @@ describe("jsx module", function() {
               }
           `);
 
-      await statelessToStatefulComponent();
+      await functionToClassComponent();
 
       expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
         "class foo extends Component {\n  constructor(props) {\n    super(props);\n  }\n\n  render() {\n    return (<div></div>);\n  }\n\n}",
