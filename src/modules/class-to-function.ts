@@ -28,7 +28,7 @@ import { Identifier } from "babel-types";
 import * as vscode from "vscode";
 import { buildEffectHook, buildRefHook, buildStateHook, buildUseCallbackHook } from '../snippet-builder'
 
-export function statefulToStateless(component) {
+export function classToFunction(component) {
   const functionBody = [];
   const stateProperties = new Map();
   const refProperties = new Map();
@@ -194,7 +194,7 @@ export function statefulToStateless(component) {
       path.traverse(RemoveSetStateAndForceUpdateVisitor);
       path.traverse(ReplaceStateWithPropsVisitor);
       path.traverse(RemoveThisVisitor);
-      appendFunctionBodyToStatelessComponent(
+      appendFunctionBodyToFunctionComponent(
         methodName,
         classBody,
         path.node.async
@@ -216,7 +216,7 @@ export function statefulToStateless(component) {
     }
   };
 
-  const appendFunctionBodyToStatelessComponent = (name, body, isAsync) => {
+  const appendFunctionBodyToFunctionComponent = (name, body, isAsync) => {
     if (name !== "render") {
       if (hooksSupported()) {
         functionBody.push(
@@ -244,7 +244,7 @@ export function statefulToStateless(component) {
 
   const visitor = {
     ClassDeclaration(path) {
-      const statelessComponentName = path.node.id.name;
+      const functionComponentName = path.node.id.name;
       const defaultPropsPath = path
         .get("body")
         .get("body")
@@ -255,8 +255,8 @@ export function statefulToStateless(component) {
           );
         });
 
-      const statelessComponent = namedArrowFunction({
-        name: statelessComponentName,
+      const functionComponent = namedArrowFunction({
+        name: functionComponentName,
         params: ["props"],
         propType:
           path.node.superTypeParameters &&
@@ -274,11 +274,11 @@ export function statefulToStateless(component) {
         path.container
       );
 
-      const exportDefaultStatelessComponent = t.exportDefaultDeclaration(
-        t.identifier(statelessComponentName)
+      const exportDefaultFunctionComponent = t.exportDefaultDeclaration(
+        t.identifier(functionComponentName)
       );
-      const exportNamedStatelessComponent = t.exportNamedDeclaration(
-        statelessComponent,
+      const exportNamedFunctionComponent = t.exportNamedDeclaration(
+        functionComponent,
         []
       );
 
@@ -287,12 +287,12 @@ export function statefulToStateless(component) {
         : path;
 
       if (isExportDefaultDeclaration) {
-        mainPath.insertBefore(statelessComponent);
-        mainPath.insertBefore(exportDefaultStatelessComponent);
+        mainPath.insertBefore(functionComponent);
+        mainPath.insertBefore(exportDefaultFunctionComponent);
       } else if (isExportNamedDeclaration) {
-        mainPath.insertBefore(exportNamedStatelessComponent);
+        mainPath.insertBefore(exportNamedFunctionComponent);
       } else {
-        mainPath.insertBefore(statelessComponent);
+        mainPath.insertBefore(functionComponent);
       }
     },
     ClassMethod(path) {
@@ -560,7 +560,7 @@ function resolveTypeAnnotation(propType: any) {
   );
 }
 
-export async function statefulToStatelessComponent() {
+export async function classToFunctionComponent() {
   try {
     const answer = shouldShowConversionWarning()
       ? await showInformationMessage(
@@ -570,7 +570,7 @@ export async function statefulToStatelessComponent() {
       : "Yes";
 
     if (answer === "Yes") {
-      const selectionProccessingResult = statefulToStateless(selectedText());
+      const selectionProccessingResult = classToFunction(selectedText());
       const persistantChanges = [
         replaceSelectionWith(selectionProccessingResult.text),
       ];
@@ -618,7 +618,7 @@ export async function statefulToStatelessComponent() {
   }
 }
 
-export function isStatefulComp(code) {
+export function isClassComponent(code) {
   const ast = templateToAst(code);
 
   const isSupportedComponent = (classPath) => {

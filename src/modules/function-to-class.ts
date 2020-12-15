@@ -7,7 +7,7 @@ import { persistFileSystemChanges } from "../file-system";
 import { selectedText } from "../editor";
 import { replaceSelectionWith, handleError } from "../code-actions";
 
-export function isStatelessComp(code) {
+export function isFunctionComponent(code) {
   const ast = templateToAst(code);
 
   return (
@@ -25,20 +25,20 @@ function isReferenced(node, parent) {
   return parent.id !== node;
 }
 
-function getRenderFunctionBody(statelessComponentBody) {
-  if(t.isBlockStatement(statelessComponentBody)) {
-    const returnStatement = < t.ReturnStatement >statelessComponentBody.body.find(bodyContent => bodyContent.type === 'ReturnStatement');
+function getRenderFunctionBody(functionComponentBody) {
+  if(t.isBlockStatement(functionComponentBody)) {
+    const returnStatement = < t.ReturnStatement >functionComponentBody.body.find(bodyContent => bodyContent.type === 'ReturnStatement');
     const returnStatementContent = returnStatement.argument;
     if(!t.isParenthesizedExpression(returnStatementContent)){
       const parenthesizedReturnStatement = t.parenthesizedExpression(returnStatementContent);
       returnStatement.argument = parenthesizedReturnStatement
     }
-    return statelessComponentBody;
-  } else if(t.isJSXElement(statelessComponentBody)) {
-    const body  = t.isParenthesizedExpression(statelessComponentBody) ? statelessComponentBody : t.parenthesizedExpression(statelessComponentBody);
+    return functionComponentBody;
+  } else if(t.isJSXElement(functionComponentBody)) {
+    const body  = t.isParenthesizedExpression(functionComponentBody) ? functionComponentBody : t.parenthesizedExpression(functionComponentBody);
     return t.blockStatement([t.returnStatement(body)]);
   } else {
-    return t.blockStatement([t.returnStatement(statelessComponentBody)]);
+    return t.blockStatement([t.returnStatement(functionComponentBody)]);
   }
 }
 
@@ -50,7 +50,7 @@ const getDeclarationTypeAnnotation = (declaration) => {
   return declaration && declaration.typeAnnotation ? t.tsTypeParameterInstantiation([declaration.typeAnnotation.typeAnnotation.typeParameters.params[0]]) : null
 }
 
-export function statelessToStateful(component) {
+export function functionToClass(component) {
   const defaultProps = new Map();
   let name;
   const visitor = {
@@ -127,9 +127,9 @@ export function statelessToStateful(component) {
   }
 }
 
-export async function statelessToStatefulComponent() {
+export async function functionToClassComponent() {
   try {
-    const selectionProccessingResult = statelessToStateful(selectedText())
+    const selectionProccessingResult = functionToClass(selectedText())
     await persistFileSystemChanges(replaceSelectionWith(selectionProccessingResult.text));
 
   } catch (e) {
