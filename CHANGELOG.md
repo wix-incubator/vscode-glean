@@ -1,3 +1,10 @@
+## [5.1.1](https://github.com/wix/vscode-glean/compare/v5.1.0...v5.1.1) (2021-01-06)
+
+
+### Bug Fixes
+
+* **class-to-functional:** fixd support for props distructuring. Fixes [#95](https://github.com/wix/vscode-glean/issues/95) ([060958c](https://github.com/wix/vscode-glean/commit/060958c738b573b235130375e6391685ce47f79b))
+
 # [5.1.0](https://github.com/wix/vscode-glean/compare/v5.0.4...v5.1.0) (2020-12-14)
 
 
