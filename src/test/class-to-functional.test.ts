@@ -107,6 +107,27 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
+  it("converts references to props object", async () => {
+    givenApprovedWarning();
+    sandbox.stub(editor, "selectedText").returns(`
+        class SomeComponent extends React.Component {
+          render() {
+            const {text} = this.props;
+            return <div>{text}</div>;
+          }
+        }
+      `);
+
+    await statefulToStatelessComponent();
+
+    expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+      "const SomeComponent = props => {\n  const {\n    text\n  } = props;\n  return <div>{text}</div>;\n};",
+      selectedTextStart,
+      selectedTextEnd,
+      "/source.js"
+    );
+  });
+
   it("creates a stateless component without lifecycle methods and instance references", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`

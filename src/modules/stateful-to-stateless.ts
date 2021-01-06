@@ -43,7 +43,8 @@ export function statefulToStateless(component) {
         if (
           t.isIdentifier(path.node.property) &&
           t.isThisExpression(path.node.object) &&
-          !classMethods.has(path.node.property.name)
+          !classMethods.has(path.node.property.name) && 
+          path.node.property.name !== 'props'
         ) {
           if (!refProperties.has(path.node.property.name)) {
             refProperties.set(path.node.property.name, undefined);
