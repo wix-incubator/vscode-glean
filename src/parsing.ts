@@ -1,22 +1,32 @@
-import { parse, ParserOptions } from "@babel/parser";
-import traverse from "@babel/traverse";
-import * as t from "@babel/types";
-import { transformFromAst } from "@babel/core";
-import { esmModuleSystemUsed, commonJSModuleSystemUsed, shouldUseExportDefault } from "./settings";
-import template from "@babel/template";
+import { parse, ParserOptions } from '@babel/parser';
+import traverse from '@babel/traverse';
+import * as t from '@babel/types';
+import { transformFromAst } from '@babel/core';
+import {
+  esmModuleSystemUsed,
+  commonJSModuleSystemUsed,
+  shouldUseExportDefault,
+} from './settings';
+import template from '@babel/template';
 
 export const parsingOptions = {
-  plugins: ["objectRestSpread", "classProperties", "typescript", "jsx"],
-  sourceType: "module"
+  plugins: [
+    'objectRestSpread',
+    'classProperties',
+    'typescript',
+    'jsx',
+    'optionalChaining',
+  ],
+  sourceType: 'module',
 };
 
-export const codeToAst = code =>
+export const codeToAst = (code) =>
   parse(code, <ParserOptions>{
     startLine: 0,
-    ...parsingOptions
+    ...parsingOptions,
   });
 
-export const jsxToAst = code => {
+export const jsxToAst = (code) => {
   try {
     return codeToAst(code);
   } catch (e) {
@@ -24,7 +34,7 @@ export const jsxToAst = code => {
   }
 };
 
-export const templateToAst = code => template.ast(code, parsingOptions);
+export const templateToAst = (code) => template.ast(code, parsingOptions);
 
 export function getIdentifier(code) {
   const identifiers = [];
@@ -34,12 +44,12 @@ export function getIdentifier(code) {
         (t.isProgram(path.parentPath.parent) ||
           t.isFile(path.parentPath.parent) ||
           t.isExportDeclaration(path.parentPath.parent)) &&
-        path.listKey !== "params" &&
-        path.key !== "superClass"
+        path.listKey !== 'params' &&
+        path.key !== 'superClass'
       ) {
         identifiers.push(path.node.name);
       }
-    }
+    },
   };
 
   traverse(codeToAst(code), Visitor);
@@ -49,8 +59,8 @@ export function getIdentifier(code) {
 
 function assignment(value) {
   return t.assignmentExpression(
-    "=",
-    t.memberExpression(t.identifier("module"), t.identifier("exports"), false),
+    '=',
+    t.memberExpression(t.identifier('module'), t.identifier('exports'), false),
     value
   );
 }
@@ -60,11 +70,13 @@ function generateExportsExpr(value) {
 }
 
 function getImportedIdentifier(identifiersString: string = ''): string {
-  return shouldUseExportDefault() ? `${identifiersString}` : `{ ${identifiersString} }`;
+  return shouldUseExportDefault()
+    ? `${identifiersString}`
+    : `{ ${identifiersString} }`;
 }
 
 export function generateImportStatementFromFile(identifiers, modulePath) {
-  const identifiersString = identifiers.join(", ");
+  const identifiersString = identifiers.join(', ');
   if (esmModuleSystemUsed()) {
     const importType = getImportedIdentifier(identifiersString);
     return `import ${importType} from './${modulePath}';\n`;
@@ -79,10 +91,9 @@ export function exportAllDeclarationsESM(code) {
   const visitor = {
     Declaration(path) {
       if (
-        path.parent.type === "Program" &&
-        !path.node.type.includes("Export")
+        path.parent.type === 'Program' &&
+        !path.node.type.includes('Export')
       ) {
-
         // check use default declaration or not
         if (shouldUseExportDefault()) {
           path.replaceWith(t.exportDefaultDeclaration(path.node));
@@ -90,7 +101,7 @@ export function exportAllDeclarationsESM(code) {
           path.replaceWith(t.exportNamedDeclaration(path.node, []));
         }
       }
-    }
+    },
   };
 
   traverse(ast, visitor);
@@ -99,11 +110,11 @@ export function exportAllDeclarationsESM(code) {
 }
 
 export function exportAllDeclarationsCommonJS(code) {
-  const identifiers = getIdentifier(code).map(id =>
+  const identifiers = getIdentifier(code).map((id) =>
     t.objectProperty(t.identifier(id), t.identifier(id), false, true)
   );
   const exportExpression = generateExportsExpr(t.objectExpression(identifiers));
-  const ast = t.file(t.program([exportExpression]), "", "");
+  const ast = t.file(t.program([exportExpression]), '', '');
   return `
 ${code}
     
@@ -119,4 +130,4 @@ export function transformJSIntoExportExpressions(code) {
   }
 }
 
-export const astToCode = ast => transformFromAst(ast).code
+export const astToCode = (ast) => transformFromAst(ast).code;
