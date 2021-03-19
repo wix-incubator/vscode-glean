@@ -1,3 +1,10 @@
+## [5.2.2](https://github.com/wix/vscode-glean/compare/v5.2.1...v5.2.2) (2021-03-19)
+
+
+### Bug Fixes
+
+* **class-to-function:** Fixed conversion of class properties with function value. Fixes [#95](https://github.com/wix/vscode-glean/issues/95) ([e5177a1](https://github.com/wix/vscode-glean/commit/e5177a1c56cbb1291e09d35fc270bc6fcf929636))
+
 ## [5.2.1](https://github.com/wix/vscode-glean/compare/v5.2.0...v5.2.1) (2021-03-19)
 
 
