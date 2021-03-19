@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/wix/vscode-glean/compare/v5.1.1...v5.2.0) (2021-03-19)
+
+
+### Features
+
+* **isJSX:** Add support for optional chainning ([7aa0826](https://github.com/wix/vscode-glean/commit/7aa082626c6a1a1c10f58006935d68bf1d68154d))
+
 ## [5.1.1](https://github.com/wix/vscode-glean/compare/v5.1.0...v5.1.1) (2021-01-06)
 
 
