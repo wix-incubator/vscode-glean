@@ -43,7 +43,7 @@ export function statefulToStateless(component) {
         if (
           t.isIdentifier(path.node.property) &&
           t.isThisExpression(path.node.object) &&
-          !classMethods.has(path.node.property.name) && 
+          !classMethods.has(path.node.property.name) &&
           path.node.property.name !== 'props'
         ) {
           if (!refProperties.has(path.node.property.name)) {
@@ -325,6 +325,7 @@ export function statefulToStateless(component) {
         t.isFunctionExpression(propValue) ||
         t.isArrowFunctionExpression(propValue)
       ) {
+        classMethods.add(path.node.key.name);
         copyNonLifeCycleMethods(path);
       } else {
         refProperties.set(path.node.key.name, path.node.value);

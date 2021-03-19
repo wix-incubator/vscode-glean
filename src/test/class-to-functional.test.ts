@@ -469,6 +469,33 @@ describe("when refactoring stateful component into stateless component", () => {
     );
   });
 
+  it("treats class properties with function experession as a class method when converting", async () => {
+    givenApprovedWarning();
+    sandbox.stub(editor, "selectedText").returns(`
+          class SomeComponent extends React.Component {
+            doFoo = () => {
+              console.log(2);
+            }
+            render() {
+              return (
+                <div>
+                  {this.state.foo} + {this.state.bar}
+                </div>
+              );
+            }
+          }
+        `);
+
+    await statefulToStatelessComponent();
+
+    expect(fileSystem.replaceTextInFile).to.have.been.calledWith(
+      "const SomeComponent = props => {\n  const [foo, setFoo] = useState();\n  const [bar, setBar] = useState();\n  const doFoo = useCallback(() => {\n    console.log(2);\n  });\n  return <div>\n                  {foo} + {bar}\n                </div>;\n};",
+      selectedTextStart,
+      selectedTextEnd,
+      "/source.js"
+    );
+  });
+
   it("replaces componentWillUnmount with useEffect cleanup function", async () => {
     givenApprovedWarning();
     sandbox.stub(editor, "selectedText").returns(`
