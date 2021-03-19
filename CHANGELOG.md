@@ -1,3 +1,10 @@
+## [5.2.1](https://github.com/wix/vscode-glean/compare/v5.2.0...v5.2.1) (2021-03-19)
+
+
+### Bug Fixes
+
+* **generla:** optional chaining support ([9ac114e](https://github.com/wix/vscode-glean/commit/9ac114ec15a478d53a0c6efc58ddb577e84f8554))
+
 # [5.2.0](https://github.com/wix/vscode-glean/compare/v5.1.1...v5.2.0) (2021-03-19)
 
 
