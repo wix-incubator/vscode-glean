@@ -1,3 +1,5 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua)
+
 <p align="center">
   <img src="https://github.com/wix/vscode-glean/blob/master/assets/github_logo.png?raw=true">
 </p>
